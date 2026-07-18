@@ -1,8 +1,9 @@
 namespace Models;
 
-public class Roles
+public class Tenant
 {
-    public int RoleId { get; set; }
     public int TenantId { get; set; }
     public required string Name { get; set; }
+    public DateTime CreatedAt { get; set; }
+    public bool IsActive { get; set; }
 }

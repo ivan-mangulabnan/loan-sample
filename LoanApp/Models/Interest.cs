@@ -1,8 +1,8 @@
 namespace Models;
 
-public class Interests
+public class Interest
 {
     public int InterestId { get; set; }
     public int TenantId { get; set; }
-    public double InterestRate { get; set; }
+    public decimal InterestRate { get; set; }
 }
