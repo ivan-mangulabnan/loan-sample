@@ -5,7 +5,7 @@ public class Correction
   public int CorrectionId { get; set; }
 
   public int CorrectedTransactionId { get; set; }
-  public Transaction Transaction { get; set; } = null!;
+  public Transaction CorrectedTransaction { get; set; } = null!;
 
   public int PostedByUserId { get; set; }
   public User PostedBy { get; set; } = null!;
