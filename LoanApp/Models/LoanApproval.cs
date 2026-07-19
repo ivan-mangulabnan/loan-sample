@@ -4,7 +4,7 @@ public class LoanApproval
 {
     public int LoanApprovalId { get; set; }
 
-    public int ApproverUserId { get; set; }
+    public int ApproverId { get; set; }
     public User Approver { get; set; } = null!;
 
     public int ReviewApplicationId { get; set; }

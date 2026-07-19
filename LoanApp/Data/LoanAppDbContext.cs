@@ -56,5 +56,36 @@ public class LoanAppDbContext : DbContext
     modelBuilder.Entity<Loan>()
     .HasIndex(l => l.FundReleaseId)
     .IsUnique();
+
+    modelBuilder.Entity<PaymentPlan>()
+    .HasOne(p => p.Tenant)
+    .WithMany()
+    .OnDelete(DeleteBehavior.Restrict);
+
+    modelBuilder.Entity<User>()
+    .HasOne(u => u.Tenant)
+    .WithMany(t => t.Users)
+    .OnDelete(DeleteBehavior.Restrict);
+
+    modelBuilder.Entity<CapitalDeposit>()
+    .HasOne(c => c.PostedBy)
+    .WithMany()
+    .OnDelete(DeleteBehavior.Restrict);
+
+    modelBuilder.Entity<Correction>()
+    .HasOne(c => c.CorrectedTransaction)
+    .WithOne()
+    .HasForeignKey<Correction>(c => c.CorrectedTransactionId)
+    .OnDelete(DeleteBehavior.Restrict);
+
+    modelBuilder.Entity<Correction>()
+    .HasOne(c => c.PostedBy)
+    .WithMany()
+    .OnDelete(DeleteBehavior.Restrict);
+
+    modelBuilder.Entity<LoanApplication>()
+    .HasOne(l => l.Borrower)
+    .WithMany()
+    .OnDelete(DeleteBehavior.Restrict);
   }
 }

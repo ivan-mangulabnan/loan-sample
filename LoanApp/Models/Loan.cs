@@ -7,7 +7,7 @@ public class Loan
     public int FundReleaseId { get; set; }
     public FundRelease FundRelease { get; set; } = null!;
 
-    public int BorrowerUserId { get; set; }
+    public int BorrowerId { get; set; }
     public User Borrower { get; set; } = null!;
     
     public int StatusId { get; set; }

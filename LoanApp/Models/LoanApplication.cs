@@ -4,8 +4,8 @@ public class LoanApplication
 {
     public int LoanApplicationId { get; set; }
 
-    public int UserId { get; set; }
-    public User User { get; set; } = null!;
+    public int BorrowerId { get; set; }
+    public User Borrower { get; set; } = null!;
 
     public int PaymentPlanId { get; set; }
     public PaymentPlan PaymentPlan { get; set; } = null!;

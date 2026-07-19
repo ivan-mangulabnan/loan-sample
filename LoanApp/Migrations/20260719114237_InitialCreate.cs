@@ -158,7 +158,7 @@ namespace LoanApp.Migrations
                         column: x => x.TenantId,
                         principalTable: "Tenants",
                         principalColumn: "TenantId",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -215,7 +215,7 @@ namespace LoanApp.Migrations
                         column: x => x.TenantId,
                         principalTable: "Tenants",
                         principalColumn: "TenantId",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -266,7 +266,7 @@ namespace LoanApp.Migrations
                         column: x => x.PostedByUserId,
                         principalTable: "Users",
                         principalColumn: "UserId",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -296,13 +296,13 @@ namespace LoanApp.Migrations
                         column: x => x.CorrectedTransactionId,
                         principalTable: "Transactions",
                         principalColumn: "TransactionId",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                     table.ForeignKey(
                         name: "FK_Corrections_Users_PostedByUserId",
                         column: x => x.PostedByUserId,
                         principalTable: "Users",
                         principalColumn: "UserId",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -311,7 +311,7 @@ namespace LoanApp.Migrations
                 {
                     LoanApplicationId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    UserId = table.Column<int>(type: "int", nullable: false),
+                    BorrowerId = table.Column<int>(type: "int", nullable: false),
                     PaymentPlanId = table.Column<int>(type: "int", nullable: false),
                     StatusId = table.Column<int>(type: "int", nullable: false),
                     Amount = table.Column<decimal>(type: "decimal(18,2)", precision: 18, scale: 2, nullable: false),
@@ -333,11 +333,11 @@ namespace LoanApp.Migrations
                         principalColumn: "StatusId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_LoanApplications_Users_UserId",
-                        column: x => x.UserId,
+                        name: "FK_LoanApplications_Users_BorrowerId",
+                        column: x => x.BorrowerId,
                         principalTable: "Users",
                         principalColumn: "UserId",
-                        onDelete: ReferentialAction.Cascade);
+                        onDelete: ReferentialAction.Restrict);
                 });
 
             migrationBuilder.CreateTable(
@@ -346,7 +346,7 @@ namespace LoanApp.Migrations
                 {
                     ReviewApplicationId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ReviewerUserId = table.Column<int>(type: "int", nullable: false),
+                    ReviewerId = table.Column<int>(type: "int", nullable: false),
                     LoanApplicationId = table.Column<int>(type: "int", nullable: false),
                     StatusId = table.Column<int>(type: "int", nullable: false),
                     Remarks = table.Column<string>(type: "nvarchar(max)", nullable: false),
@@ -368,8 +368,8 @@ namespace LoanApp.Migrations
                         principalColumn: "StatusId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_ReviewApplications_Users_ReviewerUserId",
-                        column: x => x.ReviewerUserId,
+                        name: "FK_ReviewApplications_Users_ReviewerId",
+                        column: x => x.ReviewerId,
                         principalTable: "Users",
                         principalColumn: "UserId",
                         onDelete: ReferentialAction.Cascade);
@@ -381,7 +381,7 @@ namespace LoanApp.Migrations
                 {
                     LoanApprovalId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
-                    ApproverUserId = table.Column<int>(type: "int", nullable: false),
+                    ApproverId = table.Column<int>(type: "int", nullable: false),
                     ReviewApplicationId = table.Column<int>(type: "int", nullable: false),
                     StatusId = table.Column<int>(type: "int", nullable: false),
                     InterestRate = table.Column<decimal>(type: "decimal(9,6)", precision: 9, scale: 6, nullable: false),
@@ -407,8 +407,8 @@ namespace LoanApp.Migrations
                         principalColumn: "StatusId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_LoanApprovals_Users_ApproverUserId",
-                        column: x => x.ApproverUserId,
+                        name: "FK_LoanApprovals_Users_ApproverId",
+                        column: x => x.ApproverId,
                         principalTable: "Users",
                         principalColumn: "UserId",
                         onDelete: ReferentialAction.Cascade);
@@ -455,7 +455,7 @@ namespace LoanApp.Migrations
                     LoanId = table.Column<int>(type: "int", nullable: false)
                         .Annotation("SqlServer:Identity", "1, 1"),
                     FundReleaseId = table.Column<int>(type: "int", nullable: false),
-                    BorrowerUserId = table.Column<int>(type: "int", nullable: false),
+                    BorrowerId = table.Column<int>(type: "int", nullable: false),
                     StatusId = table.Column<int>(type: "int", nullable: false),
                     InterestRate = table.Column<decimal>(type: "decimal(9,6)", precision: 9, scale: 6, nullable: false),
                     NumberOfMonths = table.Column<int>(type: "int", nullable: false),
@@ -481,8 +481,8 @@ namespace LoanApp.Migrations
                         principalColumn: "StatusId",
                         onDelete: ReferentialAction.Cascade);
                     table.ForeignKey(
-                        name: "FK_Loans_Users_BorrowerUserId",
-                        column: x => x.BorrowerUserId,
+                        name: "FK_Loans_Users_BorrowerId",
+                        column: x => x.BorrowerId,
                         principalTable: "Users",
                         principalColumn: "UserId",
                         onDelete: ReferentialAction.Cascade);
@@ -535,7 +535,8 @@ namespace LoanApp.Migrations
             migrationBuilder.CreateIndex(
                 name: "IX_Corrections_CorrectedTransactionId",
                 table: "Corrections",
-                column: "CorrectedTransactionId");
+                column: "CorrectedTransactionId",
+                unique: true);
 
             migrationBuilder.CreateIndex(
                 name: "IX_Corrections_LedgerId",
@@ -573,6 +574,11 @@ namespace LoanApp.Migrations
                 column: "TenantId");
 
             migrationBuilder.CreateIndex(
+                name: "IX_LoanApplications_BorrowerId",
+                table: "LoanApplications",
+                column: "BorrowerId");
+
+            migrationBuilder.CreateIndex(
                 name: "IX_LoanApplications_PaymentPlanId",
                 table: "LoanApplications",
                 column: "PaymentPlanId");
@@ -583,14 +589,9 @@ namespace LoanApp.Migrations
                 column: "StatusId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_LoanApplications_UserId",
-                table: "LoanApplications",
-                column: "UserId");
-
-            migrationBuilder.CreateIndex(
-                name: "IX_LoanApprovals_ApproverUserId",
+                name: "IX_LoanApprovals_ApproverId",
                 table: "LoanApprovals",
-                column: "ApproverUserId");
+                column: "ApproverId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_LoanApprovals_ReviewApplicationId",
@@ -603,9 +604,9 @@ namespace LoanApp.Migrations
                 column: "StatusId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_Loans_BorrowerUserId",
+                name: "IX_Loans_BorrowerId",
                 table: "Loans",
-                column: "BorrowerUserId");
+                column: "BorrowerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_Loans_FundReleaseId",
@@ -644,9 +645,9 @@ namespace LoanApp.Migrations
                 column: "LoanApplicationId");
 
             migrationBuilder.CreateIndex(
-                name: "IX_ReviewApplications_ReviewerUserId",
+                name: "IX_ReviewApplications_ReviewerId",
                 table: "ReviewApplications",
-                column: "ReviewerUserId");
+                column: "ReviewerId");
 
             migrationBuilder.CreateIndex(
                 name: "IX_ReviewApplications_StatusId",
