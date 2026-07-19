@@ -1,0 +1,12 @@
+{
+  "ExpandedNodes": [
+    "",
+    "\\LoanApp",
+    "\\LoanApp\\bin",
+    "\\LoanApp\\Controllers",
+    "\\LoanApp\\DbContexts",
+    "\\LoanApp\\Models"
+  ],
+  "SelectedNode": "\\LoanApp\\Controllers\\AccountsController.cs",
+  "PreviewInSolutionExplorer": false
+}

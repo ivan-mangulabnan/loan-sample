@@ -1,23 +1,23 @@
 {
   "format": 1,
   "restore": {
-    "C:\\Users\\iamangulabnan\\loan-sample\\LoanApp\\LoanApp.csproj": {}
+    "C:\\loan-sample\\LoanApp\\LoanApp.csproj": {}
   },
   "projects": {
-    "C:\\Users\\iamangulabnan\\loan-sample\\LoanApp\\LoanApp.csproj": {
+    "C:\\loan-sample\\LoanApp\\LoanApp.csproj": {
       "version": "1.0.0",
       "restore": {
-        "projectUniqueName": "C:\\Users\\iamangulabnan\\loan-sample\\LoanApp\\LoanApp.csproj",
+        "projectUniqueName": "C:\\loan-sample\\LoanApp\\LoanApp.csproj",
         "projectName": "LoanApp",
-        "projectPath": "C:\\Users\\iamangulabnan\\loan-sample\\LoanApp\\LoanApp.csproj",
-        "packagesPath": "C:\\Users\\iamangulabnan\\.nuget\\packages\\",
-        "outputPath": "C:\\Users\\iamangulabnan\\loan-sample\\LoanApp\\obj\\",
+        "projectPath": "C:\\loan-sample\\LoanApp\\LoanApp.csproj",
+        "packagesPath": "C:\\Users\\remoc\\.nuget\\packages\\",
+        "outputPath": "C:\\loan-sample\\LoanApp\\obj\\",
         "projectStyle": "PackageReference",
         "fallbackFolders": [
           "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
         ],
         "configFilePaths": [
-          "C:\\Users\\iamangulabnan\\AppData\\Roaming\\NuGet\\NuGet.Config",
+          "C:\\Users\\remoc\\AppData\\Roaming\\NuGet\\NuGet.Config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
           "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
         ],
@@ -26,7 +26,6 @@
         ],
         "sources": {
           "C:\\Program Files (x86)\\Microsoft SDKs\\NuGetPackages\\": {},
-          "C:\\Program Files\\dotnet\\library-packs": {},
           "https://api.nuget.org/v3/index.json": {}
         },
         "frameworks": {
@@ -53,6 +52,10 @@
           "framework": "net10.0",
           "targetAlias": "net10.0",
           "dependencies": {
+            "Microsoft.AspNetCore.Authentication.JwtBearer": {
+              "target": "Package",
+              "version": "[10.0.0, )"
+            },
             "Microsoft.AspNetCore.OpenApi": {
               "target": "Package",
               "version": "[10.0.8, )"
@@ -61,11 +64,21 @@
               "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
               "suppressParent": "All",
               "target": "Package",
-              "version": "[10.0.9, )"
+              "version": "[10.0.0, )"
             },
             "Microsoft.EntityFrameworkCore.SqlServer": {
               "target": "Package",
-              "version": "[10.0.9, )"
+              "version": "[10.0.0, )"
+            },
+            "Microsoft.EntityFrameworkCore.Tools": {
+              "include": "Runtime, Build, Native, ContentFiles, Analyzers, BuildTransitive",
+              "suppressParent": "All",
+              "target": "Package",
+              "version": "[10.0.0, )"
+            },
+            "Swashbuckle.AspNetCore": {
+              "target": "Package",
+              "version": "[10.2.3, )"
             }
           },
           "imports": [
@@ -87,7 +100,7 @@
               "privateAssets": "all"
             }
           },
-          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.300/PortableRuntimeIdentifierGraph.json",
+          "runtimeIdentifierGraphPath": "C:\\Program Files\\dotnet\\sdk\\10.0.302/PortableRuntimeIdentifierGraph.json",
           "packagesToPrune": {
             "Microsoft.AspNetCore": "(,10.0.32767]",
             "Microsoft.AspNetCore.Antiforgery": "(,10.0.32767]",
