@@ -1,6 +1,6 @@
 namespace Models;
 
-public class Payment
+public class Payments
 {
     public int PaymentId { get; set; }
     public int UserId { get; set; }
