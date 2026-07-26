@@ -168,12 +168,7 @@ namespace LoanApp.Migrations
                         .HasPrecision(9, 6)
                         .HasColumnType("decimal(9,6)");
 
-                    b.Property<int>("TenantId")
-                        .HasColumnType("int");
-
                     b.HasKey("InterestId");
-
-                    b.HasIndex("TenantId");
 
                     b.ToTable("Interests");
                 });
@@ -386,14 +381,9 @@ namespace LoanApp.Migrations
                     b.Property<int>("NumberOfMonths")
                         .HasColumnType("int");
 
-                    b.Property<int>("TenantId")
-                        .HasColumnType("int");
-
                     b.HasKey("PaymentPlanId");
 
                     b.HasIndex("InterestId");
-
-                    b.HasIndex("TenantId");
 
                     b.ToTable("PaymentPlans");
                 });
@@ -445,12 +435,7 @@ namespace LoanApp.Migrations
                         .IsRequired()
                         .HasColumnType("nvarchar(max)");
 
-                    b.Property<int>("TenantId")
-                        .HasColumnType("int");
-
                     b.HasKey("RoleId");
-
-                    b.HasIndex("TenantId");
 
                     b.ToTable("Roles");
                 });
@@ -644,7 +629,7 @@ namespace LoanApp.Migrations
                     b.HasOne("Models.Ledger", "Ledger")
                         .WithMany()
                         .HasForeignKey("LedgerId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Models.User", "PostedBy")
@@ -671,13 +656,13 @@ namespace LoanApp.Migrations
                     b.HasOne("Models.User", "ReleasedBy")
                         .WithMany()
                         .HasForeignKey("ReleasedByUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Models.Status", "Status")
                         .WithMany()
                         .HasForeignKey("StatusId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("LoanApproval");
@@ -685,17 +670,6 @@ namespace LoanApp.Migrations
                     b.Navigation("ReleasedBy");
 
                     b.Navigation("Status");
-                });
-
-            modelBuilder.Entity("Models.Interest", b =>
-                {
-                    b.HasOne("Models.Tenant", "Tenant")
-                        .WithMany()
-                        .HasForeignKey("TenantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Tenant");
                 });
 
             modelBuilder.Entity("Models.Ledger", b =>
@@ -714,7 +688,7 @@ namespace LoanApp.Migrations
                     b.HasOne("Models.User", "Borrower")
                         .WithMany()
                         .HasForeignKey("BorrowerId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Models.FundRelease", "FundRelease")
@@ -726,7 +700,7 @@ namespace LoanApp.Migrations
                     b.HasOne("Models.Status", "Status")
                         .WithMany()
                         .HasForeignKey("StatusId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Borrower");
@@ -753,7 +727,7 @@ namespace LoanApp.Migrations
                     b.HasOne("Models.Status", "Status")
                         .WithMany()
                         .HasForeignKey("StatusId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Borrower");
@@ -768,7 +742,7 @@ namespace LoanApp.Migrations
                     b.HasOne("Models.User", "Approver")
                         .WithMany()
                         .HasForeignKey("ApproverId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Models.ReviewApplication", "ReviewApplication")
@@ -780,7 +754,7 @@ namespace LoanApp.Migrations
                     b.HasOne("Models.Status", "Status")
                         .WithMany()
                         .HasForeignKey("StatusId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Approver");
@@ -795,7 +769,7 @@ namespace LoanApp.Migrations
                     b.HasOne("Models.User", "Borrower")
                         .WithMany()
                         .HasForeignKey("BorrowerUserId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Models.Loan", "Loan")
@@ -817,15 +791,7 @@ namespace LoanApp.Migrations
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
 
-                    b.HasOne("Models.Tenant", "Tenant")
-                        .WithMany()
-                        .HasForeignKey("TenantId")
-                        .OnDelete(DeleteBehavior.Restrict)
-                        .IsRequired();
-
                     b.Navigation("Interest");
-
-                    b.Navigation("Tenant");
                 });
 
             modelBuilder.Entity("Models.ReviewApplication", b =>
@@ -839,13 +805,13 @@ namespace LoanApp.Migrations
                     b.HasOne("Models.User", "Reviewer")
                         .WithMany()
                         .HasForeignKey("ReviewerId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Models.Status", "Status")
                         .WithMany()
                         .HasForeignKey("StatusId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("LoanApplication");
@@ -853,17 +819,6 @@ namespace LoanApp.Migrations
                     b.Navigation("Reviewer");
 
                     b.Navigation("Status");
-                });
-
-            modelBuilder.Entity("Models.Role", b =>
-                {
-                    b.HasOne("Models.Tenant", "Tenant")
-                        .WithMany()
-                        .HasForeignKey("TenantId")
-                        .OnDelete(DeleteBehavior.Cascade)
-                        .IsRequired();
-
-                    b.Navigation("Tenant");
                 });
 
             modelBuilder.Entity("Models.Status", b =>
@@ -888,7 +843,7 @@ namespace LoanApp.Migrations
                     b.HasOne("Models.TransactionType", "TransactionType")
                         .WithMany()
                         .HasForeignKey("TransactionTypeId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.Navigation("Ledger");
@@ -901,7 +856,7 @@ namespace LoanApp.Migrations
                     b.HasOne("Models.Role", "Role")
                         .WithMany()
                         .HasForeignKey("RoleId")
-                        .OnDelete(DeleteBehavior.Cascade)
+                        .OnDelete(DeleteBehavior.Restrict)
                         .IsRequired();
 
                     b.HasOne("Models.Tenant", "Tenant")

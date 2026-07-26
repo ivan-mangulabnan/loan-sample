@@ -57,11 +57,6 @@ public class LoanAppDbContext : DbContext
     .HasIndex(l => l.FundReleaseId)
     .IsUnique();
 
-    modelBuilder.Entity<PaymentPlan>()
-    .HasOne(p => p.Tenant)
-    .WithMany()
-    .OnDelete(DeleteBehavior.Restrict);
-
     modelBuilder.Entity<User>()
     .HasOne(u => u.Tenant)
     .WithMany(t => t.Users)
@@ -85,6 +80,71 @@ public class LoanAppDbContext : DbContext
 
     modelBuilder.Entity<LoanApplication>()
     .HasOne(l => l.Borrower)
+    .WithMany()
+    .OnDelete(DeleteBehavior.Restrict);
+
+    modelBuilder.Entity<User>()
+    .HasOne(u => u.Role)
+    .WithMany()
+    .OnDelete(DeleteBehavior.Restrict);
+
+    modelBuilder.Entity<Transaction>()
+    .HasOne(t => t.TransactionType)
+    .WithMany()
+    .OnDelete(DeleteBehavior.Restrict);
+
+    modelBuilder.Entity<Correction>()
+    .HasOne(c => c.Ledger)
+    .WithMany()
+    .OnDelete(DeleteBehavior.Restrict);
+
+    modelBuilder.Entity<FundRelease>()
+    .HasOne(f => f.ReleasedBy)
+    .WithMany()
+    .OnDelete(DeleteBehavior.Restrict);
+
+    modelBuilder.Entity<FundRelease>()
+    .HasOne(f => f.Status)
+    .WithMany()
+    .OnDelete(DeleteBehavior.Restrict);
+
+    modelBuilder.Entity<Loan>()
+    .HasOne(l => l.Borrower)
+    .WithMany()
+    .OnDelete(DeleteBehavior.Restrict);
+
+    modelBuilder.Entity<Loan>()
+    .HasOne(l => l.Status)
+    .WithMany()
+    .OnDelete(DeleteBehavior.Restrict);
+
+    modelBuilder.Entity<Payment>()
+    .HasOne(p => p.Borrower)
+    .WithMany()
+    .OnDelete(DeleteBehavior.Restrict);
+
+    modelBuilder.Entity<LoanApplication>()
+    .HasOne(l => l.Status)
+    .WithMany()
+    .OnDelete(DeleteBehavior.Restrict);
+
+    modelBuilder.Entity<ReviewApplication>()
+    .HasOne(r => r.Reviewer)
+    .WithMany()
+    .OnDelete(DeleteBehavior.Restrict);
+
+    modelBuilder.Entity<ReviewApplication>()
+    .HasOne(r => r.Status)
+    .WithMany()
+    .OnDelete(DeleteBehavior.Restrict);
+
+    modelBuilder.Entity<LoanApproval>()
+    .HasOne(l => l.Approver)
+    .WithMany()
+    .OnDelete(DeleteBehavior.Restrict);
+
+    modelBuilder.Entity<LoanApproval>()
+    .HasOne(l => l.Status)
     .WithMany()
     .OnDelete(DeleteBehavior.Restrict);
   }
