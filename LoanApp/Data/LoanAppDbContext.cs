@@ -147,5 +147,17 @@ public class LoanAppDbContext : DbContext
     .HasOne(l => l.Status)
     .WithMany()
     .OnDelete(DeleteBehavior.Restrict);
+
+    modelBuilder.Entity<Role>().HasData(
+      new Role { RoleId = 1, Name = "Admin" },
+      new Role { RoleId = 2, Name = "Reviewer" },
+      new Role { RoleId = 3, Name = "Approver" },
+      new Role { RoleId = 4, Name = "Loaner" }
+    );
+
+    modelBuilder.Entity<Tenant>().HasData(
+      new Tenant { TenantId = 1, Name = "Jitsu Finance", CreatedAt = new DateTime(2026, 1, 1), IsActive = true },
+      new Tenant { TenantId = 2, Name = "Mejia Finance", CreatedAt = new DateTime(2026, 1, 1), IsActive = true }
+    );
   }
 }
