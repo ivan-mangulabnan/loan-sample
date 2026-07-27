@@ -45,7 +45,7 @@ public class AuthService
 
     var loanerRole = await _roleService.GetLoanerRoleAsync();
 
-    if (loanerRole is null) return null;
+    if (loanerRole is null) throw new InvalidOperationException("Role 'Loaner' is not seeded.");
 
     var newUser = new User
     {
@@ -65,7 +65,7 @@ public class AuthService
       FirstName = registerRequest.FirstName,
       MiddleName = registerRequest.MiddleName,
       LastName = registerRequest.LastName,
-      Birthdate = registerRequest.BirthDate
+      Birthdate = registerRequest.Birthdate
     };
 
     _context.Accounts.Add(newAccount);

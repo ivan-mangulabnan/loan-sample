@@ -21,5 +21,5 @@ public class RegisterRequest
   [Required]
   public string LastName { get; set; } = null!;
   
-  public DateTime BirthDate { get; set; }
+  public DateTime Birthdate { get; set; }
 }

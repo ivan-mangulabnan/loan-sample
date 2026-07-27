@@ -30,4 +30,20 @@ public class AuthController : ControllerBase
     var token = _tokenService.CreateToken(user);
     return Ok(new { token });
   }
+
+  [AllowAnonymous]
+  [HttpPost("register")]
+  public async Task<IActionResult> Register (RegisterRequest registerRequest)
+  {
+    try
+    {
+      var newUser = await _authService.RegisterUserAsync(registerRequest);
+      if (newUser is null) return Conflict();
+
+      return Ok( new { message = "Account Created Successfully!"} );
+    } catch (Exception)
+    {
+      return Problem(detail: "Something went wrong. Please try again later");
+    }
+  }
 }
