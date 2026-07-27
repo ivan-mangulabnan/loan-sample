@@ -159,5 +159,26 @@ public class LoanAppDbContext : DbContext
       new Tenant { TenantId = 1, Name = "Jitsu Finance", CreatedAt = new DateTime(2026, 1, 1), IsActive = true },
       new Tenant { TenantId = 2, Name = "Mejia Finance", CreatedAt = new DateTime(2026, 1, 1), IsActive = true }
     );
+
+    modelBuilder.Entity<Interest>().HasData(
+      new Interest { InterestId = 1, InterestRate = 5.5m },
+      new Interest { InterestId = 2, InterestRate = 10.1m }
+    );
+
+    modelBuilder.Entity<PaymentPlan>().HasData(
+      new PaymentPlan { PaymentPlanId = 1, InterestId = 1, NumberOfMonths = 2 },
+      new PaymentPlan { PaymentPlanId = 2, InterestId = 2, NumberOfMonths = 4 }
+    );
+
+    modelBuilder.Entity<StatusCategory>().HasData(
+      new StatusCategory { StatusCategoryId = 1, Code = "LOAN_STATUS" }
+    );
+
+    modelBuilder.Entity<Status>().HasData(
+      new Status { StatusId = 1, StatusCategoryId = 1, Code = "APPROVED" },
+      new Status { StatusId = 2, StatusCategoryId = 1, Code = "RETURNED" },
+      new Status { StatusId = 3, StatusCategoryId = 1, Code = "REJECTED" },
+      new Status { StatusId = 4, StatusCategoryId = 1, Code = "PENDING" }
+    );
   }
 }

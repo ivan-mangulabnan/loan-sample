@@ -12,6 +12,11 @@ var builder = WebApplication.CreateBuilder(args);
 builder.Services.AddDbContext<LoanAppDbContext>(options => options.UseSqlServer(builder.Configuration.GetConnectionString("DefaultConnection")));
 builder.Services.AddScoped<AuthService>();
 builder.Services.AddScoped<RoleService>();
+builder.Services.AddScoped<StatusService>();
+builder.Services.AddScoped<StatusCategoryService>();
+builder.Services.AddScoped<LoanApplicationService>();
+builder.Services.AddScoped<InterestService>();
+builder.Services.AddScoped<PaymentPlanService>();
 builder.Services.AddSingleton<TokenService>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
