@@ -24,4 +24,10 @@ public class StatusService
         var status = await _context.Statuses.FirstOrDefaultAsync(s => s.Code == code);
         return status;
     }
+
+    public async Task<Status?> GetStatusByIdAsync (int statusId)
+    {
+        var status = await _context.Statuses.FirstOrDefaultAsync(s => s.StatusId == statusId);
+        return status;
+    }
 }

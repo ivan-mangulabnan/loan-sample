@@ -2,8 +2,8 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Dtos.Requests;
 
-public class UpdateStatusRequest
+public class UpdatePaymentPlanRequest
 {
     [Required]
-    public int StatusId { get; set; }
+    public int PaymentPlanId { get; set; }
 }

@@ -24,4 +24,10 @@ public class PaymentPlanService
         var targetPaymentPlan = await _context.PaymentPlans.FirstOrDefaultAsync(p => p.NumberOfMonths == numberOfMonths);
         return targetPaymentPlan;
     }
+
+    public async Task<PaymentPlan?> GetPaymentPlanByIdAsync (int paymentPlanId)
+    {
+        var paymentPlan = await _context.PaymentPlans.FirstOrDefaultAsync(p => p.PaymentPlanId == paymentPlanId);
+        return paymentPlan;
+    }
 }

@@ -37,12 +37,13 @@ public class LoanApplicationService
         return loanApplication;
     }
 
-    public async Task<LoanApplication?> GetLoanApplicationAsync (int loanApplicationId)
+    public async Task<LoanApplication?> GetLoanApplicationAsync (int loanApplicationId, int tenantId)
     {
         var loanApplication = await _context.LoanApplications
+            .Include(l => l.Borrower)
             .Include(l => l.PaymentPlan)
             .Include(l => l.Status)
-            .FirstOrDefaultAsync(l => l.LoanApplicationId == loanApplicationId);
+            .FirstOrDefaultAsync(l => l.LoanApplicationId == loanApplicationId && l.Borrower.TenantId == tenantId);
 
         return loanApplication;
     }
@@ -58,14 +59,23 @@ public class LoanApplicationService
         return loanApplications;
     }
 
-    public async Task<LoanApplication?> UpdateStatusAsync (int loanApplicationId, int statusId)
+    public async Task<LoanApplication?> UpdatePaymentPlanAsync (int loanApplicationId, int borrowerId, int paymentPlanId)
     {
         var loanApplication = await _context.LoanApplications
-            .FirstOrDefaultAsync(l => l.LoanApplicationId == loanApplicationId);
+            .Include(l => l.Status)
+            .FirstOrDefaultAsync(l => l.LoanApplicationId == loanApplicationId && l.BorrowerId == borrowerId);
 
         if (loanApplication is null) return null;
 
-        loanApplication.StatusId = statusId;
+        if (loanApplication.Status.Code != "PENDING" && loanApplication.Status.Code != "RETURNED")
+            throw new InvalidOperationException($"Cannot edit an application with status '{loanApplication.Status.Code}'.");
+
+        var pendingStatus = await _statusService.GetStatusByCodeAsync("PENDING");
+
+        if (pendingStatus is null) throw new InvalidOperationException("Status 'PENDING' is not seeded.");
+
+        loanApplication.PaymentPlanId = paymentPlanId;
+        loanApplication.StatusId = pendingStatus.StatusId;
         await _context.SaveChangesAsync();
 
         return loanApplication;

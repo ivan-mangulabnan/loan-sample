@@ -15,6 +15,7 @@ builder.Services.AddScoped<RoleService>();
 builder.Services.AddScoped<StatusService>();
 builder.Services.AddScoped<StatusCategoryService>();
 builder.Services.AddScoped<LoanApplicationService>();
+builder.Services.AddScoped<ReviewApplicationService>();
 builder.Services.AddScoped<InterestService>();
 builder.Services.AddScoped<PaymentPlanService>();
 builder.Services.AddSingleton<TokenService>();

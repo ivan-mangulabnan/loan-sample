@@ -1,5 +1,5 @@
-using System.Security.Claims;
 using Dtos.Requests;
+using Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Services;
@@ -12,16 +12,18 @@ namespace Controllers;
 public class LoanApplicationController : ControllerBase
 {
   private readonly LoanApplicationService _loanApplicationService;
+  private readonly PaymentPlanService _paymentPlanService;
 
-  public LoanApplicationController (LoanApplicationService loanApplicationService)
+  public LoanApplicationController (LoanApplicationService loanApplicationService, PaymentPlanService paymentPlanService)
   {
     _loanApplicationService = loanApplicationService;
+    _paymentPlanService = paymentPlanService;
   }
 
   [HttpPost]
   public async Task<IActionResult> Create (LoanApplicationRequest loanApplicationRequest)
   {
-    var borrowerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
+    var borrowerId = User.GetUserId();
 
     var loanApplication = await _loanApplicationService.CreateLoanApplicationAsync(borrowerId, loanApplicationRequest);
 
@@ -31,7 +33,7 @@ public class LoanApplicationController : ControllerBase
   [HttpGet("{id}")]
   public async Task<IActionResult> GetById (int id)
   {
-    var loanApplication = await _loanApplicationService.GetLoanApplicationAsync(id);
+    var loanApplication = await _loanApplicationService.GetLoanApplicationAsync(id, User.GetTenantId());
     if (loanApplication is null) return NotFound();
 
     return Ok(loanApplication);
@@ -40,20 +42,27 @@ public class LoanApplicationController : ControllerBase
   [HttpGet("me")]
   public async Task<IActionResult> GetMine ()
   {
-    var borrowerId = int.Parse(User.FindFirstValue(ClaimTypes.NameIdentifier)!);
-
-    var loanApplications = await _loanApplicationService.GetLoanApplicationsByUserAsync(borrowerId);
+    var loanApplications = await _loanApplicationService.GetLoanApplicationsByUserAsync(User.GetUserId());
 
     return Ok(loanApplications);
   }
 
-  [HttpPut("{id}/status")]
-  [Authorize(Roles = "Admin,Reviewer,Approver")]
-  public async Task<IActionResult> UpdateStatus (int id, UpdateStatusRequest updateStatusRequest)
+  [HttpPut("{id}/payment-plan")]
+  public async Task<IActionResult> UpdatePaymentPlan (int id, UpdatePaymentPlanRequest updatePaymentPlanRequest)
   {
-    var loanApplication = await _loanApplicationService.UpdateStatusAsync(id, updateStatusRequest.StatusId);
-    if (loanApplication is null) return NotFound();
+    var paymentPlan = await _paymentPlanService.GetPaymentPlanByIdAsync(updatePaymentPlanRequest.PaymentPlanId);
+    if (paymentPlan is null) return BadRequest("Payment plan does not exist.");
 
-    return Ok(loanApplication);
+    try
+    {
+      var loanApplication = await _loanApplicationService.UpdatePaymentPlanAsync(id, User.GetUserId(), updatePaymentPlanRequest.PaymentPlanId);
+      if (loanApplication is null) return NotFound();
+
+      return Ok(loanApplication);
+    }
+    catch (InvalidOperationException ex)
+    {
+      return Conflict(ex.Message);
+    }
   }
 }
