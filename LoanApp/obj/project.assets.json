@@ -4265,23 +4265,23 @@
     ]
   },
   "packageFolders": {
-    "C:\\Users\\remoc\\.nuget\\packages\\": {},
+    "C:\\Users\\abremocha\\.nuget\\packages\\": {},
     "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages": {}
   },
   "project": {
     "version": "1.0.0",
     "restore": {
-      "projectUniqueName": "C:\\loan-sample\\LoanApp\\LoanApp.csproj",
+      "projectUniqueName": "D:\\loan-sample\\LoanApp\\LoanApp.csproj",
       "projectName": "LoanApp",
-      "projectPath": "C:\\loan-sample\\LoanApp\\LoanApp.csproj",
-      "packagesPath": "C:\\Users\\remoc\\.nuget\\packages\\",
-      "outputPath": "C:\\loan-sample\\LoanApp\\obj\\",
+      "projectPath": "D:\\loan-sample\\LoanApp\\LoanApp.csproj",
+      "packagesPath": "C:\\Users\\abremocha\\.nuget\\packages\\",
+      "outputPath": "D:\\loan-sample\\LoanApp\\obj\\",
       "projectStyle": "PackageReference",
       "fallbackFolders": [
         "C:\\Program Files (x86)\\Microsoft Visual Studio\\Shared\\NuGetPackages"
       ],
       "configFilePaths": [
-        "C:\\Users\\remoc\\AppData\\Roaming\\NuGet\\NuGet.Config",
+        "C:\\Users\\abremocha\\AppData\\Roaming\\NuGet\\NuGet.Config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.FallbackLocation.config",
         "C:\\Program Files (x86)\\NuGet\\Config\\Microsoft.VisualStudio.Offline.config"
       ],
