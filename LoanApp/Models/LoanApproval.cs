@@ -7,8 +7,8 @@ public class LoanApproval
     public int ApproverId { get; set; }
     public User Approver { get; set; } = null!;
 
-    public int ReviewApplicationId { get; set; }
-    public ReviewApplication ReviewApplication { get; set; } = null!;
+    public int LoanApplicationId { get; set; }
+    public LoanApplication LoanApplication { get; set; } = null!;
 
     public int StatusId { get; set; }
     public Status Status { get; set; } = null!;

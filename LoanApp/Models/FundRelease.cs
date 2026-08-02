@@ -13,5 +13,8 @@ public class FundRelease
     public int StatusId { get; set; }
     public Status Status { get; set; } = null!;
 
+    public decimal Amount { get; set; }
+    public DateTime ReleaseDate { get; set; }
+
     public string? Remarks { get; set; }
 }

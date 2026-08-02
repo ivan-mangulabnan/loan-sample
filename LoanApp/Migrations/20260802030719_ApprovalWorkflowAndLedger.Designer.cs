@@ -4,6 +4,7 @@ using Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LoanApp.Migrations
 {
     [DbContext(typeof(LoanAppDbContext))]
-    partial class LoanAppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260802030719_ApprovalWorkflowAndLedger")]
+    partial class ApprovalWorkflowAndLedger
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -53,56 +56,6 @@ namespace LoanApp.Migrations
                         .IsUnique();
 
                     b.ToTable("Accounts");
-
-                    b.HasData(
-                        new
-                        {
-                            AccountId = 1,
-                            Birthdate = new DateTime(1990, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            FirstName = "Alo",
-                            LastName = "Santos",
-                            UserId = 1
-                        },
-                        new
-                        {
-                            AccountId = 2,
-                            Birthdate = new DateTime(1990, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            FirstName = "Luwi",
-                            LastName = "Santos",
-                            UserId = 2
-                        },
-                        new
-                        {
-                            AccountId = 3,
-                            Birthdate = new DateTime(1990, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            FirstName = "Ampol",
-                            LastName = "Santos",
-                            UserId = 3
-                        },
-                        new
-                        {
-                            AccountId = 4,
-                            Birthdate = new DateTime(1990, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            FirstName = "Alo",
-                            LastName = "Reyes",
-                            UserId = 4
-                        },
-                        new
-                        {
-                            AccountId = 5,
-                            Birthdate = new DateTime(1990, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            FirstName = "Luwi",
-                            LastName = "Reyes",
-                            UserId = 5
-                        },
-                        new
-                        {
-                            AccountId = 6,
-                            Birthdate = new DateTime(1990, 1, 1, 0, 0, 0, 0, DateTimeKind.Unspecified),
-                            FirstName = "Ampol",
-                            LastName = "Reyes",
-                            UserId = 6
-                        });
                 });
 
             modelBuilder.Entity("Models.CapitalDeposit", b =>
@@ -586,54 +539,60 @@ namespace LoanApp.Migrations
                         new
                         {
                             StatusId = 1,
-                            Code = "PENDING_REVIEW",
+                            Code = "DRAFT",
                             StatusCategoryId = 1
                         },
                         new
                         {
                             StatusId = 2,
-                            Code = "PENDING_APPROVAL",
+                            Code = "PENDING_REVIEW",
                             StatusCategoryId = 1
                         },
                         new
                         {
                             StatusId = 3,
-                            Code = "PENDING_RELEASE",
+                            Code = "PENDING_APPROVAL",
                             StatusCategoryId = 1
                         },
                         new
                         {
                             StatusId = 4,
-                            Code = "RELEASED",
+                            Code = "PENDING_RELEASE",
                             StatusCategoryId = 1
                         },
                         new
                         {
                             StatusId = 5,
-                            Code = "RETURNED_BY_REVIEWER",
+                            Code = "RELEASED",
                             StatusCategoryId = 1
                         },
                         new
                         {
                             StatusId = 6,
-                            Code = "RETURNED_BY_APPROVER",
+                            Code = "RETURNED_BY_REVIEWER",
                             StatusCategoryId = 1
                         },
                         new
                         {
                             StatusId = 7,
-                            Code = "REJECTED",
+                            Code = "RETURNED_BY_APPROVER",
                             StatusCategoryId = 1
                         },
                         new
                         {
                             StatusId = 8,
-                            Code = "CANCELLED",
+                            Code = "REJECTED",
                             StatusCategoryId = 1
                         },
                         new
                         {
                             StatusId = 9,
+                            Code = "CANCELLED",
+                            StatusCategoryId = 1
+                        },
+                        new
+                        {
+                            StatusId = 10,
                             Code = "APPROVED",
                             StatusCategoryId = 1
                         });
@@ -812,56 +771,6 @@ namespace LoanApp.Migrations
                         .IsUnique();
 
                     b.ToTable("Users");
-
-                    b.HasData(
-                        new
-                        {
-                            UserId = 1,
-                            PasswordHash = "AQAAAAEAACcQAAAAEKvOGE+ATfpFd9wZ+1zUGOWKFMC2JKkGu+BSKWYXi7oBab2KEJ3KUNkqu/XXq771Zw==",
-                            RoleId = 1,
-                            TenantId = 1,
-                            UserName = "j.admin"
-                        },
-                        new
-                        {
-                            UserId = 2,
-                            PasswordHash = "AQAAAAEAACcQAAAAEGE2jfRdx10ZGmYlr1HyuyDS7b++xIoN9M1gYpk/EuHULF3UBIvEJRXA1SnecrTPuA==",
-                            RoleId = 2,
-                            TenantId = 1,
-                            UserName = "j.reviewer"
-                        },
-                        new
-                        {
-                            UserId = 3,
-                            PasswordHash = "AQAAAAEAACcQAAAAEGWKLL3uBfsK5IRwUMe1XaTr8nQxfW8T2l1Mppi7g4ZptA6Pl8QWGDIcAiAAKTUQbw==",
-                            RoleId = 3,
-                            TenantId = 1,
-                            UserName = "j.approver"
-                        },
-                        new
-                        {
-                            UserId = 4,
-                            PasswordHash = "AQAAAAEAACcQAAAAEDOCUsFtT4h2mZK/Tes9OlJY6wawHkvmeLP7MT1o2M+yYJMkK2P/9VBHX/MXeHj2pA==",
-                            RoleId = 1,
-                            TenantId = 2,
-                            UserName = "m.admin"
-                        },
-                        new
-                        {
-                            UserId = 5,
-                            PasswordHash = "AQAAAAEAACcQAAAAEOod2TWAHlBWmZrUZYRtX8NlwBkUW8fa/m8oSHly5P/x56xDJUdL4e8+c3i0T0UCqg==",
-                            RoleId = 2,
-                            TenantId = 2,
-                            UserName = "m.reviewer"
-                        },
-                        new
-                        {
-                            UserId = 6,
-                            PasswordHash = "AQAAAAEAACcQAAAAEFcQow6xcED8W1/PSL+OlkhYjqa98PxRE6wyLWHal5VU1GiYJ0bTPu+0ryuHOYqTOQ==",
-                            RoleId = 3,
-                            TenantId = 2,
-                            UserName = "m.approver"
-                        });
                 });
 
             modelBuilder.Entity("Models.Account", b =>

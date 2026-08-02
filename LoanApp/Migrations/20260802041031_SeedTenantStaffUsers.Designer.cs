@@ -4,6 +4,7 @@ using Data;
 using Microsoft.EntityFrameworkCore;
 using Microsoft.EntityFrameworkCore.Infrastructure;
 using Microsoft.EntityFrameworkCore.Metadata;
+using Microsoft.EntityFrameworkCore.Migrations;
 using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 
 #nullable disable
@@ -11,9 +12,11 @@ using Microsoft.EntityFrameworkCore.Storage.ValueConversion;
 namespace LoanApp.Migrations
 {
     [DbContext(typeof(LoanAppDbContext))]
-    partial class LoanAppDbContextModelSnapshot : ModelSnapshot
+    [Migration("20260802041031_SeedTenantStaffUsers")]
+    partial class SeedTenantStaffUsers
     {
-        protected override void BuildModel(ModelBuilder modelBuilder)
+        /// <inheritdoc />
+        protected override void BuildTargetModel(ModelBuilder modelBuilder)
         {
 #pragma warning disable 612, 618
             modelBuilder
@@ -586,54 +589,60 @@ namespace LoanApp.Migrations
                         new
                         {
                             StatusId = 1,
-                            Code = "PENDING_REVIEW",
+                            Code = "DRAFT",
                             StatusCategoryId = 1
                         },
                         new
                         {
                             StatusId = 2,
-                            Code = "PENDING_APPROVAL",
+                            Code = "PENDING_REVIEW",
                             StatusCategoryId = 1
                         },
                         new
                         {
                             StatusId = 3,
-                            Code = "PENDING_RELEASE",
+                            Code = "PENDING_APPROVAL",
                             StatusCategoryId = 1
                         },
                         new
                         {
                             StatusId = 4,
-                            Code = "RELEASED",
+                            Code = "PENDING_RELEASE",
                             StatusCategoryId = 1
                         },
                         new
                         {
                             StatusId = 5,
-                            Code = "RETURNED_BY_REVIEWER",
+                            Code = "RELEASED",
                             StatusCategoryId = 1
                         },
                         new
                         {
                             StatusId = 6,
-                            Code = "RETURNED_BY_APPROVER",
+                            Code = "RETURNED_BY_REVIEWER",
                             StatusCategoryId = 1
                         },
                         new
                         {
                             StatusId = 7,
-                            Code = "REJECTED",
+                            Code = "RETURNED_BY_APPROVER",
                             StatusCategoryId = 1
                         },
                         new
                         {
                             StatusId = 8,
-                            Code = "CANCELLED",
+                            Code = "REJECTED",
                             StatusCategoryId = 1
                         },
                         new
                         {
                             StatusId = 9,
+                            Code = "CANCELLED",
+                            StatusCategoryId = 1
+                        },
+                        new
+                        {
+                            StatusId = 10,
                             Code = "APPROVED",
                             StatusCategoryId = 1
                         });

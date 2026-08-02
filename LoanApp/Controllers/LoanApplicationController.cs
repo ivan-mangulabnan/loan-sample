@@ -23,11 +23,19 @@ public class LoanApplicationController : ControllerBase
   [HttpPost]
   public async Task<IActionResult> Create (LoanApplicationRequest loanApplicationRequest)
   {
-    var borrowerId = User.GetUserId();
+    var paymentPlan = await _paymentPlanService.GetPaymentPlanByIdAsync(loanApplicationRequest.PaymentPlanId);
+    if (paymentPlan is null) return BadRequest("Payment plan does not exist.");
 
-    var loanApplication = await _loanApplicationService.CreateLoanApplicationAsync(borrowerId, loanApplicationRequest);
+    try
+    {
+      var loanApplication = await _loanApplicationService.CreateLoanApplicationAsync(User.GetUserId(), loanApplicationRequest);
 
-    return CreatedAtAction(nameof(GetById), new { id = loanApplication.LoanApplicationId }, loanApplication);
+      return CreatedAtAction(nameof(GetById), new { id = loanApplication.LoanApplicationId }, loanApplication);
+    }
+    catch (InvalidOperationException ex)
+    {
+      return Conflict(ex.Message);
+    }
   }
 
   [HttpGet("{id}")]
@@ -56,6 +64,22 @@ public class LoanApplicationController : ControllerBase
     try
     {
       var loanApplication = await _loanApplicationService.UpdatePaymentPlanAsync(id, User.GetUserId(), updatePaymentPlanRequest.PaymentPlanId);
+      if (loanApplication is null) return NotFound();
+
+      return Ok(loanApplication);
+    }
+    catch (InvalidOperationException ex)
+    {
+      return Conflict(ex.Message);
+    }
+  }
+
+  [HttpPost("{id}/cancel")]
+  public async Task<IActionResult> Cancel (int id)
+  {
+    try
+    {
+      var loanApplication = await _loanApplicationService.CancelAsync(id, User.GetUserId());
       if (loanApplication is null) return NotFound();
 
       return Ok(loanApplication);

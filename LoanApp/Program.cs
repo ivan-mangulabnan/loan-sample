@@ -5,7 +5,8 @@ using Security;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
-using Scalar.AspNetCore;
+using System.Text.Json.Serialization;
+using Microsoft.OpenApi.Models;
 
 var builder = WebApplication.CreateBuilder(args);
 
@@ -16,6 +17,10 @@ builder.Services.AddScoped<StatusService>();
 builder.Services.AddScoped<StatusCategoryService>();
 builder.Services.AddScoped<LoanApplicationService>();
 builder.Services.AddScoped<ReviewApplicationService>();
+builder.Services.AddScoped<LoanApprovalService>();
+builder.Services.AddScoped<LedgerService>();
+builder.Services.AddScoped<FundReleaseService>();
+builder.Services.AddScoped<CapitalDepositService>();
 builder.Services.AddScoped<InterestService>();
 builder.Services.AddScoped<PaymentPlanService>();
 builder.Services.AddSingleton<TokenService>();
@@ -37,15 +42,39 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-builder.Services.AddControllers();
-builder.Services.AddOpenApi();
+builder.Services.AddControllers()
+    .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));
+
+builder.Services.AddEndpointsApiExplorer();
+
+builder.Services.AddSwaggerGen(options =>
+{
+    options.SwaggerDoc("v1", new OpenApiInfo { Title = "LoanApp", Version = "v1" });
+
+    options.AddSecurityDefinition("Bearer", new OpenApiSecurityScheme
+    {
+        Type = SecuritySchemeType.Http,
+        Scheme = "bearer",
+        BearerFormat = "JWT",
+        In = ParameterLocation.Header,
+        Description = "Paste the token from /api/Auth/login (no \"Bearer \" prefix)."
+    });
+
+    options.AddSecurityRequirement(new OpenApiSecurityRequirement
+    {
+        [new OpenApiSecurityScheme
+        {
+            Reference = new OpenApiReference { Type = ReferenceType.SecurityScheme, Id = "Bearer" }
+        }] = []
+    });
+});
 
 var app = builder.Build();
 
 if (app.Environment.IsDevelopment())
 {
-    app.MapOpenApi();
-    app.MapScalarApiReference();
+    app.UseSwagger();
+    app.UseSwaggerUI(options => options.SwaggerEndpoint("/swagger/v1/swagger.json", "LoanApp v1"));
 }
 
 app.UseHttpsRedirection();

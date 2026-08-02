@@ -3,7 +3,7 @@ using Constants;
 
 namespace Dtos.Requests;
 
-public class ReviewApplicationRequest
+public class LoanApprovalRequest
 {
     [Range(1, int.MaxValue)]
     public int LoanApplicationId { get; set; }

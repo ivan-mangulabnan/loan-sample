@@ -1,3 +1,4 @@
+using Constants;
 using Data;
 using Dtos.Requests;
 using Microsoft.EntityFrameworkCore;
@@ -18,15 +19,13 @@ public class LoanApplicationService
 
     public async Task<LoanApplication> CreateLoanApplicationAsync (int borrowerId, LoanApplicationRequest loanApplicationRequest)
     {
-        var pendingStatus = await _statusService.GetStatusByCodeAsync("PENDING");
-
-        if (pendingStatus is null) throw new InvalidOperationException("Status 'PENDING' is not seeded.");
+        var pendingReview = await GetStatusOrThrowAsync(LoanStatusCodes.PendingReview);
 
         var loanApplication = new LoanApplication
         {
             BorrowerId = borrowerId,
             PaymentPlanId = loanApplicationRequest.PaymentPlanId,
-            StatusId = pendingStatus.StatusId,
+            StatusId = pendingReview.StatusId,
             Amount = loanApplicationRequest.Amount,
             DateRequested = DateTime.UtcNow
         };
@@ -61,23 +60,54 @@ public class LoanApplicationService
 
     public async Task<LoanApplication?> UpdatePaymentPlanAsync (int loanApplicationId, int borrowerId, int paymentPlanId)
     {
-        var loanApplication = await _context.LoanApplications
-            .Include(l => l.Status)
-            .FirstOrDefaultAsync(l => l.LoanApplicationId == loanApplicationId && l.BorrowerId == borrowerId);
+        var loanApplication = await GetOwnedAsync(loanApplicationId, borrowerId);
 
         if (loanApplication is null) return null;
 
-        if (loanApplication.Status.Code != "PENDING" && loanApplication.Status.Code != "RETURNED")
-            throw new InvalidOperationException($"Cannot edit an application with status '{loanApplication.Status.Code}'.");
+        var targetCode = loanApplication.Status.Code switch
+        {
+            LoanStatusCodes.ReturnedByReviewer => LoanStatusCodes.PendingReview,
+            LoanStatusCodes.ReturnedByApprover => LoanStatusCodes.PendingApproval,
+            _ => throw new InvalidOperationException($"Cannot edit an application with status '{loanApplication.Status.Code}'.")
+        };
 
-        var pendingStatus = await _statusService.GetStatusByCodeAsync("PENDING");
-
-        if (pendingStatus is null) throw new InvalidOperationException("Status 'PENDING' is not seeded.");
+        var targetStatus = await GetStatusOrThrowAsync(targetCode);
 
         loanApplication.PaymentPlanId = paymentPlanId;
-        loanApplication.StatusId = pendingStatus.StatusId;
+        loanApplication.StatusId = targetStatus.StatusId;
         await _context.SaveChangesAsync();
 
         return loanApplication;
+    }
+
+    public async Task<LoanApplication?> CancelAsync (int loanApplicationId, int borrowerId)
+    {
+        var loanApplication = await GetOwnedAsync(loanApplicationId, borrowerId);
+
+        if (loanApplication is null) return null;
+
+        if (LoanStatusCodes.Terminal.Contains(loanApplication.Status.Code)
+            || loanApplication.Status.Code == LoanStatusCodes.PendingRelease)
+            throw new InvalidOperationException($"Cannot cancel an application with status '{loanApplication.Status.Code}'.");
+
+        var cancelled = await GetStatusOrThrowAsync(LoanStatusCodes.Cancelled);
+
+        loanApplication.StatusId = cancelled.StatusId;
+        await _context.SaveChangesAsync();
+
+        return loanApplication;
+    }
+
+    private async Task<LoanApplication?> GetOwnedAsync (int loanApplicationId, int borrowerId)
+    {
+        return await _context.LoanApplications
+            .Include(l => l.Status)
+            .FirstOrDefaultAsync(l => l.LoanApplicationId == loanApplicationId && l.BorrowerId == borrowerId);
+    }
+
+    private async Task<Status> GetStatusOrThrowAsync (string code)
+    {
+        var status = await _statusService.GetStatusByCodeAsync(code);
+        return status ?? throw new InvalidOperationException($"Status '{code}' is not seeded.");
     }
 }

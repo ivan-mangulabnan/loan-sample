@@ -1,3 +1,4 @@
+using Constants;
 using Dtos.Requests;
 using Extensions;
 using Microsoft.AspNetCore.Authorization;
@@ -12,25 +13,27 @@ namespace Controllers;
 public class ReviewApplicationController : ControllerBase
 {
   private readonly ReviewApplicationService _reviewApplicationService;
-  private readonly StatusService _statusService;
 
-  public ReviewApplicationController (ReviewApplicationService reviewApplicationService, StatusService statusService)
+  public ReviewApplicationController (ReviewApplicationService reviewApplicationService)
   {
     _reviewApplicationService = reviewApplicationService;
-    _statusService = statusService;
   }
 
   [HttpPost]
-  [Authorize(Roles = "Reviewer")]
+  [Authorize(Roles = RoleNames.Reviewer)]
   public async Task<IActionResult> Create (ReviewApplicationRequest reviewApplicationRequest)
   {
-    var status = await _statusService.GetStatusByIdAsync(reviewApplicationRequest.StatusId);
-    if (status is null) return BadRequest("Status does not exist.");
+    try
+    {
+      var reviewApplication = await _reviewApplicationService.CreateReviewAsync(User.GetUserId(), User.GetTenantId(), reviewApplicationRequest);
+      if (reviewApplication is null) return NotFound();
 
-    var reviewApplication = await _reviewApplicationService.CreateReviewAsync(User.GetUserId(), User.GetTenantId(), reviewApplicationRequest);
-    if (reviewApplication is null) return NotFound();
-
-    return CreatedAtAction(nameof(GetTimeline), new { loanApplicationId = reviewApplication.LoanApplicationId }, reviewApplication);
+      return CreatedAtAction(nameof(GetTimeline), new { loanApplicationId = reviewApplication.LoanApplicationId }, reviewApplication);
+    }
+    catch (InvalidOperationException ex)
+    {
+      return Conflict(ex.Message);
+    }
   }
 
   [HttpGet("application/{loanApplicationId}")]
@@ -39,5 +42,14 @@ public class ReviewApplicationController : ControllerBase
     var reviewApplications = await _reviewApplicationService.GetReviewsForApplicationAsync(loanApplicationId, User.GetTenantId());
 
     return Ok(reviewApplications);
+  }
+
+  [HttpGet("queue")]
+  [Authorize(Roles = RoleNames.Reviewer)]
+  public async Task<IActionResult> GetQueue ()
+  {
+    var queue = await _reviewApplicationService.GetQueueAsync(User.GetTenantId());
+
+    return Ok(queue);
   }
 }

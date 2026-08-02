@@ -11,6 +11,8 @@ public class Transaction
     public TransactionType TransactionType { get; set; } = null!;
 
     public int ReferenceId { get; set; }
+
     public decimal Amount { get; set; }
+
     public DateTime CreatedAt { get; set; }
 }

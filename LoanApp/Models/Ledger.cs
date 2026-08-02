@@ -6,7 +6,7 @@ public class Ledger
 
   public int TenantId { get; set; }
   public Tenant Tenant { get; set; } = null!;
-  public ICollection<Transaction> Transactions = new List<Transaction>();
+  public ICollection<Transaction> Transactions { get; set; } = [];
   
   public required string Name { get; set; }
   public decimal CurrentBalance { get; set; }

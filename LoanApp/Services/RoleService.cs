@@ -1,3 +1,4 @@
+using Constants;
 using Data;
 using Models;
 using Microsoft.EntityFrameworkCore;
@@ -15,6 +16,6 @@ public class RoleService
 
   public async Task<Role?> GetLoanerRoleAsync ()
   {
-    return await _context.Roles.FirstOrDefaultAsync(r => r.Name == "Loaner");
+    return await _context.Roles.FirstOrDefaultAsync(r => r.Name == RoleNames.Loaner);
   }
 }
