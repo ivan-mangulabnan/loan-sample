@@ -1,6 +1,6 @@
 namespace Constants;
 
-public static class LoanStatusCodes
+public static class LoanApplicationStatusCodes
 {
     public const string PendingReview = "PENDING_REVIEW";
     public const string PendingApproval = "PENDING_APPROVAL";

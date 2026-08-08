@@ -31,7 +31,7 @@ public class FundReleaseService
 
         var loanApplication = loanApproval.LoanApplication;
 
-        if (loanApplication.Status.Code != LoanStatusCodes.PendingRelease)
+        if (loanApplication.Status.Code != LoanApplicationStatusCodes.PendingRelease)
             throw new InvalidOperationException($"Cannot release funds for an application with status '{loanApplication.Status.Code}'.");
 
         var ledger = await _ledgerService.GetOperatingLedgerAsync(tenantId);
@@ -41,7 +41,7 @@ public class FundReleaseService
             throw new InvalidOperationException(
                 $"Insufficient funds: ledger holds {ledger.CurrentBalance:N2}, release requires {amount:N2}.");
 
-        var releasedStatus = await GetStatusOrThrowAsync(LoanStatusCodes.Released);
+        var releasedStatus = await _statusService.GetRequiredApplicationStatusAsync(LoanApplicationStatusCodes.Released);
         var transactionTypeId = await _ledgerService.GetTransactionTypeIdAsync(TransactionTypeCodes.FundRelease);
 
         var fundRelease = new FundRelease
@@ -83,11 +83,5 @@ public class FundReleaseService
         }
 
         return fundRelease;
-    }
-
-    private async Task<Status> GetStatusOrThrowAsync (string code)
-    {
-        var status = await _statusService.GetStatusByCodeAsync(code);
-        return status ?? throw new InvalidOperationException($"Status '{code}' is not seeded.");
     }
 }

@@ -27,19 +27,19 @@ public class LoanApprovalService
 
         if (loanApplication is null) return null;
 
-        if (loanApplication.Status.Code != LoanStatusCodes.PendingApproval)
+        if (loanApplication.Status.Code != LoanApplicationStatusCodes.PendingApproval)
             throw new InvalidOperationException($"Cannot approve an application with status '{loanApplication.Status.Code}'.");
 
         var (approvalCode, applicationCode) = loanApprovalRequest.Decision switch
         {
-            Decision.Approve => (LoanStatusCodes.Approved, LoanStatusCodes.PendingRelease),
-            Decision.Reject => (LoanStatusCodes.Rejected, LoanStatusCodes.Rejected),
-            Decision.Return => (LoanStatusCodes.ReturnedByApprover, LoanStatusCodes.ReturnedByApprover),
+            Decision.Approve => (LoanApplicationStatusCodes.Approved, LoanApplicationStatusCodes.PendingRelease),
+            Decision.Reject => (LoanApplicationStatusCodes.Rejected, LoanApplicationStatusCodes.Rejected),
+            Decision.Return => (LoanApplicationStatusCodes.ReturnedByApprover, LoanApplicationStatusCodes.ReturnedByApprover),
             _ => throw new InvalidOperationException($"Unknown decision '{loanApprovalRequest.Decision}'.")
         };
 
-        var approvalStatus = await GetStatusOrThrowAsync(approvalCode);
-        var applicationStatus = await GetStatusOrThrowAsync(applicationCode);
+        var approvalStatus = await _statusService.GetRequiredApplicationStatusAsync(approvalCode);
+        var applicationStatus = await _statusService.GetRequiredApplicationStatusAsync(applicationCode);
 
         var interestRate = loanApplication.PaymentPlan.Interest.InterestRate;
         var principal = loanApplication.Amount;
@@ -81,14 +81,8 @@ public class LoanApprovalService
             .Include(l => l.Borrower)
             .Include(l => l.PaymentPlan)
             .Include(l => l.Status)
-            .Where(l => l.Borrower.TenantId == tenantId && l.Status.Code == LoanStatusCodes.PendingApproval)
+            .Where(l => l.Borrower.TenantId == tenantId && l.Status.Code == LoanApplicationStatusCodes.PendingApproval)
             .OrderBy(l => l.DateRequested)
             .ToListAsync();
-    }
-
-    private async Task<Status> GetStatusOrThrowAsync (string code)
-    {
-        var status = await _statusService.GetStatusByCodeAsync(code);
-        return status ?? throw new InvalidOperationException($"Status '{code}' is not seeded.");
     }
 }

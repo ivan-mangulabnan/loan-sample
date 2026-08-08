@@ -19,7 +19,7 @@ public class LoanApplicationService
 
     public async Task<LoanApplication> CreateLoanApplicationAsync (int borrowerId, LoanApplicationRequest loanApplicationRequest)
     {
-        var pendingReview = await GetStatusOrThrowAsync(LoanStatusCodes.PendingReview);
+        var pendingReview = await _statusService.GetRequiredApplicationStatusAsync(LoanApplicationStatusCodes.PendingReview);
 
         var loanApplication = new LoanApplication
         {
@@ -66,12 +66,12 @@ public class LoanApplicationService
 
         var targetCode = loanApplication.Status.Code switch
         {
-            LoanStatusCodes.ReturnedByReviewer => LoanStatusCodes.PendingReview,
-            LoanStatusCodes.ReturnedByApprover => LoanStatusCodes.PendingApproval,
+            LoanApplicationStatusCodes.ReturnedByReviewer => LoanApplicationStatusCodes.PendingReview,
+            LoanApplicationStatusCodes.ReturnedByApprover => LoanApplicationStatusCodes.PendingApproval,
             _ => throw new InvalidOperationException($"Cannot edit an application with status '{loanApplication.Status.Code}'.")
         };
 
-        var targetStatus = await GetStatusOrThrowAsync(targetCode);
+        var targetStatus = await _statusService.GetRequiredApplicationStatusAsync(targetCode);
 
         loanApplication.PaymentPlanId = paymentPlanId;
         loanApplication.StatusId = targetStatus.StatusId;
@@ -86,11 +86,11 @@ public class LoanApplicationService
 
         if (loanApplication is null) return null;
 
-        if (LoanStatusCodes.Terminal.Contains(loanApplication.Status.Code)
-            || loanApplication.Status.Code == LoanStatusCodes.PendingRelease)
+        if (LoanApplicationStatusCodes.Terminal.Contains(loanApplication.Status.Code)
+            || loanApplication.Status.Code == LoanApplicationStatusCodes.PendingRelease)
             throw new InvalidOperationException($"Cannot cancel an application with status '{loanApplication.Status.Code}'.");
 
-        var cancelled = await GetStatusOrThrowAsync(LoanStatusCodes.Cancelled);
+        var cancelled = await _statusService.GetRequiredApplicationStatusAsync(LoanApplicationStatusCodes.Cancelled);
 
         loanApplication.StatusId = cancelled.StatusId;
         await _context.SaveChangesAsync();
@@ -103,11 +103,5 @@ public class LoanApplicationService
         return await _context.LoanApplications
             .Include(l => l.Status)
             .FirstOrDefaultAsync(l => l.LoanApplicationId == loanApplicationId && l.BorrowerId == borrowerId);
-    }
-
-    private async Task<Status> GetStatusOrThrowAsync (string code)
-    {
-        var status = await _statusService.GetStatusByCodeAsync(code);
-        return status ?? throw new InvalidOperationException($"Status '{code}' is not seeded.");
     }
 }

@@ -26,19 +26,19 @@ public class ReviewApplicationService
 
         if (loanApplication is null) return null;
 
-        if (loanApplication.Status.Code != LoanStatusCodes.PendingReview)
+        if (loanApplication.Status.Code != LoanApplicationStatusCodes.PendingReview)
             throw new InvalidOperationException($"Cannot review an application with status '{loanApplication.Status.Code}'.");
 
         var (reviewCode, applicationCode) = reviewApplicationRequest.Decision switch
         {
-            Decision.Approve => (LoanStatusCodes.Approved, LoanStatusCodes.PendingApproval),
-            Decision.Reject => (LoanStatusCodes.Rejected, LoanStatusCodes.Rejected),
-            Decision.Return => (LoanStatusCodes.ReturnedByReviewer, LoanStatusCodes.ReturnedByReviewer),
+            Decision.Approve => (LoanApplicationStatusCodes.Approved, LoanApplicationStatusCodes.PendingApproval),
+            Decision.Reject => (LoanApplicationStatusCodes.Rejected, LoanApplicationStatusCodes.Rejected),
+            Decision.Return => (LoanApplicationStatusCodes.ReturnedByReviewer, LoanApplicationStatusCodes.ReturnedByReviewer),
             _ => throw new InvalidOperationException($"Unknown decision '{reviewApplicationRequest.Decision}'.")
         };
 
-        var reviewStatus = await GetStatusOrThrowAsync(reviewCode);
-        var applicationStatus = await GetStatusOrThrowAsync(applicationCode);
+        var reviewStatus = await _statusService.GetRequiredApplicationStatusAsync(reviewCode);
+        var applicationStatus = await _statusService.GetRequiredApplicationStatusAsync(applicationCode);
 
         var reviewApplication = new ReviewApplication
         {
@@ -75,14 +75,8 @@ public class ReviewApplicationService
             .Include(l => l.Borrower)
             .Include(l => l.PaymentPlan)
             .Include(l => l.Status)
-            .Where(l => l.Borrower.TenantId == tenantId && l.Status.Code == LoanStatusCodes.PendingReview)
+            .Where(l => l.Borrower.TenantId == tenantId && l.Status.Code == LoanApplicationStatusCodes.PendingReview)
             .OrderBy(l => l.DateRequested)
             .ToListAsync();
-    }
-
-    private async Task<Status> GetStatusOrThrowAsync (string code)
-    {
-        var status = await _statusService.GetStatusByCodeAsync(code);
-        return status ?? throw new InvalidOperationException($"Status '{code}' is not seeded.");
     }
 }
