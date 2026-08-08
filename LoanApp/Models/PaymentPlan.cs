@@ -7,5 +7,6 @@ public class PaymentPlan
     public int InterestId { get; set; }
     public Interest Interest { get; set; } = null!;
     
+    public required string Name { get; set; }
     public required int NumberOfMonths { get; set; }
 }

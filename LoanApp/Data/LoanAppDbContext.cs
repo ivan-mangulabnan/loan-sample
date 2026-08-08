@@ -168,28 +168,33 @@ public class LoanAppDbContext : DbContext
 
     modelBuilder.Entity<Interest>().HasData(
       new Interest { InterestId = 1, InterestRate = 5.5m },
-      new Interest { InterestId = 2, InterestRate = 10.1m }
+      new Interest { InterestId = 2, InterestRate = 13m }
     );
 
     modelBuilder.Entity<PaymentPlan>().HasData(
-      new PaymentPlan { PaymentPlanId = 1, InterestId = 1, NumberOfMonths = 2 },
-      new PaymentPlan { PaymentPlanId = 2, InterestId = 2, NumberOfMonths = 4 }
+      new PaymentPlan { PaymentPlanId = 1, InterestId = 1, Name = "Standard", NumberOfMonths = 2 },
+      new PaymentPlan { PaymentPlanId = 2, InterestId = 2, Name = "Extended", NumberOfMonths = 4 }
     );
 
     modelBuilder.Entity<StatusCategory>().HasData(
-      new StatusCategory { StatusCategoryId = 1, Code = "LOAN_STATUS" }
+      new StatusCategory { StatusCategoryId = 1, Code = StatusCategoryCodes.LoanApplicationStatus },
+      new StatusCategory { StatusCategoryId = 2, Code = StatusCategoryCodes.LoanStatus }
     );
 
     modelBuilder.Entity<Status>().HasData(
-      new Status { StatusId = 1, StatusCategoryId = 1, Code = LoanStatusCodes.PendingReview },
-      new Status { StatusId = 2, StatusCategoryId = 1, Code = LoanStatusCodes.PendingApproval },
-      new Status { StatusId = 3, StatusCategoryId = 1, Code = LoanStatusCodes.PendingRelease },
-      new Status { StatusId = 4, StatusCategoryId = 1, Code = LoanStatusCodes.Released },
-      new Status { StatusId = 5, StatusCategoryId = 1, Code = LoanStatusCodes.ReturnedByReviewer },
-      new Status { StatusId = 6, StatusCategoryId = 1, Code = LoanStatusCodes.ReturnedByApprover },
-      new Status { StatusId = 7, StatusCategoryId = 1, Code = LoanStatusCodes.Rejected },
-      new Status { StatusId = 8, StatusCategoryId = 1, Code = LoanStatusCodes.Cancelled },
-      new Status { StatusId = 9, StatusCategoryId = 1, Code = LoanStatusCodes.Approved }
+      new Status { StatusId = 1, StatusCategoryId = 1, Code = LoanStatusCodes.PendingReview, Label = "Pending Review" },
+      new Status { StatusId = 2, StatusCategoryId = 1, Code = LoanStatusCodes.PendingApproval, Label = "Pending Approval" },
+      new Status { StatusId = 3, StatusCategoryId = 1, Code = LoanStatusCodes.PendingRelease, Label = "Pending Release" },
+      new Status { StatusId = 4, StatusCategoryId = 1, Code = LoanStatusCodes.Released, Label = "Released" },
+      new Status { StatusId = 5, StatusCategoryId = 1, Code = LoanStatusCodes.ReturnedByReviewer, Label = "Returned by Reviewer" },
+      new Status { StatusId = 6, StatusCategoryId = 1, Code = LoanStatusCodes.ReturnedByApprover, Label = "Returned by Approver" },
+      new Status { StatusId = 7, StatusCategoryId = 1, Code = LoanStatusCodes.Rejected, Label = "Rejected" },
+      new Status { StatusId = 8, StatusCategoryId = 1, Code = LoanStatusCodes.Cancelled, Label = "Cancelled" },
+      new Status { StatusId = 9, StatusCategoryId = 1, Code = LoanStatusCodes.Approved, Label = "Approved" },
+      new Status { StatusId = 10, StatusCategoryId = 2, Code = LoanLifecycleCodes.Active, Label = "Active" },
+      new Status { StatusId = 11, StatusCategoryId = 2, Code = LoanLifecycleCodes.Paid, Label = "Fully Paid" },
+      new Status { StatusId = 12, StatusCategoryId = 2, Code = LoanLifecycleCodes.Overdue, Label = "Overdue" },
+      new Status { StatusId = 13, StatusCategoryId = 2, Code = LoanLifecycleCodes.Defaulted, Label = "Defaulted" }
     );
 
     modelBuilder.Entity<TransactionType>().HasData(
