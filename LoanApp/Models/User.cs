@@ -12,4 +12,6 @@ public class User
 
     public required string UserName { get; set; }
     public required string PasswordHash { get; set; }
+
+    public Account? Account { get; set; }
 }

@@ -18,6 +18,19 @@ public class FundReleaseService
         _statusService = statusService;
         _ledgerService = ledgerService;
     }
+    
+    public async Task<List<LoanApproval>> GetQueueAsync (int tenantId)
+    {
+        return await _context.LoanApprovals
+            .Include(a => a.Approver).ThenInclude(u => u.Account)
+            .Include(a => a.Status)
+            .Include(a => a.LoanApplication).ThenInclude(l => l.Borrower).ThenInclude(b => b.Account)
+            .Include(a => a.LoanApplication).ThenInclude(l => l.Status)
+            .Where(a => a.LoanApplication.Borrower.TenantId == tenantId
+                     && a.LoanApplication.Status.Code == LoanApplicationStatusCodes.PendingRelease)
+            .OrderBy(a => a.ApprovalDate)
+            .ToListAsync();
+    }
 
     public async Task<FundRelease?> ReleaseFundsAsync (int adminUserId, int tenantId, FundReleaseRequest fundReleaseRequest)
     {

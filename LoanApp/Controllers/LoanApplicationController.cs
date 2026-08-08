@@ -1,4 +1,5 @@
 using Dtos.Requests;
+using Dtos.Responses;
 using Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,7 +22,7 @@ public class LoanApplicationController : ControllerBase
   }
 
   [HttpPost]
-  public async Task<IActionResult> Create (LoanApplicationRequest loanApplicationRequest)
+  public async Task<ActionResult<MessageResponse>> Create (LoanApplicationRequest loanApplicationRequest)
   {
     var paymentPlan = await _paymentPlanService.GetPaymentPlanByIdAsync(loanApplicationRequest.PaymentPlanId);
     if (paymentPlan is null) return BadRequest("Payment plan does not exist.");
@@ -30,7 +31,8 @@ public class LoanApplicationController : ControllerBase
     {
       var loanApplication = await _loanApplicationService.CreateLoanApplicationAsync(User.GetUserId(), loanApplicationRequest);
 
-      return CreatedAtAction(nameof(GetById), new { id = loanApplication.LoanApplicationId }, loanApplication);
+      return CreatedAtAction(nameof(GetById), new { id = loanApplication.LoanApplicationId },
+        MessageResponse.Of("Loan application submitted for review."));
     }
     catch (InvalidOperationException ex)
     {
@@ -39,24 +41,24 @@ public class LoanApplicationController : ControllerBase
   }
 
   [HttpGet("{id}")]
-  public async Task<IActionResult> GetById (int id)
+  public async Task<ActionResult<LoanApplicationResponse>> GetById (int id)
   {
     var loanApplication = await _loanApplicationService.GetLoanApplicationAsync(id, User.GetTenantId());
     if (loanApplication is null) return NotFound();
 
-    return Ok(loanApplication);
+    return Ok(LoanApplicationResponse.From(loanApplication));
   }
 
   [HttpGet("me")]
-  public async Task<IActionResult> GetMine ()
+  public async Task<ActionResult<List<LoanApplicationResponse>>> GetMine ()
   {
     var loanApplications = await _loanApplicationService.GetLoanApplicationsByUserAsync(User.GetUserId());
 
-    return Ok(loanApplications);
+    return Ok(LoanApplicationResponse.From(loanApplications));
   }
 
   [HttpPut("{id}/payment-plan")]
-  public async Task<IActionResult> UpdatePaymentPlan (int id, UpdatePaymentPlanRequest updatePaymentPlanRequest)
+  public async Task<ActionResult<MessageResponse>> UpdatePaymentPlan (int id, UpdatePaymentPlanRequest updatePaymentPlanRequest)
   {
     var paymentPlan = await _paymentPlanService.GetPaymentPlanByIdAsync(updatePaymentPlanRequest.PaymentPlanId);
     if (paymentPlan is null) return BadRequest("Payment plan does not exist.");
@@ -66,7 +68,7 @@ public class LoanApplicationController : ControllerBase
       var loanApplication = await _loanApplicationService.UpdatePaymentPlanAsync(id, User.GetUserId(), updatePaymentPlanRequest.PaymentPlanId);
       if (loanApplication is null) return NotFound();
 
-      return Ok(loanApplication);
+      return Ok(MessageResponse.Of("Payment plan updated and resubmitted."));
     }
     catch (InvalidOperationException ex)
     {
@@ -75,14 +77,14 @@ public class LoanApplicationController : ControllerBase
   }
 
   [HttpPost("{id}/cancel")]
-  public async Task<IActionResult> Cancel (int id)
+  public async Task<ActionResult<MessageResponse>> Cancel (int id)
   {
     try
     {
       var loanApplication = await _loanApplicationService.CancelAsync(id, User.GetUserId());
       if (loanApplication is null) return NotFound();
 
-      return Ok(loanApplication);
+      return Ok(MessageResponse.Of("Loan application cancelled."));
     }
     catch (InvalidOperationException ex)
     {

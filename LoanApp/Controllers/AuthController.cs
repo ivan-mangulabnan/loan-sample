@@ -1,4 +1,5 @@
 using Dtos.Requests;
+using Dtos.Responses;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
 using Security;
@@ -33,14 +34,14 @@ public class AuthController : ControllerBase
 
   [AllowAnonymous]
   [HttpPost("register")]
-  public async Task<IActionResult> Register (RegisterRequest registerRequest)
+  public async Task<ActionResult<MessageResponse>> Register (RegisterRequest registerRequest)
   {
     try
     {
       var newUser = await _authService.RegisterUserAsync(registerRequest);
       if (newUser is null) return Conflict();
 
-      return Ok( new { message = "Account Created Successfully!"} );
+      return Ok(MessageResponse.Of("Account created successfully."));
     } catch (Exception)
     {
       return Problem(detail: "Something went wrong. Please try again later");

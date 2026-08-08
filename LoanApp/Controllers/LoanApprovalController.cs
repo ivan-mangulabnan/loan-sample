@@ -1,5 +1,6 @@
 using Constants;
 using Dtos.Requests;
+using Dtos.Responses;
 using Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -21,14 +22,15 @@ public class LoanApprovalController : ControllerBase
 
   [HttpPost]
   [Authorize(Roles = RoleNames.Approver)]
-  public async Task<IActionResult> Create (LoanApprovalRequest loanApprovalRequest)
+  public async Task<ActionResult<MessageResponse>> Create (LoanApprovalRequest loanApprovalRequest)
   {
     try
     {
       var loanApproval = await _loanApprovalService.CreateApprovalAsync(User.GetUserId(), User.GetTenantId(), loanApprovalRequest);
       if (loanApproval is null) return NotFound();
 
-      return CreatedAtAction(nameof(GetTimeline), new { loanApplicationId = loanApproval.LoanApplicationId }, loanApproval);
+      return CreatedAtAction(nameof(GetTimeline), new { loanApplicationId = loanApproval.LoanApplicationId },
+        MessageResponse.Of("Approval decision recorded."));
     }
     catch (InvalidOperationException ex)
     {
@@ -37,19 +39,19 @@ public class LoanApprovalController : ControllerBase
   }
 
   [HttpGet("application/{loanApplicationId}")]
-  public async Task<IActionResult> GetTimeline (int loanApplicationId)
+  public async Task<ActionResult<List<LoanApprovalResponse>>> GetTimeline (int loanApplicationId)
   {
     var loanApprovals = await _loanApprovalService.GetApprovalsForApplicationAsync(loanApplicationId, User.GetTenantId());
 
-    return Ok(loanApprovals);
+    return Ok(LoanApprovalResponse.From(loanApprovals));
   }
 
   [HttpGet("queue")]
   [Authorize(Roles = RoleNames.Approver)]
-  public async Task<IActionResult> GetQueue ()
+  public async Task<ActionResult<List<LoanApplicationResponse>>> GetQueue ()
   {
     var queue = await _loanApprovalService.GetQueueAsync(User.GetTenantId());
 
-    return Ok(queue);
+    return Ok(LoanApplicationResponse.From(queue));
   }
 }

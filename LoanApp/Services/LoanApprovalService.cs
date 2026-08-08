@@ -68,7 +68,7 @@ public class LoanApprovalService
     public async Task<List<LoanApproval>> GetApprovalsForApplicationAsync (int loanApplicationId, int tenantId)
     {
         return await _context.LoanApprovals
-            .Include(a => a.Approver)
+            .Include(a => a.Approver).ThenInclude(u => u.Account)
             .Include(a => a.Status)
             .Where(a => a.LoanApplicationId == loanApplicationId && a.LoanApplication.Borrower.TenantId == tenantId)
             .OrderBy(a => a.ApprovalDate)
@@ -78,8 +78,8 @@ public class LoanApprovalService
     public async Task<List<LoanApplication>> GetQueueAsync (int tenantId)
     {
         return await _context.LoanApplications
-            .Include(l => l.Borrower)
-            .Include(l => l.PaymentPlan)
+            .Include(l => l.Borrower).ThenInclude(b => b.Account)
+            .Include(l => l.PaymentPlan).ThenInclude(p => p.Interest)
             .Include(l => l.Status)
             .Where(l => l.Borrower.TenantId == tenantId && l.Status.Code == LoanApplicationStatusCodes.PendingApproval)
             .OrderBy(l => l.DateRequested)

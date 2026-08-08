@@ -1,4 +1,5 @@
 using Constants;
+using Dtos.Responses;
 using Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -19,13 +20,13 @@ public class LedgerController : ControllerBase
   }
 
   [HttpGet("balance")]
-  public async Task<IActionResult> GetBalance ()
+  public async Task<ActionResult<LedgerResponse>> GetBalance ()
   {
     try
     {
       var ledger = await _ledgerService.GetOperatingLedgerAsync(User.GetTenantId());
 
-      return Ok(new { ledger.LedgerId, ledger.Name, ledger.CurrentBalance });
+      return Ok(LedgerResponse.From(ledger));
     }
     catch (InvalidOperationException ex)
     {

@@ -39,8 +39,8 @@ public class LoanApplicationService
     public async Task<LoanApplication?> GetLoanApplicationAsync (int loanApplicationId, int tenantId)
     {
         var loanApplication = await _context.LoanApplications
-            .Include(l => l.Borrower)
-            .Include(l => l.PaymentPlan)
+            .Include(l => l.Borrower).ThenInclude(b => b.Account)
+            .Include(l => l.PaymentPlan).ThenInclude(p => p.Interest)
             .Include(l => l.Status)
             .FirstOrDefaultAsync(l => l.LoanApplicationId == loanApplicationId && l.Borrower.TenantId == tenantId);
 
@@ -50,7 +50,7 @@ public class LoanApplicationService
     public async Task<List<LoanApplication>> GetLoanApplicationsByUserAsync (int borrowerId)
     {
         var loanApplications = await _context.LoanApplications
-            .Include(l => l.PaymentPlan)
+            .Include(l => l.PaymentPlan).ThenInclude(p => p.Interest)
             .Include(l => l.Status)
             .Where(l => l.BorrowerId == borrowerId)
             .ToListAsync();

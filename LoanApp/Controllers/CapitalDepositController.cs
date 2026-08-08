@@ -1,5 +1,6 @@
 using Constants;
 using Dtos.Requests;
+using Dtos.Responses;
 using Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -20,20 +21,14 @@ public class CapitalDepositController : ControllerBase
   }
 
   [HttpPost]
-  public async Task<IActionResult> Deposit (CapitalDepositRequest capitalDepositRequest)
+  public async Task<ActionResult<MessageResponse>> Deposit (CapitalDepositRequest capitalDepositRequest)
   {
     try
     {
       var capitalDeposit = await _capitalDepositService.DepositAsync(User.GetUserId(), User.GetTenantId(), capitalDepositRequest);
       if (capitalDeposit is null) return NotFound();
 
-      return Ok(new
-      {
-        capitalDeposit.CapitalDepositId,
-        capitalDeposit.LedgerId,
-        capitalDeposit.Amount,
-        capitalDeposit.DatePosted
-      });
+      return Ok(MessageResponse.Of($"Capital deposit of {capitalDeposit.Amount:N2} posted."));
     }
     catch (InvalidOperationException ex)
     {

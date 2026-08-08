@@ -55,6 +55,11 @@ public class LoanAppDbContext : DbContext
     .HasIndex(a => a.UserId)
     .IsUnique();
 
+    modelBuilder.Entity<Account>()
+    .HasOne(a => a.User)
+    .WithOne(u => u.Account)
+    .HasForeignKey<Account>(a => a.UserId);
+
     modelBuilder.Entity<Loan>()
     .HasIndex(l => l.FundReleaseId)
     .IsUnique();
