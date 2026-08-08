@@ -15,4 +15,7 @@ public class LoanApplication
 
     public decimal Amount { get; set; }
     public DateTime DateRequested { get; set; }
+
+    public ICollection<ReviewApplication> Reviews { get; set; } = [];
+    public ICollection<LoanApproval> Approvals { get; set; } = [];
 }

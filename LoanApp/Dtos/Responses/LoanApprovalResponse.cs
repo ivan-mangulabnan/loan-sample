@@ -4,39 +4,26 @@ namespace Dtos.Responses;
 
 public class LoanApprovalResponse
 {
-    public int LoanApprovalId { get; set; }
-    public int LoanApplicationId { get; set; }
+    public DateTime ApprovalDate { get; set; }
+    public string Status { get; set; } = null!;
+    public string? Remarks { get; set; }
+
+    public string? Approver { get; set; }
 
     public decimal InterestRate { get; set; }
     public decimal PrincipalAmount { get; set; }
     public int NumberOfMonths { get; set; }
     public decimal TotalRepaymentAmount { get; set; }
 
-    public string? Remarks { get; set; }
-    public DateTime ApprovalDate { get; set; }
-
-    public string Status { get; set; } = null!;
-    public string Approver { get; set; } = null!;
-
-    public string? Borrower { get; set; }
-
-    public static LoanApprovalResponse From (LoanApproval loanApproval) => new()
+    public static LoanApprovalResponse From (LoanApproval loanApproval, bool showStaffNames) => new()
     {
-        LoanApprovalId = loanApproval.LoanApprovalId,
-        LoanApplicationId = loanApproval.LoanApplicationId,
+        ApprovalDate = loanApproval.ApprovalDate,
+        Status = loanApproval.Status.Label,
+        Remarks = loanApproval.Remarks,
+        Approver = showStaffNames ? PersonName.Of(loanApproval.Approver) : null,
         InterestRate = loanApproval.InterestRate,
         PrincipalAmount = loanApproval.PrincipalAmount,
         NumberOfMonths = loanApproval.NumberOfMonths,
-        TotalRepaymentAmount = loanApproval.TotalRepaymentAmount,
-        Remarks = loanApproval.Remarks,
-        ApprovalDate = loanApproval.ApprovalDate,
-        Status = loanApproval.Status.Label,
-        Approver = PersonName.Of(loanApproval.Approver),
-        Borrower = loanApproval.LoanApplication?.Borrower is null
-            ? null
-            : PersonName.Of(loanApproval.LoanApplication.Borrower)
+        TotalRepaymentAmount = loanApproval.TotalRepaymentAmount
     };
-
-    public static List<LoanApprovalResponse> From (IEnumerable<LoanApproval> loanApprovals) =>
-        loanApprovals.Select(From).ToList();
 }

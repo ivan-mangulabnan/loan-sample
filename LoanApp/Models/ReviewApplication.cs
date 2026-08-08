@@ -13,6 +13,6 @@ public class ReviewApplication
     public int StatusId { get; set; }
     public Status Status { get; set; } = null!;
 
-    public required string Remarks { get; set; }
+    public string? Remarks { get; set; }
     public DateTime DatePosted { get; set; }
 }

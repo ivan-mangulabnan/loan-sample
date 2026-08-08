@@ -29,21 +29,12 @@ public class LoanApprovalController : ControllerBase
       var loanApproval = await _loanApprovalService.CreateApprovalAsync(User.GetUserId(), User.GetTenantId(), loanApprovalRequest);
       if (loanApproval is null) return NotFound();
 
-      return CreatedAtAction(nameof(GetTimeline), new { loanApplicationId = loanApproval.LoanApplicationId },
-        MessageResponse.Of("Approval decision recorded."));
+      return Created((string?)null, MessageResponse.Of("Approval decision recorded."));
     }
     catch (InvalidOperationException ex)
     {
       return Conflict(ex.Message);
     }
-  }
-
-  [HttpGet("application/{loanApplicationId}")]
-  public async Task<ActionResult<List<LoanApprovalResponse>>> GetTimeline (int loanApplicationId)
-  {
-    var loanApprovals = await _loanApprovalService.GetApprovalsForApplicationAsync(loanApplicationId, User.GetTenantId());
-
-    return Ok(LoanApprovalResponse.From(loanApprovals));
   }
 
   [HttpGet("queue")]
@@ -52,6 +43,6 @@ public class LoanApprovalController : ControllerBase
   {
     var queue = await _loanApprovalService.GetQueueAsync(User.GetTenantId());
 
-    return Ok(LoanApplicationResponse.From(queue));
+    return Ok(LoanApplicationResponse.From(queue, User.CanSeeStaffNames()));
   }
 }

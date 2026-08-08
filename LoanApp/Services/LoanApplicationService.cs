@@ -42,6 +42,10 @@ public class LoanApplicationService
             .Include(l => l.Borrower).ThenInclude(b => b.Account)
             .Include(l => l.PaymentPlan).ThenInclude(p => p.Interest)
             .Include(l => l.Status)
+            .Include(l => l.Reviews).ThenInclude(r => r.Reviewer).ThenInclude(u => u.Account)
+            .Include(l => l.Reviews).ThenInclude(r => r.Status)
+            .Include(l => l.Approvals).ThenInclude(a => a.Approver).ThenInclude(u => u.Account)
+            .Include(l => l.Approvals).ThenInclude(a => a.Status)
             .FirstOrDefaultAsync(l => l.LoanApplicationId == loanApplicationId && l.Borrower.TenantId == tenantId);
 
         return loanApplication;
@@ -52,6 +56,10 @@ public class LoanApplicationService
         var loanApplications = await _context.LoanApplications
             .Include(l => l.PaymentPlan).ThenInclude(p => p.Interest)
             .Include(l => l.Status)
+            .Include(l => l.Reviews).ThenInclude(r => r.Reviewer).ThenInclude(u => u.Account)
+            .Include(l => l.Reviews).ThenInclude(r => r.Status)
+            .Include(l => l.Approvals).ThenInclude(a => a.Approver).ThenInclude(u => u.Account)
+            .Include(l => l.Approvals).ThenInclude(a => a.Status)
             .Where(l => l.BorrowerId == borrowerId)
             .ToListAsync();
 

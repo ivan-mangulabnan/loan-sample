@@ -149,6 +149,14 @@ public class LoanAppDbContext : DbContext
     .WithMany()
     .OnDelete(DeleteBehavior.Restrict);
 
+    modelBuilder.Entity<ReviewApplication>()
+    .HasOne(r => r.LoanApplication)
+    .WithMany(l => l.Reviews);
+
+    modelBuilder.Entity<LoanApproval>()
+    .HasOne(a => a.LoanApplication)
+    .WithMany(l => l.Approvals);
+
     modelBuilder.Entity<LoanApproval>()
     .HasOne(l => l.Approver)
     .WithMany()

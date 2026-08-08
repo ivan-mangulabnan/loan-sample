@@ -30,6 +30,11 @@ public class LoanApprovalService
         if (loanApplication.Status.Code != LoanApplicationStatusCodes.PendingApproval)
             throw new InvalidOperationException($"Cannot approve an application with status '{loanApplication.Status.Code}'.");
 
+        if (loanApprovalRequest.Decision is Decision.Reject or Decision.Return
+            && string.IsNullOrWhiteSpace(loanApprovalRequest.Remarks))
+            throw new InvalidOperationException(
+                "Remarks are required when rejecting or returning an application.");
+
         var (approvalCode, applicationCode) = loanApprovalRequest.Decision switch
         {
             Decision.Approve => (LoanApplicationStatusCodes.Approved, LoanApplicationStatusCodes.PendingRelease),
@@ -65,22 +70,16 @@ public class LoanApprovalService
         return loanApproval;
     }
 
-    public async Task<List<LoanApproval>> GetApprovalsForApplicationAsync (int loanApplicationId, int tenantId)
-    {
-        return await _context.LoanApprovals
-            .Include(a => a.Approver).ThenInclude(u => u.Account)
-            .Include(a => a.Status)
-            .Where(a => a.LoanApplicationId == loanApplicationId && a.LoanApplication.Borrower.TenantId == tenantId)
-            .OrderBy(a => a.ApprovalDate)
-            .ToListAsync();
-    }
-
     public async Task<List<LoanApplication>> GetQueueAsync (int tenantId)
     {
         return await _context.LoanApplications
             .Include(l => l.Borrower).ThenInclude(b => b.Account)
             .Include(l => l.PaymentPlan).ThenInclude(p => p.Interest)
             .Include(l => l.Status)
+            .Include(l => l.Reviews).ThenInclude(r => r.Reviewer).ThenInclude(u => u.Account)
+            .Include(l => l.Reviews).ThenInclude(r => r.Status)
+            .Include(l => l.Approvals).ThenInclude(a => a.Approver).ThenInclude(u => u.Account)
+            .Include(l => l.Approvals).ThenInclude(a => a.Status)
             .Where(l => l.Borrower.TenantId == tenantId && l.Status.Code == LoanApplicationStatusCodes.PendingApproval)
             .OrderBy(l => l.DateRequested)
             .ToListAsync();

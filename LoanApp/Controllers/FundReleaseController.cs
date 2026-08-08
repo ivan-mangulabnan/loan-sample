@@ -36,13 +36,11 @@ public class FundReleaseController : ControllerBase
     }
   }
 
-  /// The admin's inbox. With message-only write responses this is the only place
-  /// a LoanApprovalId can be obtained.
   [HttpGet("queue")]
-  public async Task<ActionResult<List<LoanApprovalResponse>>> GetQueue ()
+  public async Task<ActionResult<List<FundReleaseQueueResponse>>> GetQueue ()
   {
     var queue = await _fundReleaseService.GetQueueAsync(User.GetTenantId());
 
-    return Ok(LoanApprovalResponse.From(queue));
+    return Ok(FundReleaseQueueResponse.From(queue));
   }
 }

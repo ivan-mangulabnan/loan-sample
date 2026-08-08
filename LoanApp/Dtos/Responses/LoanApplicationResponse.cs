@@ -14,16 +14,28 @@ public class LoanApplicationResponse
 
     public string? Borrower { get; set; }
 
-    public static LoanApplicationResponse From (LoanApplication loanApplication) => new()
+    public List<ReviewApplicationResponse> Reviews { get; set; } = [];
+    public List<LoanApprovalResponse> Approvals { get; set; } = [];
+
+    public static LoanApplicationResponse From (LoanApplication loanApplication, bool showStaffNames) => new()
     {
         LoanApplicationId = loanApplication.LoanApplicationId,
         Amount = loanApplication.Amount,
         DateRequested = loanApplication.DateRequested,
         Status = loanApplication.Status.Label,
         PaymentPlan = PaymentPlanResponse.From(loanApplication.PaymentPlan),
-        Borrower = loanApplication.Borrower is null ? null : PersonName.Of(loanApplication.Borrower)
+        Borrower = loanApplication.Borrower is null ? null : PersonName.Of(loanApplication.Borrower),
+
+        Reviews = loanApplication.Reviews
+            .OrderBy(r => r.DatePosted)
+            .Select(r => ReviewApplicationResponse.From(r, showStaffNames))
+            .ToList(),
+        Approvals = loanApplication.Approvals
+            .OrderBy(a => a.ApprovalDate)
+            .Select(a => LoanApprovalResponse.From(a, showStaffNames))
+            .ToList()
     };
 
-    public static List<LoanApplicationResponse> From (IEnumerable<LoanApplication> loanApplications) =>
-        loanApplications.Select(From).ToList();
+    public static List<LoanApplicationResponse> From (IEnumerable<LoanApplication> loanApplications, bool showStaffNames) =>
+        loanApplications.Select(l => From(l, showStaffNames)).ToList();
 }

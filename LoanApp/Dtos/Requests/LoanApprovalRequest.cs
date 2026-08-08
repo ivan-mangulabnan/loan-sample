@@ -11,6 +11,5 @@ public class LoanApprovalRequest
     [Required]
     public Decision Decision { get; set; }
 
-    [Required]
-    public string Remarks { get; set; } = null!;
+    public string? Remarks { get; set; }
 }

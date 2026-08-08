@@ -31,8 +31,7 @@ public class LoanApplicationController : ControllerBase
     {
       var loanApplication = await _loanApplicationService.CreateLoanApplicationAsync(User.GetUserId(), loanApplicationRequest);
 
-      return CreatedAtAction(nameof(GetById), new { id = loanApplication.LoanApplicationId },
-        MessageResponse.Of("Loan application submitted for review."));
+      return Created((string?)null, MessageResponse.Of("Loan application submitted for review."));
     }
     catch (InvalidOperationException ex)
     {
@@ -46,7 +45,7 @@ public class LoanApplicationController : ControllerBase
     var loanApplication = await _loanApplicationService.GetLoanApplicationAsync(id, User.GetTenantId());
     if (loanApplication is null) return NotFound();
 
-    return Ok(LoanApplicationResponse.From(loanApplication));
+    return Ok(LoanApplicationResponse.From(loanApplication, User.CanSeeStaffNames()));
   }
 
   [HttpGet("me")]
@@ -54,7 +53,7 @@ public class LoanApplicationController : ControllerBase
   {
     var loanApplications = await _loanApplicationService.GetLoanApplicationsByUserAsync(User.GetUserId());
 
-    return Ok(LoanApplicationResponse.From(loanApplications));
+    return Ok(LoanApplicationResponse.From(loanApplications, User.CanSeeStaffNames()));
   }
 
   [HttpPut("{id}/payment-plan")]

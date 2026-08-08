@@ -26,6 +26,7 @@ public class FundReleaseService
             .Include(a => a.Status)
             .Include(a => a.LoanApplication).ThenInclude(l => l.Borrower).ThenInclude(b => b.Account)
             .Include(a => a.LoanApplication).ThenInclude(l => l.Status)
+            .Include(a => a.LoanApplication).ThenInclude(l => l.PaymentPlan)
             .Where(a => a.LoanApplication.Borrower.TenantId == tenantId
                      && a.LoanApplication.Status.Code == LoanApplicationStatusCodes.PendingRelease)
             .OrderBy(a => a.ApprovalDate)
