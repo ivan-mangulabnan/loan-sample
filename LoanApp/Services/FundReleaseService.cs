@@ -11,12 +11,14 @@ public class FundReleaseService
     private readonly LoanAppDbContext _context;
     private readonly StatusService _statusService;
     private readonly LedgerService _ledgerService;
+    private readonly LoanService _loanService;
 
-    public FundReleaseService (LoanAppDbContext context, StatusService statusService, LedgerService ledgerService)
+    public FundReleaseService (LoanAppDbContext context, StatusService statusService, LedgerService ledgerService, LoanService loanService)
     {
         _context = context;
         _statusService = statusService;
         _ledgerService = ledgerService;
+        _loanService = loanService;
     }
     
     public async Task<List<LoanApproval>> GetQueueAsync (int tenantId)
@@ -74,6 +76,8 @@ public class FundReleaseService
         {
             _context.FundReleases.Add(fundRelease);
             await _context.SaveChangesAsync();
+
+            await _loanService.CreateFromReleaseAsync(loanApproval, fundRelease);
 
             _context.Transactions.Add(new Transaction
             {

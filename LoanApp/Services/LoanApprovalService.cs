@@ -30,17 +30,17 @@ public class LoanApprovalService
         if (loanApplication.Status.Code != LoanApplicationStatusCodes.PendingApproval)
             throw new InvalidOperationException($"Cannot approve an application with status '{loanApplication.Status.Code}'.");
 
-        if (loanApprovalRequest.Decision is Decision.Reject or Decision.Return
+        if (loanApprovalRequest.Decision is Decision.Reject
             && string.IsNullOrWhiteSpace(loanApprovalRequest.Remarks))
             throw new InvalidOperationException(
-                "Remarks are required when rejecting or returning an application.");
+                "Remarks are required when rejecting an application.");
 
         var (approvalCode, applicationCode) = loanApprovalRequest.Decision switch
         {
             Decision.Approve => (LoanApplicationStatusCodes.Approved, LoanApplicationStatusCodes.PendingRelease),
             Decision.Reject => (LoanApplicationStatusCodes.Rejected, LoanApplicationStatusCodes.Rejected),
-            Decision.Return => (LoanApplicationStatusCodes.ReturnedByApprover, LoanApplicationStatusCodes.ReturnedByApprover),
-            _ => throw new InvalidOperationException($"Unknown decision '{loanApprovalRequest.Decision}'.")
+            _ => throw new InvalidOperationException(
+                "An approver can only approve or reject; returning is a reviewer decision.")
         };
 
         var approvalStatus = await _statusService.GetRequiredApplicationStatusAsync(approvalCode);

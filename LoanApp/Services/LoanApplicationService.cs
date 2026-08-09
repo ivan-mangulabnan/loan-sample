@@ -75,7 +75,6 @@ public class LoanApplicationService
         var targetCode = loanApplication.Status.Code switch
         {
             LoanApplicationStatusCodes.ReturnedByReviewer => LoanApplicationStatusCodes.PendingReview,
-            LoanApplicationStatusCodes.ReturnedByApprover => LoanApplicationStatusCodes.PendingApproval,
             _ => throw new InvalidOperationException($"Cannot edit an application with status '{loanApplication.Status.Code}'.")
         };
 

@@ -158,6 +158,10 @@ public class LoanAppDbContext : DbContext
     .WithMany(l => l.Approvals);
 
     modelBuilder.Entity<LoanApproval>()
+    .HasIndex(a => a.LoanApplicationId)
+    .IsUnique();
+
+    modelBuilder.Entity<LoanApproval>()
     .HasOne(l => l.Approver)
     .WithMany()
     .OnDelete(DeleteBehavior.Restrict);
@@ -200,7 +204,6 @@ public class LoanAppDbContext : DbContext
       new Status { StatusId = 3, StatusCategoryId = 1, Code = LoanApplicationStatusCodes.PendingRelease, Label = "Pending Release" },
       new Status { StatusId = 4, StatusCategoryId = 1, Code = LoanApplicationStatusCodes.Released, Label = "Released" },
       new Status { StatusId = 5, StatusCategoryId = 1, Code = LoanApplicationStatusCodes.ReturnedByReviewer, Label = "Returned by Reviewer" },
-      new Status { StatusId = 6, StatusCategoryId = 1, Code = LoanApplicationStatusCodes.ReturnedByApprover, Label = "Returned by Approver" },
       new Status { StatusId = 7, StatusCategoryId = 1, Code = LoanApplicationStatusCodes.Rejected, Label = "Rejected" },
       new Status { StatusId = 8, StatusCategoryId = 1, Code = LoanApplicationStatusCodes.Cancelled, Label = "Cancelled" },
       new Status { StatusId = 9, StatusCategoryId = 1, Code = LoanApplicationStatusCodes.Approved, Label = "Approved" },
