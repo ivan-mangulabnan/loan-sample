@@ -1,5 +1,6 @@
 using Constants;
 using Data;
+using Microsoft.EntityFrameworkCore;
 using Models;
 
 namespace Services;
@@ -37,5 +38,22 @@ public class LoanService
         _context.Loans.Add(loan);
 
         return loan;
+    }
+
+    public async Task<List<Loan>> GetLoansByBorrowerAsync (int borrowerId)
+    {
+        return await _context.Loans
+            .Include(l => l.Status)
+            .Where(l => l.BorrowerId == borrowerId)
+            .OrderByDescending(l => l.StartDate)
+            .ToListAsync();
+    }
+
+    public async Task<Loan?> GetLoanAsync (int loanId, int tenantId)
+    {
+        return await _context.Loans
+            .Include(l => l.Borrower).ThenInclude(b => b.Account)
+            .Include(l => l.Status)
+            .FirstOrDefaultAsync(l => l.LoanId == loanId && l.Borrower.TenantId == tenantId);
     }
 }

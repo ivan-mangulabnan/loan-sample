@@ -19,4 +19,9 @@ public static class ClaimsPrincipalExtensions
     {
         return !user.IsInRole(RoleNames.Loaner);
     }
+
+    public static bool CanSeeLoanGrading (this ClaimsPrincipal user)
+    {
+        return !user.IsInRole(RoleNames.Loaner);
+    }
 }

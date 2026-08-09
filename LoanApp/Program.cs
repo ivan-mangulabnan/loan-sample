@@ -20,6 +20,7 @@ builder.Services.AddScoped<ReviewApplicationService>();
 builder.Services.AddScoped<LoanApprovalService>();
 builder.Services.AddScoped<LedgerService>();
 builder.Services.AddScoped<LoanService>();
+builder.Services.AddScoped<PaymentService>();
 builder.Services.AddScoped<FundReleaseService>();
 builder.Services.AddScoped<CapitalDepositService>();
 builder.Services.AddScoped<InterestService>();

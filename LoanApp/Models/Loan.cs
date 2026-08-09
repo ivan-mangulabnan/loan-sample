@@ -21,4 +21,5 @@ public class Loan
 
     public required DateTime StartDate { get; set; }
     public required DateTime DueDate { get; set; }
+    public DateTime? ClosedDate { get; set; }
 }
