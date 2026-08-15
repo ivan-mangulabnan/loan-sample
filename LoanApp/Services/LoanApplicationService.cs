@@ -57,7 +57,6 @@ public class LoanApplicationService
     public async Task<List<LoanApplication>> GetLoanApplicationsByUserAsync (int borrowerId)
     {
         var loanApplications = await _context.LoanApplications
-            .Include(l => l.Borrower).ThenInclude(b => b.Account)
             .Include(l => l.PaymentPlan).ThenInclude(p => p.Interest)
             .Include(l => l.Status)
             .Include(l => l.Reviews).ThenInclude(r => r.Reviewer).ThenInclude(u => u.Account)
