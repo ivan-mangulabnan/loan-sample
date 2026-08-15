@@ -42,7 +42,12 @@ public class AuthController : ControllerBase
       if (newUser is null) return Conflict();
 
       return Ok(MessageResponse.Of("Account created successfully."));
-    } catch (Exception)
+    }
+    catch (InvalidOperationException ex)
+    {
+      return BadRequest(ex.Message);
+    }
+    catch (Exception)
     {
       return Problem(detail: "Something went wrong. Please try again later");
     }

@@ -1,3 +1,4 @@
+using Constants;
 using Dtos.Responses;
 using Extensions;
 using Microsoft.AspNetCore.Authorization;
@@ -19,6 +20,7 @@ public class LoanController : ControllerBase
   }
 
   [HttpGet("me")]
+  [Authorize(Roles = RoleNames.Loaner)]
   public async Task<ActionResult<List<LoanResponse>>> GetMine ()
   {
     var loans = await _loanService.GetLoansByBorrowerAsync(User.GetUserId());

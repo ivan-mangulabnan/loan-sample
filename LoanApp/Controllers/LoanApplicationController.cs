@@ -1,3 +1,4 @@
+using Constants;
 using Dtos.Requests;
 using Dtos.Responses;
 using Extensions;
@@ -22,6 +23,7 @@ public class LoanApplicationController : ControllerBase
   }
 
   [HttpPost]
+  [Authorize(Roles = RoleNames.Loaner)]
   public async Task<ActionResult<MessageResponse>> Create (LoanApplicationRequest loanApplicationRequest)
   {
     var paymentPlan = await _paymentPlanService.GetPaymentPlanByIdAsync(loanApplicationRequest.PaymentPlanId);
@@ -42,13 +44,15 @@ public class LoanApplicationController : ControllerBase
   [HttpGet("{id}")]
   public async Task<ActionResult<LoanApplicationResponse>> GetById (int id)
   {
-    var loanApplication = await _loanApplicationService.GetLoanApplicationAsync(id, User.GetTenantId());
+    var loanApplication = await _loanApplicationService.GetLoanApplicationAsync(
+      id, User.GetTenantId(), User.GetUserId(), User.CanSeeStaffNames());
     if (loanApplication is null) return NotFound();
 
     return Ok(LoanApplicationResponse.From(loanApplication, User.CanSeeStaffNames()));
   }
 
   [HttpGet("me")]
+  [Authorize(Roles = RoleNames.Loaner)]
   public async Task<ActionResult<List<LoanApplicationResponse>>> GetMine ()
   {
     var loanApplications = await _loanApplicationService.GetLoanApplicationsByUserAsync(User.GetUserId());
@@ -57,6 +61,7 @@ public class LoanApplicationController : ControllerBase
   }
 
   [HttpPut("{id}/payment-plan")]
+  [Authorize(Roles = RoleNames.Loaner)]
   public async Task<ActionResult<MessageResponse>> UpdatePaymentPlan (int id, UpdatePaymentPlanRequest updatePaymentPlanRequest)
   {
     var paymentPlan = await _paymentPlanService.GetPaymentPlanByIdAsync(updatePaymentPlanRequest.PaymentPlanId);
@@ -76,6 +81,7 @@ public class LoanApplicationController : ControllerBase
   }
 
   [HttpPost("{id}/cancel")]
+  [Authorize(Roles = RoleNames.Loaner)]
   public async Task<ActionResult<MessageResponse>> Cancel (int id)
   {
     try

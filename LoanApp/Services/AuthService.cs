@@ -40,6 +40,11 @@ public class AuthService
 
   public async Task<User?> RegisterUserAsync (RegisterRequest registerRequest) 
   {
+    var tenantExists = await _context.Tenants.AnyAsync(t => t.TenantId == registerRequest.TenantId);
+
+    if (!tenantExists)
+      throw new InvalidOperationException($"Tenant {registerRequest.TenantId} does not exist.");
+
     var user = await GetUserAsync(registerRequest.TenantId, registerRequest.UserName);
     if (user is not null) return null;
 
