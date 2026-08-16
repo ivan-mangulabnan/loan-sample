@@ -42,6 +42,26 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
                 Encoding.UTF8.GetBytes(builder.Configuration["Jwt:SigningKey"]!)
             )
         };
+
+        // The browser holds the JWT in an HttpOnly cookie, so it can never set an
+        // Authorization header. The header still wins when present, for curl, Postman
+        // and scripted callers holding a token — both carry the same signed token.
+        options.Events = new JwtBearerEvents
+        {
+            OnMessageReceived = context =>
+            {
+                // Read the header directly: the handler has not parsed it yet at this
+                // point, so `context.Token` is always null here. Guarding on it would
+                // read like "prefer the header" while silently doing the opposite.
+                var header = context.Request.Headers.Authorization.ToString();
+                var hasBearer = header.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase);
+
+                if (!hasBearer && context.Request.Cookies.TryGetValue(AuthCookie.Name, out var cookie))
+                    context.Token = cookie;
+
+                return Task.CompletedTask;
+            }
+        };
     });
 
 builder.Services.AddControllers()
@@ -59,7 +79,12 @@ builder.Services.AddSwaggerGen(options =>
         Scheme = "bearer",
         BearerFormat = "JWT",
         In = ParameterLocation.Header,
-        Description = "Paste the token from /api/Auth/login (no \"Bearer \" prefix)."
+        Description =
+            "Not needed here. Call POST /api/Auth/login and the browser stores an auth "
+            + "cookie automatically; POST /api/Auth/logout clears it. This field is only "
+            + "for a token held outside the browser (curl, Postman). Leave it empty when "
+            + "switching accounts — a pasted token overrides the cookie, so a stale one "
+            + "keeps you signed in as the previous user."
     });
 
     options.AddSecurityRequirement(new OpenApiSecurityRequirement

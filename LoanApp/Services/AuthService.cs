@@ -38,7 +38,19 @@ public class AuthService
     return user;
   }
 
-  public async Task<User?> RegisterUserAsync (RegisterRequest registerRequest) 
+  // Separate from GetUserAsync on purpose: that one serves login and the registration
+  // duplicate check, neither of which renders a name, and widening it would hide this
+  // include-contract from the only code that depends on it. Keyed on UserId, which
+  // arrives from a signature-validated claim.
+  public async Task<User?> GetUserForIdentityAsync (int userId)
+  {
+    return await _context.Users
+      .Include(u => u.Role)
+      .Include(u => u.Account)
+      .FirstOrDefaultAsync(u => u.UserId == userId);
+  }
+
+  public async Task<User?> RegisterUserAsync (RegisterRequest registerRequest)
   {
     var tenantExists = await _context.Tenants.AnyAsync(t => t.TenantId == registerRequest.TenantId);
 

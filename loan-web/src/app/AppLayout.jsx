@@ -10,8 +10,10 @@ function AppLayout() {
   // The rail is whatever the signed-in role's config declares.
   const navItems = configFor(role)?.nav ?? []
 
-  function handleSignOut() {
-    signOut()
+  // Awaited: signing out is a server round-trip now, because only the server can
+  // clear the HttpOnly cookie. Navigating first would race the request.
+  async function handleSignOut() {
+    await signOut()
     navigate('/login', { replace: true })
   }
 

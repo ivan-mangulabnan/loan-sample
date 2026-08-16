@@ -1,12 +1,12 @@
 import { useState } from 'react'
-import { useLocation, useNavigate } from 'react-router-dom'
+import { Navigate, useLocation, useNavigate } from 'react-router-dom'
 import Button from '../../../components/Button.jsx'
 import Glow, { GlowHost } from '../../../components/Glow.jsx'
 import { useSession } from '../hooks.js'
 import './LoginPage.css'
 
 export function LoginPage() {
-  const { signIn } = useSession()
+  const { signIn, isAuthenticated, isLoading } = useSession()
   const navigate = useNavigate()
   const location = useLocation()
 
@@ -34,6 +34,12 @@ export function LoginPage() {
       setIsSubmitting(false)
     }
   }
+
+  // This route sits outside RequireRole, so it does its own waiting: until
+  // /Auth/me answers, a valid cookie looks identical to no session at all.
+  if (isLoading) return <div className="session-splash" />
+
+  if (isAuthenticated) return <Navigate to="/" replace />
 
   return (
     <div className="login">
