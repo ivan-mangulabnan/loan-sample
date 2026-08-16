@@ -1,8 +1,41 @@
 .badge {
   display: inline-block;
-  padding: 0.1rem 0.5rem;
-  border: 1px solid var(--border);
-  border-radius: 999px;
-  font-size: 0.8em;
-  color: var(--text-h);
+  padding: 2px var(--space-3);
+  border-radius: var(--radius-pill);
+  background: var(--accent-tint);
+  color: var(--accent);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-bold);
+  white-space: nowrap;
+}
+
+/* Tone comes from the status label — see statuses.js. */
+.badge--accent {
+  background: var(--accent-tint);
+  color: var(--accent);
+}
+
+.badge--info {
+  background: var(--info-tint);
+  color: var(--info);
+}
+
+.badge--warning {
+  background: var(--warning-tint);
+  color: var(--warning);
+}
+
+.badge--success {
+  background: var(--success-tint);
+  color: var(--success);
+}
+
+.badge--danger {
+  background: var(--danger-tint);
+  color: var(--danger);
+}
+
+.badge--muted {
+  background: var(--muted-tint);
+  color: var(--text-muted);
 }

@@ -1,25 +1,115 @@
 .app {
-  max-width: 960px;
-  margin: 0 auto;
-  padding: 1rem 2rem;
-}
-
-.nav {
+  height: 100svh;
   display: flex;
-  gap: 1.5rem;
-  padding: 1rem 0;
-  border-bottom: 1px solid #8884;
+  justify-content: center;
 }
 
-.nav a {
-  font-weight: 500;
-  text-decoration: none;
+/* Fills the viewport edge to edge. */
+.shell {
+  width: 100%;
+  min-width: 0;
+  background: var(--surface-shell);
+  display: flex;
+  overflow: hidden;
 }
 
-.nav a.active {
-  text-decoration: underline;
+/* ---- Left rail ---- */
+.rail {
+  width: var(--rail-width);
+  flex-shrink: 0;
+  background: var(--surface-rail);
+  padding: var(--space-8) 0 36px;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
 }
 
+.rail__items {
+  flex: 1;
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 32px;
+}
+
+.rail__item {
+  position: relative;
+  width: var(--space-8);
+  height: var(--space-8);
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  border-radius: var(--radius-md);
+  color: var(--text-rail);
+  font-size: var(--space-5);
+  transition: background 0.15s ease, color 0.15s ease;
+}
+
+.rail__item:hover {
+  background: var(--surface-rail-hover);
+  color: var(--text-rail-hover);
+}
+
+.rail__item.active {
+  background: var(--surface-rail-active);
+  color: var(--accent);
+}
+
+/* Same affordance as a rail link, but it is a <button>. */
+.rail__signout {
+  background: none;
+  border: none;
+  padding: 0;
+  cursor: pointer;
+  font-family: inherit;
+  flex-shrink: 0;
+}
+
+/* ---- Content ---- */
+.content {
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  padding: var(--space-7) var(--space-7) var(--space-7) 38px;
+  gap: var(--space-7);
+}
+
+/* The page scrolls here, not on <body> — the shell stays pinned. */
 .main {
-  padding: 2rem 0;
+  flex: 1;
+  min-width: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* ---- Narrow screens ---- */
+@media (max-width: 768px) {
+  .shell {
+    flex-direction: column;
+  }
+
+  /* Rail becomes a horizontal bar under the content. */
+  .rail {
+    width: auto;
+    order: 2;
+    padding: var(--space-2);
+    flex-shrink: 0;
+  }
+
+  .rail__items {
+    flex: none;
+    flex-direction: row;
+    justify-content: space-around;
+    width: 100%;
+    gap: var(--space-2);
+  }
+
+  .content {
+    order: 1;
+    min-height: 0;
+    padding: var(--space-5) var(--space-4);
+  }
 }

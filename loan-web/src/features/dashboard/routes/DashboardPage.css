@@ -1,0 +1,28 @@
+/* Reflows from 4 columns down to 1 without a media query. */
+.stats {
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+  gap: var(--space-6);
+  margin-top: var(--space-5);
+}
+
+.stats__head {
+  display: flex;
+  align-items: center;
+  gap: 9px;
+}
+
+.stats__value {
+  font-size: var(--text-3xl);
+  font-weight: var(--weight-bold);
+  color: var(--text-strong);
+  margin: var(--space-3) 0 0;
+}
+
+.dashboard__queue {
+  margin-top: var(--space-2);
+}
+
+.dashboard__queue .queue {
+  margin-top: var(--space-5);
+}

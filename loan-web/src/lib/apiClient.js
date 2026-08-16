@@ -1,3 +1,5 @@
+import { getToken } from './token.js'
+
 const BASE_URL = import.meta.env.VITE_API_BASE_URL ?? '/api'
 
 export class ApiError extends Error {
@@ -10,11 +12,16 @@ export class ApiError extends Error {
 }
 
 async function request(path, { method = 'GET', body, signal } = {}) {
+  // The API authenticates with a Bearer JWT, not a session cookie.
+  const token = getToken()
+  const headers = {}
+  if (body) headers['Content-Type'] = 'application/json'
+  if (token) headers.Authorization = `Bearer ${token}`
+
   const response = await fetch(`${BASE_URL}${path}`, {
     method,
-    headers: body ? { 'Content-Type': 'application/json' } : undefined,
+    headers,
     body: body ? JSON.stringify(body) : undefined,
-    credentials: 'include',
     signal,
   })
 

@@ -1,0 +1,46 @@
+/* Wide tables scroll inside their own box — the page never scrolls sideways. */
+.queue {
+  overflow-x: auto;
+  background: var(--surface-panel);
+  border-radius: var(--radius-lg);
+}
+
+.queue__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-base);
+  white-space: nowrap;
+}
+
+.queue__table th {
+  text-align: left;
+  padding: var(--space-4) var(--space-5);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  border-bottom: 1px solid var(--border);
+}
+
+.queue__table td {
+  padding: var(--space-4) var(--space-5);
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+}
+
+.queue__table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.queue__table tbody tr:hover td {
+  background: var(--surface-card);
+}
+
+.queue__ref {
+  color: var(--text-faint);
+  font-family: var(--mono);
+}
+
+.queue__num {
+  font-weight: var(--weight-bold);
+  color: var(--text-strong);
+}
