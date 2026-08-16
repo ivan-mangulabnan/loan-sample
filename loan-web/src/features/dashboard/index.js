@@ -1,3 +1,4 @@
 // Public surface of this feature. Other features import only from here.
+export { default as QueueTable } from './components/QueueTable.jsx'
 export { configFor, roleConfig } from './roleConfig.js'
 export { useLedgerBalance, useRoleQueue } from './hooks.js'

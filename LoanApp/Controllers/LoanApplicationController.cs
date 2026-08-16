@@ -41,6 +41,19 @@ public class LoanApplicationController : ControllerBase
     }
   }
 
+  /// <summary>
+  /// Tenant-wide list for staff. Loaner is excluded from the role list on purpose:
+  /// a borrower reads their own records through "me", and must not see the tenant.
+  /// </summary>
+  [HttpGet]
+  [Authorize(Roles = $"{RoleNames.Reviewer},{RoleNames.Approver},{RoleNames.Admin}")]
+  public async Task<ActionResult<List<LoanApplicationResponse>>> GetAll ()
+  {
+    var loanApplications = await _loanApplicationService.GetLoanApplicationsByTenantAsync(User.GetTenantId());
+
+    return Ok(LoanApplicationResponse.From(loanApplications, User.CanSeeStaffNames()));
+  }
+
   [HttpGet("{id}")]
   public async Task<ActionResult<LoanApplicationResponse>> GetById (int id)
   {

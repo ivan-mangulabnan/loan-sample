@@ -54,6 +54,27 @@ public class LoanApplicationService
         return loanApplication;
     }
 
+    /// <summary>
+    /// Every application in the tenant, at any status. The queue endpoints are each
+    /// filtered to one stage, so staff have no other way to see an application's
+    /// whole history. Borrower is included here — unlike the /me query, which does
+    /// not need it — because it is the column that makes a tenant-wide list usable.
+    /// </summary>
+    public async Task<List<LoanApplication>> GetLoanApplicationsByTenantAsync (int tenantId)
+    {
+        return await _context.LoanApplications
+            .Include(l => l.Borrower).ThenInclude(b => b.Account)
+            .Include(l => l.PaymentPlan).ThenInclude(p => p.Interest)
+            .Include(l => l.Status)
+            .Include(l => l.Reviews).ThenInclude(r => r.Reviewer).ThenInclude(u => u.Account)
+            .Include(l => l.Reviews).ThenInclude(r => r.Status)
+            .Include(l => l.Approvals).ThenInclude(a => a.Approver).ThenInclude(u => u.Account)
+            .Include(l => l.Approvals).ThenInclude(a => a.Status)
+            .Where(l => l.Borrower.TenantId == tenantId)
+            .OrderByDescending(l => l.DateRequested)
+            .ToListAsync();
+    }
+
     public async Task<List<LoanApplication>> GetLoanApplicationsByUserAsync (int borrowerId)
     {
         var loanApplications = await _context.LoanApplications

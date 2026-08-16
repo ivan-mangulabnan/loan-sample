@@ -5,15 +5,6 @@ import NotFound from './app/NotFound.jsx'
 import { RequireRole } from './features/auth/index.js'
 import { ROLES } from './lib/roles.js'
 
-const queueRoute = () => ({
-  lazy: async () => {
-    const { QueuePage } = await import(
-      './features/dashboard/routes/QueuePage.jsx'
-    )
-    return { Component: QueuePage }
-  },
-})
-
 export const router = createBrowserRouter([
   {
     path: '/login',
@@ -53,29 +44,76 @@ export const router = createBrowserRouter([
           return { Component: DashboardPage }
         },
       },
+      // Both audiences reach this one, so it carries no role gate — the page
+      // renders the borrower or the staff view, and the API enforces the rest.
+      {
+        path: 'applications',
+        lazy: async () => {
+          const { ApplicationsPage } = await import(
+            './features/loan-applications/routes/ApplicationsPage.jsx'
+          )
+          return { Component: ApplicationsPage }
+        },
+      },
+      {
+        path: 'loans',
+        element: <RequireRole allow={[ROLES.Loaner]} />,
+        children: [
+          {
+            index: true,
+            lazy: async () => {
+              const { LoanListPage } = await import(
+                './features/loans/routes/LoanListPage.jsx'
+              )
+              return { Component: LoanListPage }
+            },
+          },
+        ],
+      },
       {
         path: 'review',
         element: <RequireRole allow={[ROLES.Reviewer]} />,
-        children: [{ index: true, ...queueRoute() }],
+        children: [
+          {
+            index: true,
+            lazy: async () => {
+              const { ReviewPage } = await import(
+                './features/review/routes/ReviewPage.jsx'
+              )
+              return { Component: ReviewPage }
+            },
+          },
+        ],
       },
       {
         path: 'approvals',
         element: <RequireRole allow={[ROLES.Approver]} />,
-        children: [{ index: true, ...queueRoute() }],
+        children: [
+          {
+            index: true,
+            lazy: async () => {
+              const { ApprovalsPage } = await import(
+                './features/approvals/routes/ApprovalsPage.jsx'
+              )
+              return { Component: ApprovalsPage }
+            },
+          },
+        ],
       },
       {
         path: 'releases',
         element: <RequireRole allow={[ROLES.Admin]} />,
-        children: [{ index: true, ...queueRoute() }],
-      },
-      {
-        path: 'applications',
-        lazy: async () => {
-          const { ApplicationListPage } = await import(
-            './features/loan-applications/routes/ApplicationListPage.jsx'
-          )
-          return { Component: ApplicationListPage }
-        },
+        children: [
+          {
+            index: true,
+            lazy: async () => {
+              const { FundReleasesPage } = await import(
+                './features/fund-releases/routes/FundReleasesPage.jsx'
+              )
+              return { Component: FundReleasesPage }
+            },
+          },
+        ],
       },
       { path: '*', element: <NotFound /> },
     ],

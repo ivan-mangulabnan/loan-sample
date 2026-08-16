@@ -3,6 +3,9 @@
  * Status.Label (human text), so we match on the label, lower-cased, and
  * fall back to a neutral tone for anything unmapped.
  * Codes come from LoanApp/Constants/LoanApplicationStatusCodes.cs.
+ *
+ * Application lifecycle only. A loan carries its own vocabulary in a separate
+ * status category server-side — see features/loans/statuses.js.
  */
 const TONES = {
   'pending review': 'warning',
@@ -13,10 +16,6 @@ const TONES = {
   'returned by reviewer': 'info',
   rejected: 'danger',
   cancelled: 'muted',
-  active: 'accent',
-  paid: 'success',
-  overdue: 'warning',
-  defaulted: 'danger',
 }
 
 export function statusTone(label) {
