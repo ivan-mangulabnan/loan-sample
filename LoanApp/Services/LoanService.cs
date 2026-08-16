@@ -49,11 +49,13 @@ public class LoanService
             .ToListAsync();
     }
 
-    public async Task<Loan?> GetLoanAsync (int loanId, int tenantId)
+    public async Task<Loan?> GetLoanAsync (int loanId, int tenantId, int requesterId, bool isStaff)
     {
         return await _context.Loans
             .Include(l => l.Borrower).ThenInclude(b => b.Account)
             .Include(l => l.Status)
-            .FirstOrDefaultAsync(l => l.LoanId == loanId && l.Borrower.TenantId == tenantId);
+            .FirstOrDefaultAsync(l => l.LoanId == loanId
+                                   && l.Borrower.TenantId == tenantId
+                                   && (isStaff || l.BorrowerId == requesterId));
     }
 }

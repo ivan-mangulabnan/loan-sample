@@ -19,6 +19,68 @@ public class PaymentService
         _ledgerService = ledgerService;
     }
 
+    // Returns null when the loan is not visible to the caller, and an empty list when it is
+    // visible but has no payments yet. Collapsing the two would turn a 404 into 200-with-[],
+    // and would make the ownership test vacuous — an empty list proves nothing on its own.
+    public async Task<List<Payment>?> GetForLoanAsync (int loanId, int tenantId, int requesterId, bool isStaff)
+    {
+        var loanIsVisible = await _context.Loans.AnyAsync(
+            l => l.LoanId == loanId
+              && l.Borrower.TenantId == tenantId
+              && (isStaff || l.BorrowerId == requesterId));
+
+        if (!loanIsVisible) return null;
+
+        // No Includes: the caller maps with showBorrower: false, so PersonName.Of is never
+        // reached and loading Borrower would be a wasted join.
+        return await _context.Payments
+            .Where(p => p.LoanId == loanId)
+            .OrderByDescending(p => p.PaymentDate)
+            .ThenByDescending(p => p.PaymentId)
+            .ToListAsync();
+    }
+
+    // Tenant comes from the caller's token, never the query string. The optional filters
+    // compose onto the same IQueryable, so the count and the page can never drift apart —
+    // a filter added to one and not the other would strand rows the client can't reach.
+    public async Task<(List<Payment> Items, int TotalCount)> GetPagedAsync (
+        int tenantId, int? borrowerId, DateTime? from, DateTime? to, int skip, int take)
+    {
+        var query = _context.Payments.Where(p => p.Loan.Borrower.TenantId == tenantId);
+
+        if (borrowerId is not null)
+            query = query.Where(p => p.BorrowerUserId == borrowerId.Value);
+
+        // Whole UTC days. The upper bound is exclusive on the next day: `<= to` would drop
+        // payments made later in the day on the `to` date, since PaymentDate carries a time.
+        if (from is not null)
+        {
+            var fromDate = from.Value.Date;
+            query = query.Where(p => p.PaymentDate >= fromDate);
+        }
+
+        if (to is not null)
+        {
+            var toExclusive = to.Value.Date.AddDays(1);
+            query = query.Where(p => p.PaymentDate < toExclusive);
+        }
+
+        var totalCount = await query.CountAsync();
+
+        var items = await query
+            .Include(p => p.Borrower).ThenInclude(b => b.Account)
+            // PaymentId breaks ties: PostAsync stamps PaymentDate from a single UtcNow, so
+            // batch-posted payments share one timestamp and Skip/Take would be free to
+            // repeat a row on two pages and omit another.
+            .OrderByDescending(p => p.PaymentDate)
+            .ThenByDescending(p => p.PaymentId)
+            .Skip(skip)
+            .Take(take)
+            .ToListAsync();
+
+        return (items, totalCount);
+    }
+
     public async Task<Payment?> PostAsync (int borrowerId, PaymentRequest paymentRequest)
     {
         var loan = await _context.Loans
