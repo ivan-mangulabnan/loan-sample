@@ -36,7 +36,20 @@ async function request(path, { method = 'GET', body, signal } = {}) {
   })
 
   const text = await response.text()
-  const payload = text ? JSON.parse(text) : null
+
+  // Not every error body is JSON: BadRequest(ex.Message) sends bare text, and an
+  // unhandled 500 or a dead proxy sends HTML. Parsing blind turns those into a
+  // SyntaxError that escapes as-is, so the caller sees a parser message instead
+  // of an ApiError it can branch on.
+  let payload = null
+  if (text) {
+    try {
+      payload = JSON.parse(text)
+    } catch {
+      if (response.ok) throw new ApiError('Malformed JSON in response.', response.status, text)
+      payload = text
+    }
+  }
 
   if (!response.ok) {
     // /Auth/ paths are excluded: the bootstrap /Auth/me 401 is the normal
@@ -47,7 +60,8 @@ async function request(path, { method = 'GET', body, signal } = {}) {
       onUnauthorized?.()
 
     throw new ApiError(
-      payload?.message ?? response.statusText,
+      (typeof payload === 'string' ? payload : payload?.message) ??
+        response.statusText,
       response.status,
       payload,
     )

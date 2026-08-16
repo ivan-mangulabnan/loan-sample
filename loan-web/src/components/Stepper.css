@@ -1,0 +1,183 @@
+.stepper {
+  display: flex;
+  align-items: center;
+  /* Centred rather than flush-left like the form fields, so the step row reads
+     as its own band of chrome instead of another form row. */
+  justify-content: center;
+  gap: var(--space-3);
+}
+
+.stepper__step {
+  display: flex;
+  align-items: center;
+  gap: var(--space-2);
+  min-width: 0;
+}
+
+.stepper__dot {
+  position: relative;
+  width: 30px;
+  height: 30px;
+  flex-shrink: 0;
+  border-radius: 50%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  font-size: var(--text-base);
+  font-weight: var(--weight-bold);
+  line-height: 1;
+  border: 1px solid var(--border);
+  background: var(--surface-shell);
+  color: var(--text-muted);
+  transition: background 0.25s ease, color 0.25s ease, border-color 0.25s ease;
+}
+
+.stepper--sm .stepper__dot {
+  width: 22px;
+  height: 22px;
+  font-size: var(--text-xs);
+}
+
+.stepper__check {
+  width: 15px;
+  height: 15px;
+  display: block;
+}
+
+.stepper--sm .stepper__check {
+  width: 12px;
+  height: 12px;
+}
+
+.stepper__label {
+  font-size: var(--text-sm);
+  color: var(--text-muted);
+  white-space: nowrap;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  transition: color 0.25s ease;
+}
+
+/* Announced by screen readers, never shown: the visual state is carried by
+   colour and the check mark, which a non-visual reader cannot see. */
+.stepper__state {
+  /* Not position:absolute — .stepper__step is not a positioned ancestor, so it
+     would escape to the card. Collapsing the box keeps it in flow but invisible. */
+  width: 1px;
+  height: 1px;
+  padding: 0;
+  margin: -1px;
+  overflow: hidden;
+  clip-path: inset(50%);
+  white-space: nowrap;
+  border: 0;
+}
+
+/* Capped rather than flex:1 — a connector that eats all the leftover width
+   pushes the steps to opposite edges, so the row reads as two corner items
+   instead of one centred group. It still shrinks when space is tight. */
+.stepper__bar {
+  flex: 0 1 var(--space-8);
+  height: 1px;
+  min-width: var(--space-4);
+  background: var(--border);
+  transition: background 0.25s ease;
+}
+
+.stepper__bar--filled {
+  background: var(--accent);
+}
+
+/* ---- States ---- */
+.stepper__step--active .stepper__dot {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--surface-page);
+}
+
+.stepper__step--active .stepper__label {
+  color: var(--text-strong);
+}
+
+/* Done: outlined with a check, so it reads as finished rather than current. */
+.stepper__step--done .stepper__dot {
+  border-color: var(--accent);
+  color: var(--accent);
+  background: var(--surface-shell);
+}
+
+.stepper__step--done .stepper__label {
+  color: var(--text-muted);
+}
+
+/* Waiting: the step is blocked on an action, so the dot pulses to draw the eye. */
+.stepper__step--waiting .stepper__dot {
+  background: var(--accent);
+  border-color: var(--accent);
+  color: var(--surface-page);
+}
+
+.stepper__step--waiting .stepper__label {
+  color: var(--text-strong);
+}
+
+/* A ring that expands and fades out from behind the dot. Separate element so
+   the dot itself does not move — animating the dot would shift the label. */
+.stepper__pulse {
+  position: absolute;
+  inset: -1px;
+  border-radius: 50%;
+  border: 2px solid var(--accent);
+  /* A soft halo under the ring so the pulse carries further than a hairline. */
+  box-shadow: 0 0 0 0 var(--glow-accent-soft);
+  animation: stepper-pulse 1.6s ease-out infinite;
+  pointer-events: none;
+}
+
+/* Holds near-opaque through the first third so the ring is genuinely visible,
+   then expands and fades. Peak scale is bounded by the dot-to-label gap: at a
+   30px dot with an 8px gap the ring reaches the label at 1.53x, so 1.5 is the
+   most it can travel without colliding. Widen that gap before raising this. */
+@keyframes stepper-pulse {
+  0% {
+    transform: scale(1);
+    opacity: 0.85;
+    box-shadow: 0 0 0 0 var(--glow-accent-soft);
+  }
+  35% {
+    opacity: 0.6;
+  }
+  100% {
+    transform: scale(1.5);
+    opacity: 0;
+    box-shadow: 0 0 0 6px transparent;
+  }
+}
+
+/* Invalid: visited but needs fixing. */
+.stepper__step--invalid .stepper__dot {
+  border-color: var(--danger);
+  color: var(--danger);
+  background: var(--danger-tint);
+}
+
+.stepper__step--invalid .stepper__label {
+  color: var(--danger);
+}
+
+/* Co-located with the rules it overrides, so import order cannot decide which
+   one wins. */
+@media (prefers-reduced-motion: reduce) {
+  .stepper__dot,
+  .stepper__label,
+  .stepper__bar {
+    transition: none;
+  }
+
+  /* The pulse signals "waiting on you", so keep a static ring rather than
+     removing the affordance entirely. */
+  .stepper__pulse {
+    animation: none;
+    opacity: 0.5;
+  }
+}

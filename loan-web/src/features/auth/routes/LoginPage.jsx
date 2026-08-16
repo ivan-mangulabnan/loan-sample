@@ -1,7 +1,7 @@
 import { useState } from 'react'
-import { Navigate, useLocation, useNavigate } from 'react-router-dom'
+import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import Button from '../../../components/Button.jsx'
-import Glow, { GlowHost } from '../../../components/Glow.jsx'
+import AuthScreen from '../components/AuthScreen.jsx'
 import { useSession } from '../hooks.js'
 import './LoginPage.css'
 
@@ -42,65 +42,72 @@ export function LoginPage() {
   if (isAuthenticated) return <Navigate to="/" replace />
 
   return (
-    <div className="login">
-      <GlowHost className="login__card">
-        <Glow tone="accent" placement="top-left" />
-        <Glow tone="info" placement="top-right" />
+    <AuthScreen
+      title="Sign in"
+      subtitle="LoanApp staff console"
+      footer={
+        <p className="login__alt">
+          No account? <Link to="/register">Create one</Link>
+        </p>
+      }
+    >
+      {/* Set by RegisterPage on redirect — the account exists but has no session. */}
+      {location.state?.notice && (
+        <p className="login__notice" role="status">
+          {location.state.notice}
+        </p>
+      )}
 
-        <h1 className="heading">Sign in</h1>
-        <p className="muted">LoanApp staff console</p>
+      <form className="login__form" onSubmit={handleSubmit}>
+        <label className="login__label" htmlFor="tenantId">
+          Tenant
+        </label>
+        <select
+          id="tenantId"
+          className="field field--input"
+          value={tenantId}
+          onChange={(event) => setTenantId(event.target.value)}
+        >
+          <option value="1">Jitsu Finance</option>
+          <option value="2">Mejia Finance</option>
+        </select>
 
-        <form className="login__form" onSubmit={handleSubmit}>
-          <label className="login__label" htmlFor="tenantId">
-            Tenant
-          </label>
-          <select
-            id="tenantId"
-            className="field field--input"
-            value={tenantId}
-            onChange={(event) => setTenantId(event.target.value)}
-          >
-            <option value="1">Jitsu Finance</option>
-            <option value="2">Mejia Finance</option>
-          </select>
+        <label className="login__label" htmlFor="userName">
+          Username
+        </label>
+        <input
+          id="userName"
+          className="field field--input"
+          value={userName}
+          autoComplete="username"
+          onChange={(event) => setUserName(event.target.value)}
+          required
+        />
 
-          <label className="login__label" htmlFor="userName">
-            Username
-          </label>
-          <input
-            id="userName"
-            className="field field--input"
-            value={userName}
-            autoComplete="username"
-            onChange={(event) => setUserName(event.target.value)}
-            required
-          />
+        <label className="login__label" htmlFor="password">
+          Password
+        </label>
+        <input
+          id="password"
+          className="field field--input"
+          type="password"
+          value={password}
+          autoComplete="current-password"
+          onChange={(event) => setPassword(event.target.value)}
+          required
+        />
 
-          <label className="login__label" htmlFor="password">
-            Password
-          </label>
-          <input
-            id="password"
-            className="field field--input"
-            type="password"
-            value={password}
-            autoComplete="current-password"
-            onChange={(event) => setPassword(event.target.value)}
-            required
-          />
+        {error && (
+          <p className="login__error" role="alert">
+            {error}
+          </p>
+        )}
 
-          {error && (
-            <p className="login__error" role="alert">
-              {error}
-            </p>
-          )}
-
-          <Button variant="accent" type="submit" disabled={isSubmitting}>
-            {isSubmitting ? 'Signing in…' : 'Sign in'}
-          </Button>
-        </form>
-      </GlowHost>
-    </div>
+        <Button variant="accent" type="submit" disabled={isSubmitting}>
+          {isSubmitting ? 'Signing in…' : 'Sign in'}
+        </Button>
+      </form>
+    </AuthScreen>
   )
 }
 

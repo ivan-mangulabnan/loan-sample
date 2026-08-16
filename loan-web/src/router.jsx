@@ -26,6 +26,16 @@ export const router = createBrowserRouter([
     errorElement: <ErrorBoundary />,
   },
   {
+    path: '/register',
+    lazy: async () => {
+      const { RegisterPage } = await import(
+        './features/auth/routes/RegisterPage.jsx'
+      )
+      return { Component: RegisterPage }
+    },
+    errorElement: <ErrorBoundary />,
+  },
+  {
     path: '/',
     element: (
       <RequireRole>
