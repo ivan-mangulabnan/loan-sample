@@ -29,8 +29,21 @@ export const roleConfig = {
       // The queue returns LoanApplicationResponse[].
       shape: 'application',
       emptyMessage: 'No applications are waiting for review.',
+      // Singular/plural copy for the "N waiting" notice. Named per role because the
+      // noun differs — an Admin waits on releases, not applications.
+      unit: 'application is',
+      unitPlural: 'applications are',
       calloutAction: 'Open review queue',
       calloutTo: '/review',
+    },
+    // The server decides what the headline MEANS; this decides how it is formatted,
+    // which is presentation and belongs here.
+    stats: {
+      path: '/Stats/dashboard',
+      days: 7,
+      headline: 'count',
+      chartCaption: 'Reviews posted per day',
+      emptyChartMessage: 'No reviews posted in this period.',
     },
     nav: [
       { to: '/', glyph: '⌂', label: 'Overview', end: true },
@@ -48,8 +61,17 @@ export const roleConfig = {
       path: '/LoanApproval/queue',
       shape: 'application',
       emptyMessage: 'No applications are waiting for approval.',
+      unit: 'application is',
+      unitPlural: 'applications are',
       calloutAction: 'Open approval queue',
       calloutTo: '/approvals',
+    },
+    stats: {
+      path: '/Stats/dashboard',
+      days: 7,
+      headline: 'amount',
+      chartCaption: 'Approved principal per day',
+      emptyChartMessage: 'No approvals in this period.',
     },
     nav: [
       { to: '/', glyph: '⌂', label: 'Overview', end: true },
@@ -68,8 +90,17 @@ export const roleConfig = {
       // The queue returns FundReleaseQueueResponse[] — a different shape.
       shape: 'release',
       emptyMessage: 'Nothing is waiting for release.',
+      unit: 'loan is',
+      unitPlural: 'loans are',
       calloutAction: 'Open release queue',
       calloutTo: '/releases',
+    },
+    stats: {
+      path: '/Stats/dashboard',
+      days: 7,
+      headline: 'amount',
+      chartCaption: 'Payments collected per day',
+      emptyChartMessage: 'No payments collected in this period.',
     },
     // Only Admin can read the capital ledger.
     ledger: { path: '/Ledger/balance' },
@@ -82,7 +113,8 @@ export const roleConfig = {
   },
 
   // No `queue` key on purpose: useRoleQueue(undefined) resolves to [] without a
-  // request, so nothing here fires a staff endpoint a borrower cannot call.
+  // request, so nothing here fires a staff endpoint a borrower cannot call. The `stats`
+  // key below is present but points at /Stats/me, which is Loaner-gated.
   [ROLES.Loaner]: {
     kind: 'self',
     label: 'Borrower',
@@ -99,6 +131,15 @@ export const roleConfig = {
         shape: 'loan',
         emptyMessage: 'You have no loans yet.',
       },
+    },
+    // A different path from the staff block, not a different component: /Stats/me is
+    // scoped to this borrower's own rows and returns no tenant-wide field.
+    stats: {
+      path: '/Stats/me',
+      days: 7,
+      headline: 'amount',
+      chartCaption: 'Payments you made per day',
+      emptyChartMessage: 'You have made no payments this week.',
     },
     nav: [
       { to: '/', glyph: '⌂', label: 'Overview', end: true },

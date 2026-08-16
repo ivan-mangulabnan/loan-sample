@@ -25,6 +25,7 @@ builder.Services.AddScoped<FundReleaseService>();
 builder.Services.AddScoped<CapitalDepositService>();
 builder.Services.AddScoped<InterestService>();
 builder.Services.AddScoped<PaymentPlanService>();
+builder.Services.AddScoped<StatsService>();
 builder.Services.AddSingleton<TokenService>();
 
 builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)

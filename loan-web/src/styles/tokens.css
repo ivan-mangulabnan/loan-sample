@@ -26,6 +26,9 @@
   --text-muted: #9fb0b3;
   --text-subtle: #8d9fa3;
   --text-faint: #6c7d82;
+  /* Dimmer than --text-subtle: a page subtitle sits under a 30px heading and competes
+     with it at subtle's weight. */
+  --text-dim: #7f9196;
   --text-on-accent: #ffffff;
   --text-rail: #8fa3a8;
   --text-rail-hover: #e6f2f0;
@@ -66,6 +69,15 @@
   --bar-warning: linear-gradient(90deg, #d67c5a, #a85f47);
   --bar-success: linear-gradient(90deg, #8caa78, #4fc0a6);
   --bar-vertical: linear-gradient(180deg, #4fc0a6, #2b7f70);
+
+  /* ---- Chart ---- */
+  /* The area line fades to grey at both ends so the accent reads as a highlight in the
+     middle rather than a uniform stroke. Not --text-faint: that is a text colour and
+     the two would drift apart. */
+  --chart-line-fade: #5c6f70;
+  /* The vertical rule dropped from the highlighted point — above the curve without
+     becoming the loudest thing on the page. */
+  --chart-rule: #c9d8d6;
 
   /* ---- Type ---- */
   --sans: 'DM Sans', Helvetica, system-ui, sans-serif;
@@ -115,4 +127,5 @@
   /* ---- Layout ---- */
   --rail-width: 96px;
   --aside-width: 308px;
+  --chart-height: 240px;
 }

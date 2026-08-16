@@ -2,6 +2,10 @@
   display: flex;
   align-items: center;
   flex-wrap: wrap;
+  /* The action sits at the far edge rather than trailing the text: the message can be
+     any length, and without this the button lands in a different place on every
+     callout. The gap is the minimum separation when the two do meet. */
+  justify-content: space-between;
   gap: var(--space-6);
   background: var(--surface-panel);
   border-radius: var(--radius-xl);

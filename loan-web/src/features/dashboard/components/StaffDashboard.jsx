@@ -1,8 +1,10 @@
 import { useNavigate } from 'react-router-dom'
+import AreaChart from '../../../components/AreaChart.jsx'
 import Callout from '../../../components/Callout.jsx'
-import QueueTable from './QueueTable.jsx'
-import StatTile from './StatTile.jsx'
-import { useLedgerBalance, useRoleQueue } from '../hooks.js'
+import { useSession } from '../../auth/index.js'
+import { useDashboardStats, useRoleQueue } from '../hooks.js'
+import DashboardAside from './DashboardAside.jsx'
+import './StaffDashboard.css'
 
 const currency = new Intl.NumberFormat(undefined, {
   style: 'currency',
@@ -10,112 +12,103 @@ const currency = new Intl.NumberFormat(undefined, {
   maximumFractionDigits: 0,
 })
 
-const DAY = 24 * 60 * 60 * 1000
-
-/** Rows older than this are what the callout warns about. */
-const STALE_DAYS = 5
-
-function ageInDays(row, shape) {
-  const raw = shape === 'release' ? row.approvalDate : row.dateRequested
-  return Math.floor((Date.now() - new Date(raw).getTime()) / DAY)
-}
-
-function totalOf(rows, shape) {
-  return rows.reduce(
-    (sum, row) => sum + (shape === 'release' ? row.principalAmount : row.amount),
-    0,
-  )
-}
+const weekday = new Intl.DateTimeFormat(undefined, { weekday: 'short' })
 
 /**
- * Overview for a role that works a queue of other people's applications —
- * Reviewer, Approver, Admin. Which queue comes from the config, never from the
- * role itself.
+ * Overview for a staff role: headline, trend and pipeline. The work list itself is not
+ * repeated here — it has its own area page (/review, /approvals, /releases), and the
+ * duplicate made the dashboard scroll. The queue is still read for the "nothing is
+ * waiting" notice, which links through to that page.
+ *
+ * Figures come from /Stats/dashboard rather than being derived client-side, so the
+ * numbers here and in any report agree by construction.
  */
 function StaffDashboard({ config }) {
   const navigate = useNavigate()
+  const { name } = useSession()
 
-  const isAdmin = Boolean(config.ledger)
   const queue = useRoleQueue(config.queue)
-  const ledger = useLedgerBalance(isAdmin)
+  const stats = useDashboardStats(config.stats)
+  const data = stats.data
 
-  const rows = queue.data ?? []
-  const stale = rows.filter(
-    (row) => ageInDays(row, config.queue.shape) > STALE_DAYS,
-  )
+  // The notice covers both desks, not just the clear one. Previously it appeared only on
+  // an empty queue, which meant the role most likely to have work — the Reviewer — was
+  // the one role that never saw it at all.
+  const waiting = (queue.data ?? []).length
+  const showQueueNotice = !queue.isLoading && !queue.error
+  const queueMessage =
+    waiting === 0
+      ? config.queue.emptyMessage
+      : `${waiting} ${waiting === 1 ? config.queue.unit : config.queue.unitPlural} waiting.`
+
+  const isAmount = config.stats?.headline === 'amount'
+  const headline = data
+    ? isAmount
+      ? currency.format(data.headlineAmount)
+      : data.headlineCount
+    : '—'
+
+  const points = (data?.series ?? []).map((p) => ({
+    label: weekday.format(new Date(p.date)),
+    value: isAmount ? p.amount : p.count,
+  }))
 
   return (
-    <>
-      <header>
-        <h1 className="heading">{config.title}</h1>
-        <p className="muted">{config.subtitle}</p>
-      </header>
+    <div className="staff">
+      <div className="staff__main">
+        <header className="page-head">
+          <div>
+            <h1 className="heading">{config.title}</h1>
+            <p className="staff__subtitle">{config.subtitle}</p>
+          </div>
+        </header>
 
-      {queue.error && (
-        <Callout action="Retry" onAction={queue.reload}>
-          Could not load the queue: {queue.error.message}
-        </Callout>
-      )}
-
-      {stale.length > 0 && (
-        <Callout
-          action={config.queue.calloutAction}
-          onAction={() => navigate(config.queue.calloutTo)}
-        >
-          {stale.length} {stale.length === 1 ? 'item has' : 'items have'} been
-          waiting more than {STALE_DAYS} days.
-        </Callout>
-      )}
-
-      <section>
-        <p className="section-label">Summary</p>
-        <div className="stats">
-          <StatTile
-            tone="warning"
-            glyph="⏱"
-            label="In queue"
-            value={rows.length}
-            isLoading={queue.isLoading}
-          />
-          <StatTile
-            tone="info"
-            glyph="◷"
-            label={`Over ${STALE_DAYS} days`}
-            value={stale.length}
-            isLoading={queue.isLoading}
-          />
-          <StatTile
-            tone="accent"
-            glyph="◈"
-            label="Queue value"
-            value={currency.format(totalOf(rows, config.queue.shape))}
-            isLoading={queue.isLoading}
-          />
-          {isAdmin && (
-            <StatTile
-              tone="success"
-              glyph="₱"
-              label="Capital on hand"
-              value={
-                ledger.data ? currency.format(ledger.data.currentBalance) : '—'
-              }
-              isLoading={ledger.isLoading}
-            />
-          )}
-        </div>
-      </section>
-
-      <section className="dashboard__queue">
-        <p className="section-label">{config.title}</p>
-        {queue.isLoading ? (
-          <p className="muted">Loading…</p>
-        ) : rows.length === 0 ? (
-          <p className="muted">{config.queue.emptyMessage}</p>
-        ) : (
-          <QueueTable shape={config.queue.shape} rows={rows} />
+        {stats.error && (
+          <Callout action="Retry" onAction={stats.reload}>
+            Could not load the overview: {stats.error.message}
+          </Callout>
         )}
-      </section>
-    </>
+
+        {showQueueNotice && (
+          <Callout
+            action={config.queue.calloutAction}
+            onAction={() => navigate(config.queue.calloutTo)}
+          >
+            {queueMessage}
+          </Callout>
+        )}
+
+        <section className="staff__headline">
+          <p className="staff__figure">{stats.isLoading ? '—' : headline}</p>
+          <p className="staff__caption">
+            <span className="dot dot--sm" />
+            {stats.isLoading ? 'Loading…' : (data?.headlineCaption ?? '')}
+          </p>
+        </section>
+
+        {stats.isLoading ? (
+          <p className="muted">Loading…</p>
+        ) : (
+          <AreaChart
+            points={points}
+            format={(v) => (isAmount ? currency.format(v) : v)}
+            tone={isAmount ? 'accent' : 'info'}
+            caption={config.stats.chartCaption}
+            emptyMessage={config.stats.emptyChartMessage}
+          />
+        )}
+      </div>
+
+      <DashboardAside
+        name={name}
+        role={config.label}
+        pipeline={data?.pipeline ?? []}
+        averageValue={data?.averageLoanSize ?? 0}
+        trend={data?.averageTrend ?? []}
+        format={(v) => currency.format(v)}
+        isLoading={stats.isLoading}
+      />
+    </div>
   )
 }
 
