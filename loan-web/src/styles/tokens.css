@@ -1,0 +1,131 @@
+/**
+ * Design tokens — the single source of truth for colour, type, radius and
+ * elevation. Nothing outside this file may hardcode a hex value.
+ * Extracted from the Loan Dashboard design.
+ */
+
+:root {
+  /* ---- Surfaces: darkest (page) to lightest (raised control) ---- */
+  --surface-page: #0a0d0f;
+  --surface-shell: #12171a;
+  --surface-panel: #1b2226;
+  --surface-card: #1a2124;
+  --surface-sunken: #191f23;
+  --surface-track: #1d2427;
+  --surface-control: #252e33;
+  --surface-control-hover: #2e3a40;
+
+  /* Sidebar reads as a vertical gradient, not a flat fill. */
+  --surface-rail: linear-gradient(180deg, #161d21 0%, #1a2b2c 45%, #151b1f 100%);
+  --surface-rail-hover: rgba(255, 255, 255, 0.05);
+  --surface-rail-active: rgba(255, 255, 255, 0.07);
+
+  /* ---- Text: strongest to faintest ---- */
+  --text-strong: #f2f7f6;
+  --text: #cfdedb;
+  --text-muted: #9fb0b3;
+  --text-subtle: #8d9fa3;
+  --text-faint: #6c7d82;
+  /* Dimmer than --text-subtle: a page subtitle sits under a 30px heading and competes
+     with it at subtle's weight. */
+  --text-dim: #7f9196;
+  --text-on-accent: #ffffff;
+  --text-rail: #8fa3a8;
+  --text-rail-hover: #e6f2f0;
+
+  /* ---- Borders ---- */
+  --border: #242c2f;
+  --border-dashed: #3a4a4d;
+
+  /* ---- Brand + status ---- */
+  --accent: #4fc0a6;
+  --accent-strong: #2fbf87;
+  --accent-hover: #6fd0bd;
+  --accent-deep: #2b7f70;
+  --info: #607cd6;
+  --info-deep: #4658a8;
+  --warning: #d67c5a;
+  --warning-deep: #a85f47;
+  --success: #8caa78;
+  --danger: #e2455a;
+
+  /* Translucent tints for icon chips. */
+  --accent-tint: rgba(47, 191, 135, 0.14);
+  --info-tint: rgba(96, 124, 214, 0.14);
+  --warning-tint: rgba(214, 124, 90, 0.14);
+  --success-tint: rgba(140, 170, 120, 0.14);
+  --danger-tint: rgba(226, 69, 90, 0.14);
+  --muted-tint: rgba(159, 176, 179, 0.12);
+
+  /* ---- Glow colours: drive the radial-gradient utilities ---- */
+  --glow-accent: rgba(79, 192, 166, 0.5);
+  --glow-accent-soft: rgba(79, 192, 166, 0.38);
+  --glow-info: rgba(95, 127, 216, 0.42);
+  --glow-info-soft: rgba(95, 127, 216, 0.4);
+
+  /* ---- Bar / progress gradients ---- */
+  --bar-accent: linear-gradient(90deg, #2fbf87, #4fc0a6);
+  --bar-info: linear-gradient(90deg, #607cd6, #4658a8);
+  --bar-warning: linear-gradient(90deg, #d67c5a, #a85f47);
+  --bar-success: linear-gradient(90deg, #8caa78, #4fc0a6);
+  --bar-vertical: linear-gradient(180deg, #4fc0a6, #2b7f70);
+
+  /* ---- Chart ---- */
+  /* The area line fades to grey at both ends so the accent reads as a highlight in the
+     middle rather than a uniform stroke. Not --text-faint: that is a text colour and
+     the two would drift apart. */
+  --chart-line-fade: #5c6f70;
+  /* The vertical rule dropped from the highlighted point — above the curve without
+     becoming the loudest thing on the page. */
+  --chart-rule: #c9d8d6;
+
+  /* ---- Type ---- */
+  --sans: 'DM Sans', Helvetica, system-ui, sans-serif;
+  --mono: ui-monospace, Consolas, monospace;
+
+  --text-xs: 10px;
+  --text-sm: 12px;
+  --text-base: 13px;
+  --text-md: 14px;
+  --text-lg: 15px;
+  --text-xl: 17px;
+  --text-2xl: 22px;
+  --text-3xl: 24px;
+  --text-4xl: 30px;
+  --text-5xl: 34px;
+
+  --weight-normal: 400;
+  --weight-medium: 500;
+  --weight-bold: 700;
+
+  --tracking-tight: -0.5px;
+  --tracking-tighter: -1px;
+
+  /* ---- Radius ---- */
+  --radius-sm: 7px;
+  --radius: 10px;
+  --radius-md: 12px;
+  --radius-lg: 16px;
+  --radius-xl: 18px;
+  --radius-2xl: 24px;
+  --radius-3xl: 28px;
+  --radius-pill: 999px;
+
+  /* ---- Spacing ---- */
+  --space-1: 4px;
+  --space-2: 8px;
+  --space-3: 12px;
+  --space-4: 16px;
+  --space-5: 20px;
+  --space-6: 26px;
+  --space-7: 34px;
+  --space-8: 44px;
+
+  /* ---- Elevation ---- */
+  --shadow-raised: 0 30px 80px rgba(0, 0, 0, 0.5);
+
+  /* ---- Layout ---- */
+  --rail-width: 96px;
+  --aside-width: 308px;
+  --chart-height: 240px;
+}

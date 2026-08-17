@@ -1,3 +1,4 @@
+using Constants;
 using Microsoft.EntityFrameworkCore;
 using Models;
 
@@ -44,6 +45,7 @@ public class LoanAppDbContext : DbContext
     modelBuilder.Entity<LoanApproval>().Property(l => l.TotalRepaymentAmount).HasPrecision(18, 2);
     modelBuilder.Entity<Payment>().Property(p => p.Amount).HasPrecision(18, 2);
     modelBuilder.Entity<Transaction>().Property(t => t.Amount).HasPrecision(18, 2);
+    modelBuilder.Entity<FundRelease>().Property(f => f.Amount).HasPrecision(18, 2);
 
     modelBuilder.Entity<User>()
     .HasIndex(u => new { u.TenantId, u.UserName })
@@ -52,6 +54,11 @@ public class LoanAppDbContext : DbContext
     modelBuilder.Entity<Account>()
     .HasIndex(a => a.UserId)
     .IsUnique();
+
+    modelBuilder.Entity<Account>()
+    .HasOne(a => a.User)
+    .WithOne(u => u.Account)
+    .HasForeignKey<Account>(a => a.UserId);
 
     modelBuilder.Entity<Loan>()
     .HasIndex(l => l.FundReleaseId)
@@ -92,6 +99,10 @@ public class LoanAppDbContext : DbContext
     .HasOne(t => t.TransactionType)
     .WithMany()
     .OnDelete(DeleteBehavior.Restrict);
+
+    modelBuilder.Entity<Transaction>()
+    .HasOne(t => t.Ledger)
+    .WithMany(l => l.Transactions);
 
     modelBuilder.Entity<Correction>()
     .HasOne(c => c.Ledger)
@@ -138,6 +149,18 @@ public class LoanAppDbContext : DbContext
     .WithMany()
     .OnDelete(DeleteBehavior.Restrict);
 
+    modelBuilder.Entity<ReviewApplication>()
+    .HasOne(r => r.LoanApplication)
+    .WithMany(l => l.Reviews);
+
+    modelBuilder.Entity<LoanApproval>()
+    .HasOne(a => a.LoanApplication)
+    .WithMany(l => l.Approvals);
+
+    modelBuilder.Entity<LoanApproval>()
+    .HasIndex(a => a.LoanApplicationId)
+    .IsUnique();
+
     modelBuilder.Entity<LoanApproval>()
     .HasOne(l => l.Approver)
     .WithMany()
@@ -149,10 +172,10 @@ public class LoanAppDbContext : DbContext
     .OnDelete(DeleteBehavior.Restrict);
 
     modelBuilder.Entity<Role>().HasData(
-      new Role { RoleId = 1, Name = "Admin" },
-      new Role { RoleId = 2, Name = "Reviewer" },
-      new Role { RoleId = 3, Name = "Approver" },
-      new Role { RoleId = 4, Name = "Loaner" }
+      new Role { RoleId = 1, Name = RoleNames.Admin },
+      new Role { RoleId = 2, Name = RoleNames.Reviewer },
+      new Role { RoleId = 3, Name = RoleNames.Approver },
+      new Role { RoleId = 4, Name = RoleNames.Loaner }
     );
 
     modelBuilder.Entity<Tenant>().HasData(
@@ -162,23 +185,62 @@ public class LoanAppDbContext : DbContext
 
     modelBuilder.Entity<Interest>().HasData(
       new Interest { InterestId = 1, InterestRate = 5.5m },
-      new Interest { InterestId = 2, InterestRate = 10.1m }
+      new Interest { InterestId = 2, InterestRate = 13m }
     );
 
     modelBuilder.Entity<PaymentPlan>().HasData(
-      new PaymentPlan { PaymentPlanId = 1, InterestId = 1, NumberOfMonths = 2 },
-      new PaymentPlan { PaymentPlanId = 2, InterestId = 2, NumberOfMonths = 4 }
+      new PaymentPlan { PaymentPlanId = 1, InterestId = 1, Name = "Standard", NumberOfMonths = 2 },
+      new PaymentPlan { PaymentPlanId = 2, InterestId = 2, Name = "Extended", NumberOfMonths = 4 }
     );
 
     modelBuilder.Entity<StatusCategory>().HasData(
-      new StatusCategory { StatusCategoryId = 1, Code = "LOAN_STATUS" }
+      new StatusCategory { StatusCategoryId = 1, Code = StatusCategoryCodes.LoanApplicationStatus },
+      new StatusCategory { StatusCategoryId = 2, Code = StatusCategoryCodes.LoanStatus }
     );
 
     modelBuilder.Entity<Status>().HasData(
-      new Status { StatusId = 1, StatusCategoryId = 1, Code = "APPROVED" },
-      new Status { StatusId = 2, StatusCategoryId = 1, Code = "RETURNED" },
-      new Status { StatusId = 3, StatusCategoryId = 1, Code = "REJECTED" },
-      new Status { StatusId = 4, StatusCategoryId = 1, Code = "PENDING" }
+      new Status { StatusId = 1, StatusCategoryId = 1, Code = LoanApplicationStatusCodes.PendingReview, Label = "Pending Review" },
+      new Status { StatusId = 2, StatusCategoryId = 1, Code = LoanApplicationStatusCodes.PendingApproval, Label = "Pending Approval" },
+      new Status { StatusId = 3, StatusCategoryId = 1, Code = LoanApplicationStatusCodes.PendingRelease, Label = "Pending Release" },
+      new Status { StatusId = 4, StatusCategoryId = 1, Code = LoanApplicationStatusCodes.Released, Label = "Released" },
+      new Status { StatusId = 5, StatusCategoryId = 1, Code = LoanApplicationStatusCodes.ReturnedByReviewer, Label = "Returned by Reviewer" },
+      new Status { StatusId = 7, StatusCategoryId = 1, Code = LoanApplicationStatusCodes.Rejected, Label = "Rejected" },
+      new Status { StatusId = 8, StatusCategoryId = 1, Code = LoanApplicationStatusCodes.Cancelled, Label = "Cancelled" },
+      new Status { StatusId = 9, StatusCategoryId = 1, Code = LoanApplicationStatusCodes.Approved, Label = "Approved" },
+      new Status { StatusId = 10, StatusCategoryId = 2, Code = LoanLifecycleCodes.Active, Label = "Active" },
+      new Status { StatusId = 11, StatusCategoryId = 2, Code = LoanLifecycleCodes.Paid, Label = "Fully Paid" },
+      new Status { StatusId = 12, StatusCategoryId = 2, Code = LoanLifecycleCodes.Overdue, Label = "Overdue" },
+      new Status { StatusId = 13, StatusCategoryId = 2, Code = LoanLifecycleCodes.Defaulted, Label = "Defaulted" }
+    );
+
+    modelBuilder.Entity<TransactionType>().HasData(
+      new TransactionType { TransactionTypeId = 1, Code = TransactionTypeCodes.CapitalDeposit, Label = "Capital Deposit" },
+      new TransactionType { TransactionTypeId = 2, Code = TransactionTypeCodes.Correction, Label = "Correction" },
+      new TransactionType { TransactionTypeId = 3, Code = TransactionTypeCodes.FundRelease, Label = "Fund Release" },
+      new TransactionType { TransactionTypeId = 4, Code = TransactionTypeCodes.Payment, Label = "Payment" }
+    );
+
+    modelBuilder.Entity<Ledger>().HasData(
+      new Ledger { LedgerId = 1, TenantId = 1, Name = "Jitsu Finance Operating", CurrentBalance = 0m },
+      new Ledger { LedgerId = 2, TenantId = 2, Name = "Mejia Finance Operating", CurrentBalance = 0m }
+    );
+
+    modelBuilder.Entity<User>().HasData(
+      new User { UserId = 1, TenantId = 1, RoleId = 1, UserName = "j.admin", PasswordHash = SeedPasswordHashes.JitsuAdmin },
+      new User { UserId = 2, TenantId = 1, RoleId = 2, UserName = "j.reviewer", PasswordHash = SeedPasswordHashes.JitsuReviewer },
+      new User { UserId = 3, TenantId = 1, RoleId = 3, UserName = "j.approver", PasswordHash = SeedPasswordHashes.JitsuApprover },
+      new User { UserId = 4, TenantId = 2, RoleId = 1, UserName = "m.admin", PasswordHash = SeedPasswordHashes.MejiaAdmin },
+      new User { UserId = 5, TenantId = 2, RoleId = 2, UserName = "m.reviewer", PasswordHash = SeedPasswordHashes.MejiaReviewer },
+      new User { UserId = 6, TenantId = 2, RoleId = 3, UserName = "m.approver", PasswordHash = SeedPasswordHashes.MejiaApprover }
+    );
+
+    modelBuilder.Entity<Account>().HasData(
+      new Account { AccountId = 1, UserId = 1, FirstName = "Alo", LastName = "Santos", Birthdate = new DateTime(1990, 1, 1) },
+      new Account { AccountId = 2, UserId = 2, FirstName = "Luwi", LastName = "Santos", Birthdate = new DateTime(1990, 1, 1) },
+      new Account { AccountId = 3, UserId = 3, FirstName = "Ampol", LastName = "Santos", Birthdate = new DateTime(1990, 1, 1) },
+      new Account { AccountId = 4, UserId = 4, FirstName = "Alo", LastName = "Reyes", Birthdate = new DateTime(1990, 1, 1) },
+      new Account { AccountId = 5, UserId = 5, FirstName = "Luwi", LastName = "Reyes", Birthdate = new DateTime(1990, 1, 1) },
+      new Account { AccountId = 6, UserId = 6, FirstName = "Ampol", LastName = "Reyes", Birthdate = new DateTime(1990, 1, 1) }
     );
   }
 }

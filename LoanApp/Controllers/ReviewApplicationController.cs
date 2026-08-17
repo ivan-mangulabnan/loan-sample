@@ -1,4 +1,6 @@
-﻿using Dtos.Requests;
+using Constants;
+using Dtos.Requests;
+using Dtos.Responses;
 using Extensions;
 using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
@@ -11,33 +13,36 @@ namespace Controllers;
 [Authorize]
 public class ReviewApplicationController : ControllerBase
 {
-    private readonly ReviewApplicationService _reviewApplicationService;
-    private readonly StatusService _statusService;
+  private readonly ReviewApplicationService _reviewApplicationService;
 
-    public ReviewApplicationController(ReviewApplicationService reviewApplicationService, StatusService statusService)
+  public ReviewApplicationController (ReviewApplicationService reviewApplicationService)
+  {
+    _reviewApplicationService = reviewApplicationService;
+  }
+
+  [HttpPost]
+  [Authorize(Roles = RoleNames.Reviewer)]
+  public async Task<ActionResult<MessageResponse>> Create (ReviewApplicationRequest reviewApplicationRequest)
+  {
+    try
     {
-        _reviewApplicationService = reviewApplicationService;
-        _statusService = statusService;
-    }
+      var reviewApplication = await _reviewApplicationService.CreateReviewAsync(User.GetUserId(), User.GetTenantId(), reviewApplicationRequest);
+      if (reviewApplication is null) return NotFound();
 
-    [HttpPost]
-    [Authorize(Roles = "Reviewer")]
-    public async Task<IActionResult> Create(ReviewApplicationRequest reviewApplicationRequest)
+      return Created((string?)null, MessageResponse.Of("Review recorded."));
+    }
+    catch (InvalidOperationException ex)
     {
-        var status = await _statusService.GetStatusByIdAsync(reviewApplicationRequest.StatusId);
-        if (status is null) return BadRequest("Status does not exist.");
-
-        var reviewApplication = await _reviewApplicationService.CreateReviewAsync(User.GetUserId(), User.GetTenantId(), reviewApplicationRequest);
-        if (reviewApplication is null) return NotFound();
-
-        return CreatedAtAction(nameof(GetTimeline), new { loanApplicationId = reviewApplication.LoanApplicationId }, reviewApplication);
+      return Conflict(ex.Message);
     }
+  }
 
-    [HttpGet("application/{loanApplicationId}")]
-    public async Task<IActionResult> GetTimeline(int loanApplicationId)
-    {
-        var reviewApplications = await _reviewApplicationService.GetReviewsForApplicationAsync(loanApplicationId, User.GetTenantId());
+  [HttpGet("queue")]
+  [Authorize(Roles = RoleNames.Reviewer)]
+  public async Task<ActionResult<List<LoanApplicationResponse>>> GetQueue ()
+  {
+    var queue = await _reviewApplicationService.GetQueueAsync(User.GetTenantId());
 
-        return Ok(reviewApplications);
-    }
+    return Ok(LoanApplicationResponse.From(queue, User.CanSeeStaffNames()));
+  }
 }

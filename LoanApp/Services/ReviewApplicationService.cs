@@ -1,3 +1,4 @@
+using Constants;
 using Data;
 using Dtos.Requests;
 using Microsoft.EntityFrameworkCore;
@@ -8,30 +9,52 @@ namespace Services;
 public class ReviewApplicationService
 {
     private readonly LoanAppDbContext _context;
+    private readonly StatusService _statusService;
 
-    public ReviewApplicationService (LoanAppDbContext context)
+    public ReviewApplicationService (LoanAppDbContext context, StatusService statusService)
     {
         _context = context;
+        _statusService = statusService;
     }
 
     public async Task<ReviewApplication?> CreateReviewAsync (int reviewerId, int tenantId, ReviewApplicationRequest reviewApplicationRequest)
     {
         var loanApplication = await _context.LoanApplications
             .Include(l => l.Borrower)
+            .Include(l => l.Status)
             .FirstOrDefaultAsync(l => l.LoanApplicationId == reviewApplicationRequest.LoanApplicationId && l.Borrower.TenantId == tenantId);
 
         if (loanApplication is null) return null;
+
+        if (loanApplication.Status.Code != LoanApplicationStatusCodes.PendingReview)
+            throw new InvalidOperationException($"Cannot review an application with status '{loanApplication.Status.Code}'.");
+
+        if (reviewApplicationRequest.Decision is Decision.Reject or Decision.Return
+            && string.IsNullOrWhiteSpace(reviewApplicationRequest.Remarks))
+            throw new InvalidOperationException(
+                "Remarks are required when rejecting or returning an application.");
+
+        var (reviewCode, applicationCode) = reviewApplicationRequest.Decision switch
+        {
+            Decision.Approve => (LoanApplicationStatusCodes.Approved, LoanApplicationStatusCodes.PendingApproval),
+            Decision.Reject => (LoanApplicationStatusCodes.Rejected, LoanApplicationStatusCodes.Rejected),
+            Decision.Return => (LoanApplicationStatusCodes.ReturnedByReviewer, LoanApplicationStatusCodes.ReturnedByReviewer),
+            _ => throw new InvalidOperationException($"Unknown decision '{reviewApplicationRequest.Decision}'.")
+        };
+
+        var reviewStatus = await _statusService.GetRequiredApplicationStatusAsync(reviewCode);
+        var applicationStatus = await _statusService.GetRequiredApplicationStatusAsync(applicationCode);
 
         var reviewApplication = new ReviewApplication
         {
             ReviewerId = reviewerId,
             LoanApplicationId = reviewApplicationRequest.LoanApplicationId,
-            StatusId = reviewApplicationRequest.StatusId,
+            StatusId = reviewStatus.StatusId,
             Remarks = reviewApplicationRequest.Remarks,
             DatePosted = DateTime.UtcNow
         };
 
-        loanApplication.StatusId = reviewApplicationRequest.StatusId;
+        loanApplication.StatusId = applicationStatus.StatusId;
 
         _context.ReviewApplications.Add(reviewApplication);
         await _context.SaveChangesAsync();
@@ -39,15 +62,18 @@ public class ReviewApplicationService
         return reviewApplication;
     }
 
-    public async Task<List<ReviewApplication>> GetReviewsForApplicationAsync (int loanApplicationId, int tenantId)
+    public async Task<List<LoanApplication>> GetQueueAsync (int tenantId)
     {
-        var reviewApplications = await _context.ReviewApplications
-            .Include(r => r.Reviewer)
-            .Include(r => r.Status)
-            .Where(r => r.LoanApplicationId == loanApplicationId && r.LoanApplication.Borrower.TenantId == tenantId)
-            .OrderBy(r => r.DatePosted)
+        return await _context.LoanApplications
+            .Include(l => l.Borrower).ThenInclude(b => b.Account)
+            .Include(l => l.PaymentPlan).ThenInclude(p => p.Interest)
+            .Include(l => l.Status)
+            .Include(l => l.Reviews).ThenInclude(r => r.Reviewer).ThenInclude(u => u.Account)
+            .Include(l => l.Reviews).ThenInclude(r => r.Status)
+            .Include(l => l.Approvals).ThenInclude(a => a.Approver).ThenInclude(u => u.Account)
+            .Include(l => l.Approvals).ThenInclude(a => a.Status)
+            .Where(l => l.Borrower.TenantId == tenantId && l.Status.Code == LoanApplicationStatusCodes.PendingReview)
+            .OrderBy(l => l.DateRequested)
             .ToListAsync();
-
-        return reviewApplications;
     }
 }

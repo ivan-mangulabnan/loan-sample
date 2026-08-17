@@ -1,0 +1,23 @@
+# Test project is intentionally untracked (local TDD scaffolding only).
+LoanApp.Tests/
+
+# .NET 10 solution format; VS 2022 cannot open it.
+LoanApp.slnx
+
+# Adds the untracked test project; LoanApp.sln is the one a fresh clone uses.
+LoanApp.Local.sln
+
+# Local assistant tool permissions; machine-specific.
+.claude/
+
+# Personal session notes, not project documentation.
+TURNOVER.md
+
+# Build output
+[Bb]in/
+[Oo]bj/
+
+# User-specific VS / Rider files
+.vs/
+*.user
+*.suo

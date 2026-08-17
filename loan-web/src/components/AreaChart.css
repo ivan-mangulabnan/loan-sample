@@ -1,0 +1,75 @@
+.chart {
+  position: relative;
+  margin: 0;
+}
+
+/* Width is fluid, height is fixed. `height: auto` would derive height from the
+   viewBox's aspect ratio, so a wide column would produce a chart several hundred
+   pixels tall — the plot is a band across the page, not a square. The viewBox still
+   carries the coordinate space, so no layout px is hardcoded (rule 15). */
+.chart__svg {
+  display: block;
+  width: 100%;
+  height: var(--chart-height);
+}
+
+.chart__grid {
+  stroke: var(--border);
+  stroke-width: 1;
+  vector-effect: non-scaling-stroke;
+}
+
+/* non-scaling-stroke throughout: preserveAspectRatio="none" stretches the viewBox
+   horizontally, which would otherwise smear the stroke into a wedge. */
+.chart__line {
+  fill: none;
+  stroke-width: 2;
+  stroke-linecap: round;
+  vector-effect: non-scaling-stroke;
+}
+
+.chart__rule {
+  stroke: var(--chart-rule);
+  stroke-width: 1;
+  stroke-dasharray: 3 4;
+  vector-effect: non-scaling-stroke;
+}
+
+/* An HTML element, not an SVG circle: the SVG is stretched horizontally, which would
+   flatten a circle into an ellipse. */
+.chart__marker {
+  position: absolute;
+  width: 10px;
+  height: 10px;
+  border-radius: 50%;
+  border: 2px solid var(--surface-shell);
+  transform: translate(-50%, -50%);
+  pointer-events: none;
+}
+
+/* Sits under the plot, spanning the same coordinate space so each label lines up with
+   its point. Outside the SVG so the glyphs are not stretched. */
+.chart__ticks {
+  position: relative;
+  height: var(--space-5);
+  margin-top: var(--space-2);
+}
+
+.chart__tick {
+  position: absolute;
+  transform: translateX(-50%);
+  font-size: var(--text-sm);
+  color: var(--text-faint);
+  white-space: nowrap;
+}
+
+/* Sits over the plot rather than replacing it: the axis stays, so the period is still
+   legible when nothing happened. */
+.chart__empty {
+  position: absolute;
+  inset: 0;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  pointer-events: none;
+}

@@ -1,3 +1,4 @@
+using Constants;
 using Data;
 using Microsoft.EntityFrameworkCore;
 using Models;
@@ -13,21 +14,25 @@ public class StatusService
         _context = context;
     }
 
-    public async Task<List<Status>> GetStatusesAsync ()
+    public async Task<Status> GetRequiredApplicationStatusAsync (string code)
     {
-        var statuses = await _context.Statuses.ToListAsync();
-        return statuses;
+        return await FindAsync(code, StatusCategoryCodes.LoanApplicationStatus)
+            ?? throw new InvalidOperationException(
+                $"Status '{code}' is not seeded in category '{StatusCategoryCodes.LoanApplicationStatus}'.");
     }
 
-    public async Task<Status?> GetStatusByCodeAsync (string code)
+    public async Task<Status> GetRequiredLoanStatusAsync (string code)
     {
-        var status = await _context.Statuses.FirstOrDefaultAsync(s => s.Code == code);
-        return status;
+        return await FindAsync(code, StatusCategoryCodes.LoanStatus)
+            ?? throw new InvalidOperationException(
+                $"Status '{code}' is not seeded in category '{StatusCategoryCodes.LoanStatus}'.");
     }
 
-    public async Task<Status?> GetStatusByIdAsync (int statusId)
+    private async Task<Status?> FindAsync (string code, string statusCategoryCode)
     {
-        var status = await _context.Statuses.FirstOrDefaultAsync(s => s.StatusId == statusId);
+        var status = await _context.Statuses
+            .SingleOrDefaultAsync(s => s.Code == code && s.StatusCategory.Code == statusCategoryCode);
+
         return status;
     }
 }

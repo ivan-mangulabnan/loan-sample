@@ -1,0 +1,46 @@
+.callout {
+  display: flex;
+  align-items: center;
+  flex-wrap: wrap;
+  /* The action sits at the far edge rather than trailing the text: the message can be
+     any length, and without this the button lands in a different place on every
+     callout. The gap is the minimum separation when the two do meet. */
+  justify-content: space-between;
+  gap: var(--space-6);
+  background: var(--surface-panel);
+  border-radius: var(--radius-xl);
+  padding: var(--space-6) 28px;
+  padding-right: var(--space-8);
+  /* A .glow-host clips its overflow to contain the glow, and this is a flex item
+     in the column-flex .main, so it shrinks below its content by default. Once
+     the text wraps and pushes the button onto a second row — which happens on a
+     narrow viewport — the button lands outside the shrunken box and is clipped
+     away entirely. Refusing to shrink keeps the whole notice visible. */
+  flex-shrink: 0;
+}
+
+.callout__text {
+  flex: 1;
+  min-width: 240px;
+  max-width: 430px;
+  margin: 0;
+  font-size: var(--text-xl);
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.callout__dismiss {
+  position: absolute;
+  top: 18px;
+  right: var(--space-5);
+  background: none;
+  border: none;
+  padding: 0;
+  color: var(--text-subtle);
+  font-size: var(--text-lg);
+  cursor: pointer;
+}
+
+.callout__dismiss:hover {
+  color: var(--text-strong);
+}

@@ -1,0 +1,63 @@
+@import './fonts.css';
+@import './tokens.css';
+@import './utilities.css';
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+/* The shell owns viewport height and scrolling; the page itself never scrolls. */
+body {
+  margin: 0;
+  overflow: hidden;
+  background: var(--surface-page);
+  color: var(--text);
+  font: var(--weight-normal) var(--text-md) / 1.5 var(--sans);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+}
+
+h1,
+h2,
+h3 {
+  color: var(--text-strong);
+  font-weight: var(--weight-bold);
+  margin: 0 0 var(--space-4);
+}
+
+h1 {
+  font-size: var(--text-4xl);
+  letter-spacing: var(--tracking-tight);
+}
+
+h2 {
+  font-size: var(--text-3xl);
+}
+
+h3 {
+  font-size: var(--text-xl);
+}
+
+p {
+  margin: 0 0 var(--space-4);
+}
+
+a {
+  color: var(--accent);
+  text-decoration: none;
+}
+
+a:hover {
+  color: var(--accent-hover);
+}
+
+code {
+  font-family: var(--mono);
+  font-size: 0.9em;
+}
+
+button {
+  font-family: inherit;
+}

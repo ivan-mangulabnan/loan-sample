@@ -1,70 +1,55 @@
-﻿using Data;
+using Constants;
+using Dtos.Responses;
+using Extensions;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Mvc;
-using Microsoft.EntityFrameworkCore;
-using Models;
+using Services;
 
-namespace LoanApp.Controllers;
+namespace Controllers;
 
 [ApiController]
-[Route("api/loans")]
-public class LoansController : ControllerBase
+[Route("api/[controller]")]
+[Authorize]
+public class LoanController : ControllerBase
 {
-    private readonly AppDbContext _context;
+  private readonly LoanService _loanService;
+  private readonly PaymentService _paymentService;
 
-    public LoansController(AppDbContext context)
-    {
-        _context = context;
-    }
+  public LoanController (LoanService loanService, PaymentService paymentService)
+  {
+    _loanService = loanService;
+    _paymentService = paymentService;
+  }
 
-    [HttpGet]
-    public async Task<ActionResult<IEnumerable<Loans>>> GetAll()
-    {
-        return await _context.Loans.ToListAsync();
-    }
+  [HttpGet("me")]
+  [Authorize(Roles = RoleNames.Loaner)]
+  public async Task<ActionResult<List<LoanResponse>>> GetMine ()
+  {
+    var loans = await _loanService.GetLoansByBorrowerAsync(User.GetUserId());
 
-    [HttpGet("{id}")]
-    public async Task<ActionResult<Loans>> Get(int id)
-    {
-        var loan = await _context.Loans.FindAsync(id);
+    return Ok(LoanResponse.From(loans, DateTime.UtcNow, User.CanSeeLoanGrading()));
+  }
 
-        if (loan == null)
-            return NotFound();
+  [HttpGet("{id}")]
+  public async Task<ActionResult<LoanResponse>> GetById (int id)
+  {
+    var loan = await _loanService.GetLoanAsync(id, User.GetTenantId(), User.GetUserId(), User.CanSeeStaffNames());
+    if (loan is null) return NotFound();
 
-        return loan;
-    }
+    return Ok(LoanResponse.From(loan, DateTime.UtcNow, User.CanSeeLoanGrading()));
+  }
 
-    [HttpPost]
-    public async Task<ActionResult<Loans>> Create(Loans loan)
-    {
-        _context.Loans.Add(loan);
-        await _context.SaveChangesAsync();
+  // A sub-resource of the loan: same visibility question as GetById, so it lives here
+  // rather than on PaymentController and inherits this controller's bare [Authorize].
+  [HttpGet("{id}/payments")]
+  public async Task<ActionResult<List<PaymentResponse>>> GetPayments (int id)
+  {
+    var payments = await _paymentService.GetForLoanAsync(
+      id, User.GetTenantId(), User.GetUserId(), User.CanSeeStaffNames());
+    if (payments is null) return NotFound();
 
-        return CreatedAtAction(nameof(Get), new { id = loan.LoanId }, loan);
-    }
-
-    [HttpPut("{id}")]
-    public async Task<IActionResult> Update(int id, Loans loan)
-    {
-        if (id != loan.LoanId)
-            return BadRequest();
-
-        _context.Entry(loan).State = EntityState.Modified;
-        await _context.SaveChangesAsync();
-
-        return NoContent();
-    }
-
-    [HttpDelete("{id}")]
-    public async Task<IActionResult> Delete(int id)
-    {
-        var loan = await _context.Loans.FindAsync(id);
-
-        if (loan == null)
-            return NotFound();
-
-        _context.Loans.Remove(loan);
-        await _context.SaveChangesAsync();
-
-        return NoContent();
-    }
+    // showBorrower: false — a borrower reading their own loan does not need their own
+    // name echoed back, and staff already have it from the loan read.
+    return Ok(PaymentResponse.From(payments, showBorrower: false));
+  }
 }

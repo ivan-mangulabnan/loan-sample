@@ -1,0 +1,61 @@
+.bars {
+  margin: 0;
+}
+
+/* Fixed height so the percentage heights have something to resolve against; bars grow
+   from the baseline up. */
+.bars__row {
+  display: flex;
+  align-items: flex-end;
+  gap: var(--space-3);
+  height: 72px;
+}
+
+/* The band the bars actually occupy. The label is a sibling in the same fixed-height
+   column, so without its own track a 100% bar fills the column outright and shunts the
+   label past the bottom edge — the tallest month was the one whose name vanished. */
+.bars__track {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  align-items: flex-end;
+  width: 100%;
+  justify-content: center;
+}
+
+/* Each column takes an equal share so a full month name has room to centre under its
+   bar; without this the columns size to the label and the bars drift apart unevenly. */
+.bars__item {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-2);
+  height: 100%;
+  flex: 1 1 0;
+  min-width: 0;
+}
+
+.bars__bar {
+  width: 11px;
+  border-radius: var(--radius-sm);
+  background: var(--bar-vertical);
+  flex-shrink: 0;
+}
+
+/* A month with nothing in it reads as an absence, not as a very small amount. */
+.bars__bar--empty {
+  background: var(--surface-track);
+}
+
+/* One line, always. The row has a fixed height and the bar grows from the baseline, so
+   a label that wraps to two lines would shorten its own bar and break the baseline the
+   other months stand on. */
+.bars__label {
+  font-size: var(--text-xs);
+  color: var(--text-faint);
+  max-width: 100%;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+}
