@@ -59,3 +59,15 @@
   font-size: var(--text-xs);
   color: var(--text-muted);
 }
+
+/* Right-aligned and shrink-wrapped, matching the queue tables so the two read as one
+   pattern rather than two. */
+.loans__action {
+  width: 1%;
+  white-space: nowrap;
+  text-align: right;
+}
+
+.loans__row--actionable {
+  cursor: pointer;
+}

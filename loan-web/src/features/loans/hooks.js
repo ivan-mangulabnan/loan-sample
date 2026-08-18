@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 import { useApiResource } from '../../hooks/useApiResource.js'
-import { fetchLoan, fetchMyLoans } from './api.js'
+import { fetchLoan, fetchLoanPayments, fetchMyLoans } from './api.js'
 
 /**
  * The signed-in borrower's own loans, whole. `params` is `{ search, status }` and the
@@ -21,6 +21,13 @@ export function useMyLoans({ search = '', status = '' } = {}) {
 export function useLoan(id) {
   return useApiResource(
     useCallback((options) => fetchLoan(id, options), [id]),
+    [id],
+  )
+}
+
+export function useLoanPayments(id) {
+  return useApiResource(
+    useCallback((options) => fetchLoanPayments(id, options), [id]),
     [id],
   )
 }

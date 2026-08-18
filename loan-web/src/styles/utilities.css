@@ -193,6 +193,16 @@
   flex-wrap: wrap;
 }
 
+/* For a head carrying more than one action. Without the wrapper, space-between
+   spreads three children across the row and the title stops being a pair with
+   nothing. Part of .page-head rather than a pattern of its own. */
+.page-head__actions {
+  display: flex;
+  align-items: center;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
 .metric {
   font-size: var(--text-5xl);
   font-weight: var(--weight-bold);

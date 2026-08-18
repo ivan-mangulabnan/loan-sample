@@ -27,3 +27,11 @@ export function createApplication(payload) {
 export function cancelApplication(id) {
   return apiClient.post(`/LoanApplication/${id}/cancel`)
 }
+
+/**
+ * The plans a borrower can apply under. Global reference data — PaymentPlans carries no
+ * TenantId — so this is the same list for every reader and needs no params.
+ */
+export function fetchPaymentPlans(options) {
+  return apiClient.get('/PaymentPlan', options)
+}

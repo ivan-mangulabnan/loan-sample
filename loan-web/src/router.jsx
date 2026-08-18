@@ -68,6 +68,18 @@ export const router = createBrowserRouter([
               return { Component: LoanListPage }
             },
           },
+          // Sibling of the index, not a child of it: the table unmounts and the
+          // detail takes its place, so Back restores the list rather than nesting
+          // one inside the other.
+          {
+            path: ':id',
+            lazy: async () => {
+              const { LoanDetailPage } = await import(
+                './features/loans/routes/LoanDetailPage.jsx'
+              )
+              return { Component: LoanDetailPage }
+            },
+          },
         ],
       },
       {

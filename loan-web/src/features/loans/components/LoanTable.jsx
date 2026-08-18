@@ -1,5 +1,7 @@
-import Progress from '../../../components/Progress.jsx'
+import Button from '../../../components/Button.jsx'
 import LoanStatusBadge from './LoanStatusBadge.jsx'
+import { dueNote, repaidPercent } from '../progress.js'
+import Progress from '../../../components/Progress.jsx'
 import './LoanTable.css'
 
 const currency = new Intl.NumberFormat(undefined, {
@@ -14,30 +16,19 @@ const date = new Intl.DateTimeFormat(undefined, {
   year: 'numeric',
 })
 
-/** Repaid share of the total. Guards the zero total so a malformed row is 0%, not NaN%. */
-function repaidPercent(loan) {
-  const total = loan.totalRepaymentAmount
-  if (!total || total <= 0) return 0
-  return ((total - loan.balance) / total) * 100
-}
-
-/**
- * daysRemaining is a plain int that keeps counting down past the due date, so a
- * late loan reports a negative. "-12 days" reads as a bug; say what it means.
- */
-function dueNote(loan) {
-  const days = loan.standing?.daysRemaining
-  if (typeof days !== 'number') return null
-  if (days < 0) return `${Math.abs(days)} days overdue`
-  return `${days} days left`
-}
-
 /**
  * A borrower's own loans. Deliberately reads no staff-only field: grade,
  * daysBehind and isGoodPayer are nulled for a Loaner by the API, so "behind
  * schedule" is derived from standing.behindBy instead.
+ *
+ * `actionLabel` + `onAction` add a trailing action column, the same opt-in shape
+ * QueueTable carries (rule 19b) — the row click is a convenience over the button, which
+ * is what a keyboard reaches, and the button stops propagation so one click is one
+ * navigation.
  */
-function LoanTable({ rows }) {
+function LoanTable({ rows, actionLabel, onAction }) {
+  const canAct = Boolean(actionLabel && onAction)
+
   return (
     <div className="loans">
       <table className="loans__table">
@@ -49,6 +40,11 @@ function LoanTable({ rows }) {
             <th scope="col">Repaid</th>
             <th scope="col">Due</th>
             <th scope="col">Status</th>
+            {canAct && (
+              <th scope="col" className="loans__action">
+                <span className="visually-hidden">Action</span>
+              </th>
+            )}
           </tr>
         </thead>
         <tbody>
@@ -57,7 +53,11 @@ function LoanTable({ rows }) {
             const note = dueNote(loan)
 
             return (
-              <tr key={loan.loanId}>
+              <tr
+                key={loan.loanId}
+                className={canAct ? 'loans__row--actionable' : undefined}
+                onClick={canAct ? () => onAction(loan) : undefined}
+              >
                 <td className="loans__ref">#{loan.loanId}</td>
                 <td className="loans__num">
                   {currency.format(loan.principalAmount)}
@@ -82,6 +82,19 @@ function LoanTable({ rows }) {
                 <td>
                   <LoanStatusBadge status={loan.status} />
                 </td>
+                {canAct && (
+                  <td className="loans__action">
+                    <Button
+                      size="sm"
+                      onClick={(event) => {
+                        event.stopPropagation()
+                        onAction(loan)
+                      }}
+                    >
+                      {actionLabel}
+                    </Button>
+                  </td>
+                )}
               </tr>
             )
           })}

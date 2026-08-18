@@ -1,0 +1,141 @@
+.loanp {
+  padding: var(--space-6);
+  background: var(--surface-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+}
+
+.loanp__head {
+  display: flex;
+  align-items: flex-start;
+  justify-content: space-between;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  margin-bottom: var(--space-6);
+}
+
+.loanp__title {
+  margin: 0;
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  color: var(--text-strong);
+  letter-spacing: var(--tracking-tight);
+}
+
+.loanp__sub {
+  margin: var(--space-1) 0 0;
+  color: var(--text-muted);
+  font-size: var(--text-base);
+}
+
+.loanp__balance {
+  display: flex;
+  align-items: baseline;
+  gap: var(--space-3);
+  margin: 0 0 var(--space-4);
+}
+
+/* The one figure the borrower came to read. */
+.loanp__figure {
+  font-size: var(--text-4xl);
+  font-weight: var(--weight-bold);
+  color: var(--text-strong);
+  letter-spacing: var(--tracking-tighter);
+}
+
+.loanp__balance-label {
+  color: var(--text-muted);
+  font-size: var(--text-md);
+}
+
+/* Taller than the table's bar: this one has a marker inside it and needs the room to
+   keep the two readable apart. */
+.loanp__track {
+  position: relative;
+  height: 14px;
+  background: var(--surface-track);
+  border-radius: var(--radius-pill);
+  overflow: hidden;
+}
+
+.loanp__bar {
+  height: 100%;
+  border-radius: var(--radius-pill);
+  transition: width 0.3s ease;
+}
+
+/* Where the schedule says today should be. A full-height rule rather than a dot so it
+   stays legible where it overlaps the filled part of the bar. */
+.loanp__marker {
+  position: absolute;
+  top: 0;
+  bottom: 0;
+  width: 2px;
+  /* Centres the rule on its percentage instead of starting at it. */
+  transform: translateX(-1px);
+  background: var(--chart-rule);
+}
+
+.loanp__legend {
+  display: flex;
+  align-items: center;
+  gap: var(--space-4);
+  flex-wrap: wrap;
+  margin: var(--space-3) 0 0;
+  color: var(--text-faint);
+  font-size: var(--text-sm);
+}
+
+/* Ties the words to the rule in the bar above without a second colour token. */
+.loanp__legend-item--marker::before {
+  content: '';
+  display: inline-block;
+  width: 2px;
+  height: 10px;
+  margin-right: var(--space-2);
+  vertical-align: -1px;
+  background: var(--chart-rule);
+}
+
+.loanp__status {
+  margin: var(--space-4) 0 0;
+  font-size: var(--text-md);
+  font-weight: var(--weight-medium);
+}
+
+.loanp__status--behind {
+  color: var(--warning);
+}
+
+.loanp__status--ontrack {
+  color: var(--accent);
+}
+
+.loanp__facts {
+  display: grid;
+  /* Intrinsic sizing: two columns on a phone, four on a desktop, no breakpoint (rule 16). */
+  grid-template-columns: repeat(auto-fit, minmax(140px, 1fr));
+  gap: var(--space-4);
+  margin: var(--space-6) 0 0;
+  padding-top: var(--space-5);
+  border-top: 1px solid var(--border);
+}
+
+.loanp__fact dt {
+  margin-bottom: var(--space-1);
+  color: var(--text-faint);
+  font-size: var(--text-sm);
+}
+
+.loanp__fact dd {
+  margin: 0;
+  color: var(--text);
+  font-size: var(--text-base);
+}
+
+.loanp__note {
+  display: block;
+  margin-top: var(--space-1);
+  color: var(--text-faint);
+  font-size: var(--text-xs);
+}

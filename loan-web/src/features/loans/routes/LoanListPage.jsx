@@ -1,3 +1,4 @@
+import { useNavigate } from 'react-router-dom'
 import Button from '../../../components/Button.jsx'
 import { useListQuery } from '../../../hooks/useListQuery.js'
 import { ListView } from '../../dashboard/index.js'
@@ -10,6 +11,7 @@ import { LOAN_STATUS_OPTIONS } from '../statusOptions.js'
  * different vocabulary from the application one — see statusOptions.js.
  */
 export function LoanListPage() {
+  const navigate = useNavigate()
   const [query, onQueryChange] = useListQuery()
   const { data, error, isLoading, reload } = useMyLoans(query)
 
@@ -36,7 +38,13 @@ export function LoanListPage() {
         searchLabel="Search my loans"
         statusOptions={LOAN_STATUS_OPTIONS}
       >
-        {(rows) => <LoanTable rows={rows} />}
+        {(rows) => (
+          <LoanTable
+            rows={rows}
+            actionLabel="Open"
+            onAction={(loan) => navigate(`/loans/${loan.loanId}`)}
+          />
+        )}
       </ListView>
     </>
   )

@@ -1,0 +1,34 @@
+/* The one scrolling region on this page, for the same reason ListView has one: the
+   heading and the pay action stay put while the history grows (rule 15). */
+.loandetail {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-6);
+}
+
+.loandetail__back {
+  display: inline-block;
+  margin-bottom: var(--space-2);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  text-decoration: none;
+}
+
+.loandetail__back:hover {
+  color: var(--text-strong);
+}
+
+.loandetail__payments {
+  padding: var(--space-6);
+  background: var(--surface-panel);
+  border: 1px solid var(--border);
+  border-radius: var(--radius-xl);
+}
+
+.loandetail__payments .section-label {
+  margin-bottom: var(--space-4);
+}

@@ -3,6 +3,7 @@ import { useApiResource } from '../../hooks/useApiResource.js'
 import {
   fetchAllApplications,
   fetchApplication,
+  fetchPaymentPlans,
   fetchMyApplications,
 } from './api.js'
 
@@ -38,4 +39,12 @@ export function useApplication(id) {
     useCallback((options) => fetchApplication(id, options), [id]),
     [id],
   )
+}
+
+/**
+ * Plans for the apply form's picker. No deps: the list is reference data and does not
+ * vary by reader, so it is fetched once per mount of whatever needs it.
+ */
+export function usePaymentPlans() {
+  return useApiResource(useCallback((options) => fetchPaymentPlans(options), []), [])
 }

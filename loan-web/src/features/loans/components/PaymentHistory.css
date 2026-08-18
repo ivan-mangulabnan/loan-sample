@@ -1,0 +1,29 @@
+.paylist {
+  margin: 0;
+  padding: 0;
+  list-style: none;
+}
+
+.paylist__row {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-4);
+  padding: var(--space-3) 0;
+  border-bottom: 1px solid var(--border);
+}
+
+.paylist__row:last-child {
+  border-bottom: none;
+}
+
+.paylist__date {
+  color: var(--text-muted);
+  font-size: var(--text-base);
+}
+
+.paylist__amount {
+  color: var(--text-strong);
+  font-size: var(--text-base);
+  font-weight: var(--weight-bold);
+}

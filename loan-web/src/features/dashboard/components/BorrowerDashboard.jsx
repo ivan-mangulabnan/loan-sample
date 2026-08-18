@@ -37,8 +37,8 @@ function noticeFor(stats) {
     return {
       message: 'You have no loans yet. Apply for one to get started.',
       action: 'Apply for a loan',
-      // /applications, not /applications/new — there is no new-application route yet,
-      // and a callout that lands on a 404 is worse than one that lands a click short.
+      // /applications is where applying happens — the form is a modal on that page,
+      // not a route of its own, so there is nothing more specific to link to.
       to: '/applications',
     }
   }
