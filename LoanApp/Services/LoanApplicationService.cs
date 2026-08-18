@@ -59,35 +59,63 @@ public class LoanApplicationService
     /// filtered to one stage, so staff have no other way to see an application's
     /// whole history. Borrower is included here — unlike the /me query, which does
     /// not need it — because it is the column that makes a tenant-wide list usable.
+    ///
+    /// Returns a tuple rather than a PagedResponse so the service stays DTO-free and the
+    /// controller owns the envelope — the PaymentService.GetPagedAsync convention.
     /// </summary>
-    public async Task<List<LoanApplication>> GetLoanApplicationsByTenantAsync (int tenantId)
+    public async Task<(List<LoanApplication> Items, int TotalCount)> GetLoanApplicationsByTenantAsync (
+        int tenantId, ApplicationQueryRequest applicationQueryRequest)
     {
-        return await _context.LoanApplications
-            .Include(l => l.Borrower).ThenInclude(b => b.Account)
-            .Include(l => l.PaymentPlan).ThenInclude(p => p.Interest)
-            .Include(l => l.Status)
-            .Include(l => l.Reviews).ThenInclude(r => r.Reviewer).ThenInclude(u => u.Account)
-            .Include(l => l.Reviews).ThenInclude(r => r.Status)
-            .Include(l => l.Approvals).ThenInclude(a => a.Approver).ThenInclude(u => u.Account)
-            .Include(l => l.Approvals).ThenInclude(a => a.Status)
-            .Where(l => l.Borrower.TenantId == tenantId)
+        var query = _context.LoanApplications
+            .ForTenant(tenantId)
+            .WhereStatusCode(applicationQueryRequest.Status)
+            .WhereMatches(applicationQueryRequest.Search);
+
+        // Counted before the Includes: a bare COUNT over the filtered set, no joins.
+        var totalCount = await query.CountAsync();
+
+        var items = await query
+            .WithApplicationDetail()
+            // LoanApplicationId breaks ties: DateRequested is a UtcNow stamp, so two
+            // applications submitted in the same tick would let Skip/Take repeat one row
+            // on two pages and drop another entirely.
             .OrderByDescending(l => l.DateRequested)
+            .ThenByDescending(l => l.LoanApplicationId)
+            .Skip(applicationQueryRequest.Skip)
+            .Take(applicationQueryRequest.PageSize)
+            // Reviews and Approvals are collections — two reviews and one approval per
+            // application in live data — so one query would drag six joined rows back
+            // per application, times the page size.
+            .AsSplitQuery()
             .ToListAsync();
+
+        return (items, totalCount);
     }
 
-    public async Task<List<LoanApplication>> GetLoanApplicationsByUserAsync (int borrowerId)
+    public async Task<(List<LoanApplication> Items, int TotalCount)> GetLoanApplicationsByUserAsync (
+        int borrowerId, ApplicationQueryRequest applicationQueryRequest)
     {
-        var loanApplications = await _context.LoanApplications
-            .Include(l => l.PaymentPlan).ThenInclude(p => p.Interest)
-            .Include(l => l.Status)
-            .Include(l => l.Reviews).ThenInclude(r => r.Reviewer).ThenInclude(u => u.Account)
-            .Include(l => l.Reviews).ThenInclude(r => r.Status)
-            .Include(l => l.Approvals).ThenInclude(a => a.Approver).ThenInclude(u => u.Account)
-            .Include(l => l.Approvals).ThenInclude(a => a.Status)
+        var query = _context.LoanApplications
             .Where(l => l.BorrowerId == borrowerId)
+            .WhereStatusCode(applicationQueryRequest.Status)
+            .WhereMatches(applicationQueryRequest.Search);
+
+        var totalCount = await query.CountAsync();
+
+        // This query carried no OrderBy at all before it was paged. Skip/Take over an
+        // unordered set returns whatever the server finds convenient, so the ordering is
+        // load-bearing here rather than cosmetic.
+        var items = await query
+            // includeBorrower: false — the reader is the borrower.
+            .WithApplicationDetail(includeBorrower: false)
+            .OrderByDescending(l => l.DateRequested)
+            .ThenByDescending(l => l.LoanApplicationId)
+            .Skip(applicationQueryRequest.Skip)
+            .Take(applicationQueryRequest.PageSize)
+            .AsSplitQuery()
             .ToListAsync();
 
-        return loanApplications;
+        return (items, totalCount);
     }
 
     public async Task<LoanApplication?> UpdatePaymentPlanAsync (int loanApplicationId, int borrowerId, int paymentPlanId)

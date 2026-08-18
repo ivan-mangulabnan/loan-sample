@@ -55,7 +55,7 @@ public class StatsService
                 response.HeadlineLabel = "Reviews posted";
                 response.HeadlineCount = response.Series.Sum(p => p.Count);
                 response.HeadlineAmount = response.Series.Sum(p => p.Amount);
-                response.HeadlineCaption = Caption(response.HeadlineCount, "reviewed", days);
+                response.HeadlineCaption = Caption(response.HeadlineLabel, days);
                 break;
 
             case DashboardAudience.Approver:
@@ -64,7 +64,7 @@ public class StatsService
                 response.HeadlineLabel = "Approved value";
                 response.HeadlineCount = response.Series.Sum(p => p.Count);
                 response.HeadlineAmount = response.Series.Sum(p => p.Amount);
-                response.HeadlineCaption = Caption(response.HeadlineCount, "approved", days);
+                response.HeadlineCaption = Caption(response.HeadlineLabel, days);
                 break;
 
             case DashboardAudience.Admin:
@@ -74,7 +74,7 @@ public class StatsService
                 response.HeadlineLabel = "Payments collected";
                 response.HeadlineCount = response.Payments.Sum(p => p.Count);
                 response.HeadlineAmount = response.Payments.Sum(p => p.Amount);
-                response.HeadlineCaption = Caption(response.HeadlineCount, "payments", days);
+                response.HeadlineCaption = Caption(response.HeadlineLabel, days);
                 break;
 
             default:
@@ -119,15 +119,19 @@ public class StatsService
         var count = series.Sum(p => p.Count);
         var amount = series.Sum(p => p.Amount);
 
+        // Named once and used twice: the caption is the label plus the window, so a
+        // literal in both places is two copies of one string waiting to disagree.
+        const string headlineLabel = "Payments you made";
+
         return new BorrowerStatsResponse
         {
             From = from,
             To = today,
             Days = days,
-            HeadlineLabel = "Paid",
+            HeadlineLabel = headlineLabel,
             HeadlineAmount = amount,
             HeadlineCount = count,
-            HeadlineCaption = Caption(count, count == 1 ? "payment" : "payments", days),
+            HeadlineCaption = Caption(headlineLabel, days),
             Series = series,
             AveragePayment = averagePayment,
             AverageTrend = trend,
@@ -410,11 +414,24 @@ public class StatsService
         return (average, trend);
     }
 
-    private static string Caption (int count, string verb, int days)
+    /// <summary>
+    /// The words that follow the headline figure, forming one sentence with it:
+    /// "5 reviews posted this week". It names what the figure *is* and never restates
+    /// it — "5" over "5 reviewed this week" said the same thing twice and still never
+    /// answered "five of what".
+    ///
+    /// Built from HeadlineLabel so the noun and the figure it describes cannot drift
+    /// apart. The leading capital is dropped because this is a sentence tail, not a
+    /// heading; HeadlineLabel keeps its own casing for standalone use. Only the window
+    /// phrasing is decided here, because that is copy — and copy is the server's, the
+    /// same way the headline's meaning is.
+    /// </summary>
+    private static string Caption (string headlineLabel, int days)
     {
         var window = days == 7 ? "this week" : $"in the last {days} days";
+        var noun = char.ToLowerInvariant(headlineLabel[0]) + headlineLabel[1..];
 
-        return $"{count} {verb} {window}";
+        return $"{noun} {window}";
     }
 
     private readonly record struct DayBucket(DateTime Day, int Count, decimal Amount);

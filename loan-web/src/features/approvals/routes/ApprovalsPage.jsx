@@ -1,18 +1,20 @@
 import Button from '../../../components/Button.jsx'
-import { QueueTable, configFor, useRoleQueue } from '../../dashboard/index.js'
+import { useListQuery } from '../../../hooks/useListQuery.js'
+import { ListView, QueueTable, configFor, useRoleQueue } from '../../dashboard/index.js'
 import { useSession } from '../../auth/index.js'
 
 /**
  * Approval decisions: applications at PENDING_APPROVAL, already reviewed. Its
  * own component rather than a shared queue page — approving is not reviewing,
  * and the decision action will live here.
+ *
+ * No status filter: the endpoint is pinned to one stage server-side.
  */
 export function ApprovalsPage() {
   const { role } = useSession()
   const config = configFor(role)
-  const queue = useRoleQueue(config?.queue)
-
-  const rows = queue.data ?? []
+  const [query, onQueryChange] = useListQuery()
+  const queue = useRoleQueue(config?.queue, query)
 
   return (
     <>
@@ -26,15 +28,18 @@ export function ApprovalsPage() {
         </Button>
       </header>
 
-      {queue.error ? (
-        <p className="muted">Could not load: {queue.error.message}</p>
-      ) : queue.isLoading ? (
-        <p className="muted">Loading…</p>
-      ) : rows.length === 0 ? (
-        <p className="muted">No applications are waiting for approval.</p>
-      ) : (
-        <QueueTable shape="application" rows={rows} />
-      )}
+      <ListView
+        query={query}
+        onQueryChange={onQueryChange}
+        result={queue.data}
+        isLoading={queue.isLoading}
+        error={queue.error}
+        emptyMessage="No applications are waiting for approval."
+        searchPlaceholder="Search by reference or borrower name"
+        searchLabel="Search the approval queue"
+      >
+        {(rows) => <QueueTable shape="application" rows={rows} />}
+      </ListView>
     </>
   )
 }

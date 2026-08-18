@@ -1,0 +1,16 @@
+/* Pinned below the scrolling rows, never inside them — the whole point of the pager is
+   that it is reachable without scrolling to the end of the page. */
+.pager {
+  display: flex;
+  align-items: center;
+  justify-content: flex-end;
+  gap: var(--space-3);
+  flex-wrap: wrap;
+}
+
+.pager__status {
+  margin: 0;
+  /* Keeps the two buttons still while the number of digits changes. */
+  min-width: 96px;
+  text-align: center;
+}

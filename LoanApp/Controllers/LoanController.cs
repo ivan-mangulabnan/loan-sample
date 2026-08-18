@@ -1,4 +1,5 @@
 using Constants;
+using Dtos.Requests;
 using Dtos.Responses;
 using Extensions;
 using Microsoft.AspNetCore.Authorization;
@@ -23,11 +24,14 @@ public class LoanController : ControllerBase
 
   [HttpGet("me")]
   [Authorize(Roles = RoleNames.Loaner)]
-  public async Task<ActionResult<List<LoanResponse>>> GetMine ()
+  public async Task<ActionResult<PagedResponse<LoanResponse>>> GetMine (
+    [FromQuery] LoanQueryRequest loanQueryRequest)
   {
-    var loans = await _loanService.GetLoansByBorrowerAsync(User.GetUserId());
+    var (loans, totalCount) = await _loanService.GetLoansByBorrowerAsync(User.GetUserId(), loanQueryRequest);
 
-    return Ok(LoanResponse.From(loans, DateTime.UtcNow, User.CanSeeLoanGrading()));
+    return Ok(PagedResponse<LoanResponse>.Of(
+      LoanResponse.From(loans, DateTime.UtcNow, User.CanSeeLoanGrading()),
+      loanQueryRequest.Page, loanQueryRequest.PageSize, totalCount));
   }
 
   [HttpGet("{id}")]

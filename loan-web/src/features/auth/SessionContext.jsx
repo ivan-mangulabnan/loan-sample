@@ -62,6 +62,12 @@ export function SessionProvider({ children }) {
       identity,
       role: identity?.role ?? null,
       name: identity?.name ?? null,
+      // The parts behind `name`. Null exactly when the user has no Account — the case
+      // where `name` is the login handle rather than a person's name, which is why the
+      // greeting reads these instead of splitting that string.
+      firstName: identity?.firstName ?? null,
+      middleName: identity?.middleName ?? null,
+      lastName: identity?.lastName ?? null,
       isAuthenticated: Boolean(identity),
       isLoading,
       signIn,

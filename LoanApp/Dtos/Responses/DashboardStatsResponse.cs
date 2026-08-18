@@ -39,6 +39,12 @@ public class DashboardStatsResponse
 
     // The meaning is role-specific (reviews posted / principal approved / payments
     // collected) but the shape never varies, so the client renders one component.
+    //
+    // Amount and Count are both filled for every role; the client's roleConfig decides
+    // which one is the figure on screen, because that is formatting and formatting is
+    // the client's. Caption is HeadlineLabel plus the window, lower-cased: the client
+    // renders it directly after the figure as one sentence — "5 reviews posted this
+    // week" — so it names the figure and never restates it.
     public string HeadlineLabel { get; set; } = null!;
     public decimal HeadlineAmount { get; set; }
     public int HeadlineCount { get; set; }

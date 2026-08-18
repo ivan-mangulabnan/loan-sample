@@ -2,16 +2,28 @@ import { useCallback } from 'react'
 import { useApiResource } from '../../hooks/useApiResource.js'
 import { fetchDashboardStats, fetchLedgerBalance, fetchQueue } from './api.js'
 
-/** Loads whichever queue the signed-in role owns. */
-export function useRoleQueue(queue) {
+/**
+ * Loads whichever queue the signed-in role owns, paged.
+ *
+ * `data` is a `PagedResponse` envelope now, so callers read `data.items` for the rows
+ * and `data.totalCount` for "how many are waiting" — the two are no longer the same
+ * number once a queue runs past one page.
+ *
+ * A role with no `queue` block (the Loaner) resolves to null without a request, so
+ * nothing here fires a staff endpoint a borrower cannot call.
+ */
+export function useRoleQueue(queue, { page = 1, pageSize, search = '', status = '' } = {}) {
   const path = queue?.path ?? null
 
   const fetcher = useCallback(
-    (options) => (path ? fetchQueue(path, options) : Promise.resolve([])),
-    [path],
+    (options) =>
+      path
+        ? fetchQueue(path, { page, pageSize, search, status }, options)
+        : Promise.resolve(null),
+    [path, page, pageSize, search, status],
   )
 
-  return useApiResource(fetcher, [path])
+  return useApiResource(fetcher, [path, page, pageSize, search, status])
 }
 
 /**

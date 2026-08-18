@@ -1,12 +1,19 @@
 import { apiClient } from '../../lib/apiClient.js'
+import { withQuery } from '../../lib/query.js'
 
-export function fetchMyApplications(options) {
-  return apiClient.get('/LoanApplication/me', options)
+/**
+ * Both list endpoints return a `PagedResponse` envelope — `{ items, page, pageSize,
+ * totalCount, totalPages, hasNext, hasPrevious }` — not a bare array. `params` carries
+ * `{ page, search, status }`; `status` is the backend's status CODE, and withQuery drops
+ * whatever is unset so an untouched filter sends no parameter at all.
+ */
+export function fetchMyApplications(params, options) {
+  return apiClient.get(withQuery('/LoanApplication/me', params), options)
 }
 
 /** Staff-only: every application in the tenant, at any status. */
-export function fetchAllApplications(options) {
-  return apiClient.get('/LoanApplication', options)
+export function fetchAllApplications(params, options) {
+  return apiClient.get(withQuery('/LoanApplication', params), options)
 }
 
 export function fetchApplication(id, options) {

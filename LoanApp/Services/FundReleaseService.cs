@@ -21,18 +21,63 @@ public class FundReleaseService
         _loanService = loanService;
     }
     
-    public async Task<List<LoanApproval>> GetQueueAsync (int tenantId)
+    /// <summary>
+    /// The disbursement desk. Rooted on LoanApproval rather than the application, because
+    /// the principal being released is the approval's figure — the application's Amount is
+    /// what was asked for, not what was granted.
+    ///
+    /// No AsSplitQuery here: every Include on this query is a reference, so there is no
+    /// collection to fan out and a single query returns exactly one row per approval.
+    /// </summary>
+    public async Task<(List<LoanApproval> Items, int TotalCount)> GetQueueAsync (
+        int tenantId, ApplicationQueryRequest applicationQueryRequest)
     {
-        return await _context.LoanApprovals
+        var query = _context.LoanApprovals
+            .Where(a => a.LoanApplication.Borrower.TenantId == tenantId
+                     && a.LoanApplication.Status.Code == LoanApplicationStatusCodes.PendingRelease);
+
+        query = ApplySearch(query, applicationQueryRequest.Search);
+
+        var totalCount = await query.CountAsync();
+
+        var items = await query
             .Include(a => a.Approver).ThenInclude(u => u.Account)
             .Include(a => a.Status)
             .Include(a => a.LoanApplication).ThenInclude(l => l.Borrower).ThenInclude(b => b.Account)
             .Include(a => a.LoanApplication).ThenInclude(l => l.Status)
             .Include(a => a.LoanApplication).ThenInclude(l => l.PaymentPlan)
-            .Where(a => a.LoanApplication.Borrower.TenantId == tenantId
-                     && a.LoanApplication.Status.Code == LoanApplicationStatusCodes.PendingRelease)
+            // LoanApprovalId breaks ties: ApprovalDate is a UtcNow stamp, so two decisions
+            // recorded in the same tick would let Skip/Take repeat one and drop another.
             .OrderBy(a => a.ApprovalDate)
+            .ThenBy(a => a.LoanApprovalId)
+            .Skip(applicationQueryRequest.Skip)
+            .Take(applicationQueryRequest.PageSize)
             .ToListAsync();
+
+        return (items, totalCount);
+    }
+
+    /// <summary>
+    /// Matches the same two things the application queues do — reference number or
+    /// borrower name — but reaches them through LoanApplication, since this query is
+    /// rooted one level up. The reference shown in the UI is the application's, not the
+    /// approval's, so that is what a typed "#12" has to hit.
+    ///
+    /// Columns rather than PersonName.Of, and no ToLower: see LoanApplicationQueries.
+    /// </summary>
+    private static IQueryable<LoanApproval> ApplySearch (IQueryable<LoanApproval> query, string? search)
+    {
+        if (string.IsNullOrWhiteSpace(search)) return query;
+
+        var term = search.Trim().TrimStart('#');
+        if (term.Length == 0) return query;
+
+        if (int.TryParse(term, out var reference))
+            return query.Where(a => a.LoanApplicationId == reference);
+
+        return query.Where(a => a.LoanApplication.Borrower.Account != null
+                             && (a.LoanApplication.Borrower.Account.FirstName.Contains(term)
+                              || a.LoanApplication.Borrower.Account.LastName.Contains(term)));
     }
 
     public async Task<FundRelease?> ReleaseFundsAsync (int adminUserId, int tenantId, FundReleaseRequest fundReleaseRequest)

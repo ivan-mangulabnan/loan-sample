@@ -39,10 +39,14 @@ public class ReviewApplicationController : ControllerBase
 
   [HttpGet("queue")]
   [Authorize(Roles = RoleNames.Reviewer)]
-  public async Task<ActionResult<List<LoanApplicationResponse>>> GetQueue ()
+  public async Task<ActionResult<PagedResponse<LoanApplicationResponse>>> GetQueue (
+    [FromQuery] ApplicationQueryRequest applicationQueryRequest)
   {
-    var queue = await _reviewApplicationService.GetQueueAsync(User.GetTenantId());
+    var (queue, totalCount) = await _reviewApplicationService.GetQueueAsync(
+      User.GetTenantId(), applicationQueryRequest);
 
-    return Ok(LoanApplicationResponse.From(queue, User.CanSeeStaffNames()));
+    return Ok(PagedResponse<LoanApplicationResponse>.Of(
+      LoanApplicationResponse.From(queue, User.CanSeeStaffNames()),
+      applicationQueryRequest.Page, applicationQueryRequest.PageSize, totalCount));
   }
 }

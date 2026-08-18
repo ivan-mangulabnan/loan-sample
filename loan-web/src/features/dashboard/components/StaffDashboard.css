@@ -20,27 +20,45 @@
   margin: var(--space-2) 0 0;
 }
 
-.staff__headline {
+/* Header and plot are one block, closer to each other than to anything above: the
+   sentence is the chart's title, not a figure floating over it. --space-4 rather than
+   the column's --space-6 is what says so. */
+.staff__chart {
   display: flex;
   flex-direction: column;
-  gap: var(--space-2);
+  gap: var(--space-4);
+}
+
+/* One sentence, not two elements: the figure is an inline span inside the line of text
+   that says what it counts. Nothing aligns them — sharing a line box does, which is the
+   point. It wraps as prose on a narrow viewport (rule 16).
+
+   The two halves are sized to read as one voice. 34px over 13px was a 2.6x jump, and at
+   that distance the same typeface stops looking like the same typeface — the number read
+   as a display graphic with a footnote stuck to it. 24/17 is close enough that the line
+   reads as a sentence with one word emphasised, which is what it is. The figure is also
+   no longer larger than the h1 above it (30px); it is a figure on the page, not the
+   title of it. */
+.staff__headline {
+  font-size: var(--text-xl);
+  font-weight: var(--weight-medium);
+  color: var(--text-muted);
+  margin: 0;
 }
 
 .staff__figure {
-  font-size: var(--text-5xl);
+  font-size: var(--text-3xl);
   font-weight: var(--weight-bold);
   color: var(--text-strong);
-  letter-spacing: var(--tracking-tighter);
-  margin: 0;
+  letter-spacing: var(--tracking-tight);
 }
 
-.staff__caption {
-  display: flex;
-  align-items: center;
-  gap: var(--space-2);
-  font-size: var(--text-base);
-  color: var(--text-muted);
-  margin: 0;
+/* The key for the curve below. The same dot the aside's metrics use (rule 11), inline
+   in the sentence rather than a flex item beside it — optically centred on the text
+   instead of sat on its baseline, which is where an inline-block would land. */
+.staff__key {
+  vertical-align: middle;
+  margin-right: var(--space-2);
 }
 
 .staff__queue {

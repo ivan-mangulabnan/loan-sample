@@ -2,11 +2,9 @@ import { useNavigate } from 'react-router-dom'
 import AreaChart from '../../../components/AreaChart.jsx'
 import Callout from '../../../components/Callout.jsx'
 import { useSession } from '../../auth/index.js'
-import { useMyApplications } from '../../loan-applications/index.js'
-import { LoanTable, useMyLoans } from '../../loans/index.js'
 import { useDashboardStats } from '../hooks.js'
 import DashboardAside from './DashboardAside.jsx'
-import QueueTable from './QueueTable.jsx'
+import DashboardGreeting from './DashboardGreeting.jsx'
 import './StaffDashboard.css'
 
 const currency = new Intl.NumberFormat(undefined, {
@@ -78,18 +76,19 @@ function noticeFor(stats) {
  * the staff dashboard — headline, chart, aside — but every figure is their own, and it
  * reads no staff-only field. The API nulls grade, daysBehind and isGoodPayer for a
  * Loaner, and /Stats/me carries no pipeline at all.
+ *
+ * It carries no tables. The "My loans" and "My applications" sections here were a second
+ * copy of /loans and /applications — both already in the rail, both now paged and
+ * searchable — and their only real effect was to make the overview scroll. The callout
+ * above still links into them.
  */
 function BorrowerDashboard({ config }) {
   const navigate = useNavigate()
   const { name } = useSession()
 
   const stats = useDashboardStats(config.stats)
-  const loans = useMyLoans()
-  const applications = useMyApplications()
 
   const data = stats.data
-  const loanRows = loans.data ?? []
-  const applicationRows = applications.data ?? []
 
   const notice = stats.isLoading ? null : noticeFor(data)
 
@@ -101,12 +100,7 @@ function BorrowerDashboard({ config }) {
   return (
     <div className="staff">
       <div className="staff__main">
-        <header className="page-head">
-          <div>
-            <h1 className="heading">{config.title}</h1>
-            <p className="staff__subtitle">{config.subtitle}</p>
-          </div>
-        </header>
+        <DashboardGreeting subtitle={config.dashboardSubtitle} />
 
         {stats.error && (
           <Callout action="Retry" onAction={stats.reload}>
@@ -120,49 +114,26 @@ function BorrowerDashboard({ config }) {
           </Callout>
         )}
 
-        <section className="staff__headline">
-          <p className="staff__figure">
-            {stats.isLoading ? '—' : currency.format(data?.headlineAmount ?? 0)}
+        {/* Chart with its header, one sentence — see StaffDashboard. */}
+        <section className="staff__chart">
+          <p className="staff__headline">
+            <span className="dot dot--sm staff__key" />
+            <span className="staff__figure">
+              {stats.isLoading ? '—' : currency.format(data?.headlineAmount ?? 0)}
+            </span>
+            {stats.isLoading ? '' : ` ${data?.headlineCaption ?? ''}`}
           </p>
-          <p className="staff__caption">
-            <span className="dot dot--sm" />
-            {stats.isLoading ? 'Loading…' : (data?.headlineCaption ?? '')}
-          </p>
-        </section>
 
-        {stats.isLoading ? (
-          <p className="muted">Loading…</p>
-        ) : (
-          <AreaChart
-            points={points}
-            format={(v) => currency.format(v)}
-            tone="accent"
-            caption={config.stats.chartCaption}
-            emptyMessage={config.stats.emptyChartMessage}
-          />
-        )}
-
-        <section className="staff__queue">
-          <p className="section-label">My loans</p>
-          {loans.isLoading ? (
+          {stats.isLoading ? (
             <p className="muted">Loading…</p>
-          ) : loanRows.length === 0 ? (
-            <p className="muted">{config.collections.loans.emptyMessage}</p>
           ) : (
-            <LoanTable rows={loanRows} />
-          )}
-        </section>
-
-        <section className="staff__queue">
-          <p className="section-label">My applications</p>
-          {applications.isLoading ? (
-            <p className="muted">Loading…</p>
-          ) : applicationRows.length === 0 ? (
-            <p className="muted">{config.collections.applications.emptyMessage}</p>
-          ) : (
-            // hideBorrower: /LoanApplication/me does not include the borrower, and
-            // it is the reader's own name regardless.
-            <QueueTable shape="application" rows={applicationRows} hideBorrower />
+            <AreaChart
+              points={points}
+              format={(v) => currency.format(v)}
+              tone="accent"
+              caption={config.stats.chartCaption}
+              emptyMessage={config.stats.emptyChartMessage}
+            />
           )}
         </section>
       </div>

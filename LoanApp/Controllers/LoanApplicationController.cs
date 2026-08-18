@@ -44,14 +44,21 @@ public class LoanApplicationController : ControllerBase
   /// <summary>
   /// Tenant-wide list for staff. Loaner is excluded from the role list on purpose:
   /// a borrower reads their own records through "me", and must not see the tenant.
+  ///
+  /// Paged. PagedRequest's defaults mean a caller that sends no query string still gets
+  /// page 1 at 20 rows, so the parameter is additive rather than required.
   /// </summary>
   [HttpGet]
   [Authorize(Roles = $"{RoleNames.Reviewer},{RoleNames.Approver},{RoleNames.Admin}")]
-  public async Task<ActionResult<List<LoanApplicationResponse>>> GetAll ()
+  public async Task<ActionResult<PagedResponse<LoanApplicationResponse>>> GetAll (
+    [FromQuery] ApplicationQueryRequest applicationQueryRequest)
   {
-    var loanApplications = await _loanApplicationService.GetLoanApplicationsByTenantAsync(User.GetTenantId());
+    var (loanApplications, totalCount) = await _loanApplicationService.GetLoanApplicationsByTenantAsync(
+      User.GetTenantId(), applicationQueryRequest);
 
-    return Ok(LoanApplicationResponse.From(loanApplications, User.CanSeeStaffNames()));
+    return Ok(PagedResponse<LoanApplicationResponse>.Of(
+      LoanApplicationResponse.From(loanApplications, User.CanSeeStaffNames()),
+      applicationQueryRequest.Page, applicationQueryRequest.PageSize, totalCount));
   }
 
   [HttpGet("{id}")]
@@ -66,11 +73,15 @@ public class LoanApplicationController : ControllerBase
 
   [HttpGet("me")]
   [Authorize(Roles = RoleNames.Loaner)]
-  public async Task<ActionResult<List<LoanApplicationResponse>>> GetMine ()
+  public async Task<ActionResult<PagedResponse<LoanApplicationResponse>>> GetMine (
+    [FromQuery] ApplicationQueryRequest applicationQueryRequest)
   {
-    var loanApplications = await _loanApplicationService.GetLoanApplicationsByUserAsync(User.GetUserId());
+    var (loanApplications, totalCount) = await _loanApplicationService.GetLoanApplicationsByUserAsync(
+      User.GetUserId(), applicationQueryRequest);
 
-    return Ok(LoanApplicationResponse.From(loanApplications, User.CanSeeStaffNames()));
+    return Ok(PagedResponse<LoanApplicationResponse>.Of(
+      LoanApplicationResponse.From(loanApplications, User.CanSeeStaffNames()),
+      applicationQueryRequest.Page, applicationQueryRequest.PageSize, totalCount));
   }
 
   [HttpPut("{id}/payment-plan")]

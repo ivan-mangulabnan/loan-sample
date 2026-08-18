@@ -70,18 +70,29 @@ public class LoanApprovalService
         return loanApproval;
     }
 
-    public async Task<List<LoanApplication>> GetQueueAsync (int tenantId)
+    /// <summary>
+    /// The decision desk: applications already reviewed and sitting at PENDING_APPROVAL,
+    /// oldest first.
+    /// </summary>
+    public async Task<(List<LoanApplication> Items, int TotalCount)> GetQueueAsync (
+        int tenantId, ApplicationQueryRequest applicationQueryRequest)
     {
-        return await _context.LoanApplications
-            .Include(l => l.Borrower).ThenInclude(b => b.Account)
-            .Include(l => l.PaymentPlan).ThenInclude(p => p.Interest)
-            .Include(l => l.Status)
-            .Include(l => l.Reviews).ThenInclude(r => r.Reviewer).ThenInclude(u => u.Account)
-            .Include(l => l.Reviews).ThenInclude(r => r.Status)
-            .Include(l => l.Approvals).ThenInclude(a => a.Approver).ThenInclude(u => u.Account)
-            .Include(l => l.Approvals).ThenInclude(a => a.Status)
-            .Where(l => l.Borrower.TenantId == tenantId && l.Status.Code == LoanApplicationStatusCodes.PendingApproval)
+        var query = _context.LoanApplications
+            .ForTenant(tenantId)
+            .WhereStatusCode(LoanApplicationStatusCodes.PendingApproval)
+            .WhereMatches(applicationQueryRequest.Search);
+
+        var totalCount = await query.CountAsync();
+
+        var items = await query
+            .WithApplicationDetail()
             .OrderBy(l => l.DateRequested)
+            .ThenBy(l => l.LoanApplicationId)
+            .Skip(applicationQueryRequest.Skip)
+            .Take(applicationQueryRequest.PageSize)
+            .AsSplitQuery()
             .ToListAsync();
+
+        return (items, totalCount);
     }
 }

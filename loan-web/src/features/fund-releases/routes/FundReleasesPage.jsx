@@ -1,18 +1,21 @@
 import Button from '../../../components/Button.jsx'
-import { QueueTable, configFor, useRoleQueue } from '../../dashboard/index.js'
+import { useListQuery } from '../../../hooks/useListQuery.js'
+import { ListView, QueueTable, configFor, useRoleQueue } from '../../dashboard/index.js'
 import { useSession } from '../../auth/index.js'
 
 /**
  * Disbursement: approved loans at PENDING_RELEASE. Rows are
  * FundReleaseQueueResponse[] — a different shape from the two application
  * queues, which is why this area cannot share their columns.
+ *
+ * No status filter: the endpoint is pinned to one stage server-side. Search still
+ * matches the *application's* reference, which is the number the table prints.
  */
 export function FundReleasesPage() {
   const { role } = useSession()
   const config = configFor(role)
-  const queue = useRoleQueue(config?.queue)
-
-  const rows = queue.data ?? []
+  const [query, onQueryChange] = useListQuery()
+  const queue = useRoleQueue(config?.queue, query)
 
   return (
     <>
@@ -26,15 +29,18 @@ export function FundReleasesPage() {
         </Button>
       </header>
 
-      {queue.error ? (
-        <p className="muted">Could not load: {queue.error.message}</p>
-      ) : queue.isLoading ? (
-        <p className="muted">Loading…</p>
-      ) : rows.length === 0 ? (
-        <p className="muted">Nothing is waiting for release.</p>
-      ) : (
-        <QueueTable shape="release" rows={rows} />
-      )}
+      <ListView
+        query={query}
+        onQueryChange={onQueryChange}
+        result={queue.data}
+        isLoading={queue.isLoading}
+        error={queue.error}
+        emptyMessage="Nothing is waiting for release."
+        searchPlaceholder="Search by reference or borrower name"
+        searchLabel="Search the release queue"
+      >
+        {(rows) => <QueueTable shape="release" rows={rows} />}
+      </ListView>
     </>
   )
 }

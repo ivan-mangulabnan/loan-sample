@@ -3,17 +3,22 @@ import { useApiResource } from '../../hooks/useApiResource.js'
 import { fetchLoan, fetchMyLoans } from './api.js'
 
 /**
- * The signed-in borrower's own loans. `/Loan/me` is Loaner-only, so staff must
- * pass enabled=false — resolving to [] rather than skipping the hook, matching
- * useRoleQueue. Firing it for staff would earn a 403 on every dashboard load.
+ * The signed-in borrower's own loans, paged. `params` is `{ page, search, status }` and
+ * the deps are spelled out as primitives — an object literal would be a new value every
+ * render and refetch forever.
+ *
+ * The old `enabled` flag is gone with the borrower dashboard's loans table: `/Loan/me`
+ * is Loaner-only, and the one caller left is `/loans`, which `RequireRole` already gates
+ * to a Loaner. There is no longer a render path that could fire it for staff.
  */
-export function useMyLoans(enabled = true) {
-  const fetcher = useCallback(
-    (options) => (enabled ? fetchMyLoans(options) : Promise.resolve([])),
-    [enabled],
+export function useMyLoans({ page = 1, search = '', status = '' } = {}) {
+  return useApiResource(
+    useCallback(
+      (options) => fetchMyLoans({ page, search, status }, options),
+      [page, search, status],
+    ),
+    [page, search, status],
   )
-
-  return useApiResource(fetcher, [enabled])
 }
 
 export function useLoan(id) {

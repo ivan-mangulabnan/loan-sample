@@ -1,14 +1,18 @@
 import Button from '../../../components/Button.jsx'
-import { QueueTable } from '../../dashboard/index.js'
+import { useListQuery } from '../../../hooks/useListQuery.js'
+import { ListView, QueueTable } from '../../dashboard/index.js'
 import { useAllApplications } from '../hooks.js'
+import { APPLICATION_STATUS_OPTIONS } from '../statusOptions.js'
 
 /**
  * Every application in the tenant, at any status. The queue endpoints each show
- * one stage only, so this is the sole place staff see an application's history.
+ * one stage only, so this is the sole place staff see an application's history —
+ * and the only list that offers a status filter, because it is the only one not
+ * already pinned to a stage server-side.
  */
 function AllApplications() {
-  const { data, error, isLoading, reload } = useAllApplications()
-  const rows = data ?? []
+  const [query, onQueryChange] = useListQuery()
+  const { data, error, isLoading, reload } = useAllApplications(query)
 
   return (
     <>
@@ -22,15 +26,19 @@ function AllApplications() {
         </Button>
       </header>
 
-      {error ? (
-        <p className="muted">Could not load: {error.message}</p>
-      ) : isLoading ? (
-        <p className="muted">Loading…</p>
-      ) : rows.length === 0 ? (
-        <p className="muted">No applications have been submitted yet.</p>
-      ) : (
-        <QueueTable shape="application" rows={rows} />
-      )}
+      <ListView
+        query={query}
+        onQueryChange={onQueryChange}
+        result={data}
+        isLoading={isLoading}
+        error={error}
+        emptyMessage="No applications have been submitted yet."
+        searchPlaceholder="Search by reference or borrower name"
+        searchLabel="Search applications"
+        statusOptions={APPLICATION_STATUS_OPTIONS}
+      >
+        {(rows) => <QueueTable shape="application" rows={rows} />}
+      </ListView>
     </>
   )
 }

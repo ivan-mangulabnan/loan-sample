@@ -62,18 +62,31 @@ public class ReviewApplicationService
         return reviewApplication;
     }
 
-    public async Task<List<LoanApplication>> GetQueueAsync (int tenantId)
+    /// <summary>
+    /// The first-pass desk: applications sitting at PENDING_REVIEW, oldest first, so the
+    /// longest wait is worked first.
+    /// </summary>
+    public async Task<(List<LoanApplication> Items, int TotalCount)> GetQueueAsync (
+        int tenantId, ApplicationQueryRequest applicationQueryRequest)
     {
-        return await _context.LoanApplications
-            .Include(l => l.Borrower).ThenInclude(b => b.Account)
-            .Include(l => l.PaymentPlan).ThenInclude(p => p.Interest)
-            .Include(l => l.Status)
-            .Include(l => l.Reviews).ThenInclude(r => r.Reviewer).ThenInclude(u => u.Account)
-            .Include(l => l.Reviews).ThenInclude(r => r.Status)
-            .Include(l => l.Approvals).ThenInclude(a => a.Approver).ThenInclude(u => u.Account)
-            .Include(l => l.Approvals).ThenInclude(a => a.Status)
-            .Where(l => l.Borrower.TenantId == tenantId && l.Status.Code == LoanApplicationStatusCodes.PendingReview)
+        var query = _context.LoanApplications
+            .ForTenant(tenantId)
+            // The stage is this desk's identity, not a caller-supplied filter — the
+            // request's own Status narrows within it and cannot widen past it.
+            .WhereStatusCode(LoanApplicationStatusCodes.PendingReview)
+            .WhereMatches(applicationQueryRequest.Search);
+
+        var totalCount = await query.CountAsync();
+
+        var items = await query
+            .WithApplicationDetail()
             .OrderBy(l => l.DateRequested)
+            .ThenBy(l => l.LoanApplicationId)
+            .Skip(applicationQueryRequest.Skip)
+            .Take(applicationQueryRequest.PageSize)
+            .AsSplitQuery()
             .ToListAsync();
+
+        return (items, totalCount);
     }
 }

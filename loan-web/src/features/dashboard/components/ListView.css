@@ -1,0 +1,52 @@
+/* Takes the height `.main` has left after the page heading, then never grows past it.
+   `min-height: 0` is the load-bearing half: without it a flex item refuses to shrink
+   below its content, the rows push the column taller than the viewport, and `.main`
+   scrolls the heading and the pager away — the defect this replaced. */
+.list {
+  flex: 1;
+  min-height: 0;
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.list__toolbar {
+  display: flex;
+  gap: var(--space-3);
+  flex-shrink: 0;
+  /* Wraps rather than squeezing the select to nothing on a narrow viewport (rule 16). */
+  flex-wrap: wrap;
+}
+
+/* Both controls carry `.field field--input`, so the sunken box, height and padding come
+   from utilities.css (rule 11) and only the two widths are decided here.
+   Scoped through `.list` to outrank `.field--input`'s own `width: 100%`, which would
+   otherwise win or lose on import order alone. */
+.list .list__search {
+  flex: 1;
+  min-width: 200px;
+}
+
+/* Intrinsic width: a select stretched to the row would leave the search box a stub. */
+.list .list__status {
+  width: auto;
+  cursor: pointer;
+}
+
+/* The only scrolling region on a list page. `overscroll-behavior: contain` stops a
+   flick at the end of the rows from scrolling whatever is behind it. The radius matches
+   the table's own so the clipped edge reads as the panel ending, not a table cut off. */
+.list__rows {
+  flex: 1;
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+  border-radius: var(--radius-lg);
+}
+
+/* Rows are kept on screen while the next page loads, so they need to read as stale
+   rather than current. */
+.list__rows--busy {
+  opacity: 0.55;
+  transition: opacity 0.15s ease;
+}

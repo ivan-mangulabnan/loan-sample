@@ -5,6 +5,13 @@ import { ROLES } from '../../lib/roles.js'
  * rail items, dashboard heading, and which endpoints feed it. The backend still
  * enforces every gate — this only decides what we bother rendering.
  *
+ * Two pieces of copy, two screens. `title` / `subtitle` name the role's AREA page —
+ * "Review queue", "Fund release" — and each area page states them itself, because
+ * importing this config into one would couple that page to a role (rule 17a). The
+ * dashboard is not that page: it greets the reader by name and takes only
+ * `dashboardSubtitle`, which is what keeps a Reviewer's overview and an Admin's
+ * distinguishable now that neither carries a queue title.
+ *
  * `kind` selects the dashboard body:
  *   'queue' — staff working a list of other people's applications. Carries a
  *             single `queue` block naming the endpoint and row shape.
@@ -24,6 +31,9 @@ export const roleConfig = {
     label: 'Reviewer',
     title: 'Review queue',
     subtitle: 'Applications awaiting first-pass review',
+    // The line under the greeting on the OVERVIEW. `title`/`subtitle` above name the
+    // area page, which is a different screen and hardcodes them itself (rule 17a).
+    dashboardSubtitle: 'Your review desk, at a glance',
     queue: {
       path: '/ReviewApplication/queue',
       // The queue returns LoanApplicationResponse[].
@@ -57,6 +67,7 @@ export const roleConfig = {
     label: 'Approver',
     title: 'Approval queue',
     subtitle: 'Reviewed applications awaiting a decision',
+    dashboardSubtitle: 'Your approval desk, at a glance',
     queue: {
       path: '/LoanApproval/queue',
       shape: 'application',
@@ -85,6 +96,7 @@ export const roleConfig = {
     label: 'Admin',
     title: 'Fund release',
     subtitle: 'Approved loans awaiting disbursement',
+    dashboardSubtitle: 'Disbursement, collections and the capital ledger',
     queue: {
       path: '/FundRelease/queue',
       // The queue returns FundReleaseQueueResponse[] — a different shape.
@@ -120,6 +132,7 @@ export const roleConfig = {
     label: 'Borrower',
     title: 'My loans',
     subtitle: 'Your applications and active loans',
+    dashboardSubtitle: 'Your applications, loans and payments',
     collections: {
       applications: {
         path: '/LoanApplication/me',
