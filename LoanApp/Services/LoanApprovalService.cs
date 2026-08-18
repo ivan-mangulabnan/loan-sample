@@ -74,7 +74,7 @@ public class LoanApprovalService
     /// The decision desk: applications already reviewed and sitting at PENDING_APPROVAL,
     /// oldest first.
     /// </summary>
-    public async Task<(List<LoanApplication> Items, int TotalCount)> GetQueueAsync (
+    public async Task<List<LoanApplication>> GetQueueAsync (
         int tenantId, ApplicationQueryRequest applicationQueryRequest)
     {
         var query = _context.LoanApplications
@@ -82,17 +82,12 @@ public class LoanApprovalService
             .WhereStatusCode(LoanApplicationStatusCodes.PendingApproval)
             .WhereMatches(applicationQueryRequest.Search);
 
-        var totalCount = await query.CountAsync();
-
-        var items = await query
+        return await query
             .WithApplicationDetail()
             .OrderBy(l => l.DateRequested)
             .ThenBy(l => l.LoanApplicationId)
-            .Skip(applicationQueryRequest.Skip)
-            .Take(applicationQueryRequest.PageSize)
+            .Take(ListLimit.MaxRows)
             .AsSplitQuery()
             .ToListAsync();
-
-        return (items, totalCount);
     }
 }

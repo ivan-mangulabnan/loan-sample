@@ -2,9 +2,9 @@ import { apiClient } from '../../lib/apiClient.js'
 import { withQuery } from '../../lib/query.js'
 
 /**
- * `path` comes from roleConfig and is unchanged; `params` carries `{ page, search,
- * status }`. All three queues return a `PagedResponse` envelope now, so callers read
- * `data.items`, not `data`.
+ * `path` comes from roleConfig and is unchanged; `params` carries `{ search, status }`.
+ * All three queues return a bare array of rows — no page parameter, no envelope. How
+ * many of them fit on screen is the browser's question, and it is answered in ListView.
  */
 export function fetchQueue(path, params, options) {
   return apiClient.get(withQuery(path, params), options)

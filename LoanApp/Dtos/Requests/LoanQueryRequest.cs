@@ -6,7 +6,7 @@ namespace Dtos.Requests;
 /// application is PENDING_REVIEW and friends — and merging them is how a filter ends up
 /// sending a code the other category has never heard of (rule 20's mistake, server-side).
 /// </summary>
-public class LoanQueryRequest : PagedRequest
+public class LoanQueryRequest
 {
     // Null means "do not filter". Matches the loan reference number.
     public string? Search { get; set; }

@@ -40,11 +40,10 @@ public class PaymentService
             .ToListAsync();
     }
 
-    // Tenant comes from the caller's token, never the query string. The optional filters
-    // compose onto the same IQueryable, so the count and the page can never drift apart —
-    // a filter added to one and not the other would strand rows the client can't reach.
-    public async Task<(List<Payment> Items, int TotalCount)> GetPagedAsync (
-        int tenantId, int? borrowerId, DateTime? from, DateTime? to, int skip, int take)
+    // Tenant comes from the caller's token, never the query string. Returns the filtered
+    // list whole, up to ListLimit.MaxRows — the client pages it.
+    public async Task<List<Payment>> GetFilteredAsync (
+        int tenantId, int? borrowerId, DateTime? from, DateTime? to)
     {
         var query = _context.Payments.Where(p => p.Loan.Borrower.TenantId == tenantId);
 
@@ -65,20 +64,15 @@ public class PaymentService
             query = query.Where(p => p.PaymentDate < toExclusive);
         }
 
-        var totalCount = await query.CountAsync();
-
-        var items = await query
+        return await query
             .Include(p => p.Borrower).ThenInclude(b => b.Account)
             // PaymentId breaks ties: PostAsync stamps PaymentDate from a single UtcNow, so
-            // batch-posted payments share one timestamp and Skip/Take would be free to
-            // repeat a row on two pages and omit another.
+            // batch-posted payments share one timestamp and would otherwise swap places
+            // between requests.
             .OrderByDescending(p => p.PaymentDate)
             .ThenByDescending(p => p.PaymentId)
-            .Skip(skip)
-            .Take(take)
+            .Take(ListLimit.MaxRows)
             .ToListAsync();
-
-        return (items, totalCount);
     }
 
     public async Task<Payment?> PostAsync (int borrowerId, PaymentRequest paymentRequest)

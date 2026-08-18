@@ -32,7 +32,7 @@ export function FundReleasesPage() {
       <ListView
         query={query}
         onQueryChange={onQueryChange}
-        result={queue.data}
+        items={queue.data}
         isLoading={queue.isLoading}
         error={queue.error}
         emptyMessage="Nothing is waiting for release."

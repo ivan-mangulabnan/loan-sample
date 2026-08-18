@@ -32,7 +32,7 @@ export function ReviewPage() {
       <ListView
         query={query}
         onQueryChange={onQueryChange}
-        result={queue.data}
+        items={queue.data}
         isLoading={queue.isLoading}
         error={queue.error}
         emptyMessage="No applications are waiting for review."

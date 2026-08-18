@@ -5,8 +5,13 @@ namespace Dtos.Requests;
 /// borrower's own applications, and the review and approval queues. They differ only in
 /// which stage they pin and how they order, which is the service's business — not the
 /// caller's.
+///
+/// Filters only. There is no page or page size: the client decides which filters to
+/// send, the database applies them, and the whole filtered list comes back (capped by
+/// ListLimit). Paging is the browser's, because only the browser knows how tall the
+/// screen is.
 /// </summary>
-public class ApplicationQueryRequest : PagedRequest
+public class ApplicationQueryRequest
 {
     // Null means "do not filter" — the PaymentQueryRequest convention. Matches a
     // reference number or part of the borrower's name; the service decides which by

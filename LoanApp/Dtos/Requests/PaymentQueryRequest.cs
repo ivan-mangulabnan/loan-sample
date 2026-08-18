@@ -2,7 +2,7 @@ using System.ComponentModel.DataAnnotations;
 
 namespace Dtos.Requests;
 
-public class PaymentQueryRequest : PagedRequest
+public class PaymentQueryRequest
 {
   // Null means "do not filter". [Range] is skipped on null and enforced when supplied,
   // so borrowerId=0 is a 400 rather than a filter that silently matches nothing.

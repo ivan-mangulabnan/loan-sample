@@ -7,7 +7,7 @@ public class StatsQueryRequest
   public const int DefaultDays = 7;
   public const int MaxDays = 90;
 
-  // Capped rather than clamped, matching PagedRequest.PageSize: silently serving a
+  // Capped rather than clamped, matching StatsService: silently serving a
   // different window than the caller asked for makes the headline copy a lie.
   // [ApiController] turns this into a 400.
   [Range(1, MaxDays)]

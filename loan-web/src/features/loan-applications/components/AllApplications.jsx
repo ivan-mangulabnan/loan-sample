@@ -29,7 +29,7 @@ function AllApplications() {
       <ListView
         query={query}
         onQueryChange={onQueryChange}
-        result={data}
+        items={data}
         isLoading={isLoading}
         error={error}
         emptyMessage="No applications have been submitted yet."

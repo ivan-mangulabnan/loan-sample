@@ -24,17 +24,14 @@ public class AdminPaymentController : ControllerBase
   }
 
   [HttpGet]
-  public async Task<ActionResult<PagedResponse<PaymentResponse>>> GetPayments (
+  public async Task<ActionResult<List<PaymentResponse>>> GetPayments (
     [FromQuery] PaymentQueryRequest paymentQueryRequest)
   {
-    var (payments, totalCount) = await _paymentService.GetPagedAsync(
+    var payments = await _paymentService.GetFilteredAsync(
       User.GetTenantId(), paymentQueryRequest.BorrowerId,
-      paymentQueryRequest.From, paymentQueryRequest.To,
-      paymentQueryRequest.Skip, paymentQueryRequest.PageSize);
+      paymentQueryRequest.From, paymentQueryRequest.To);
 
     // showBorrower: true — identifying who paid is the point of this list.
-    return Ok(PagedResponse<PaymentResponse>.Of(
-      PaymentResponse.From(payments, showBorrower: true),
-      paymentQueryRequest.Page, paymentQueryRequest.PageSize, totalCount));
+    return Ok(PaymentResponse.From(payments, showBorrower: true));
   }
 }

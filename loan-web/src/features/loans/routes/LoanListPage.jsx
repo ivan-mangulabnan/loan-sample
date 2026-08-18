@@ -28,7 +28,7 @@ export function LoanListPage() {
       <ListView
         query={query}
         onQueryChange={onQueryChange}
-        result={data}
+        items={data}
         isLoading={isLoading}
         error={error}
         emptyMessage="You have no loans yet."

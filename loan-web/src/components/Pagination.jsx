@@ -2,12 +2,13 @@ import Button from './Button.jsx'
 import './Pagination.css'
 
 /**
- * Prev/next over a `PagedResponse` envelope. Every value it renders or acts on comes
- * from the server — `totalPages`, `hasNext`, `hasPrevious` are fields on the response,
- * not arithmetic done here. Deriving them client-side means the last page's Next button
- * disagrees with the API the moment a row is added between two requests.
+ * Prev/next over a list that is already in memory. `totalPages`, `hasNext` and
+ * `hasPrevious` are computed by ListView from the row count and the measured page size
+ * — there is no server-side page to disagree with, because the server sent the list
+ * whole and has no opinion about how it is divided.
  *
- * Knows nothing about what is being paged (rule 4).
+ * Knows nothing about what is being paged, or about how the page size was arrived at
+ * (rule 4).
  */
 function Pagination({ page, totalPages, hasNext, hasPrevious, onPage }) {
   // One page of results needs no control at all — and neither does none.

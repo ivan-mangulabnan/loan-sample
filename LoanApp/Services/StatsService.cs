@@ -27,7 +27,7 @@ public class StatsService
         // DateTime.UtcNow and stored as datetime2 with no offset, so "today" is the UTC
         // day. Documented rather than converted: there is no per-tenant timezone column
         // to convert to, and inventing one would silently disagree with /admin/payments,
-        // which already buckets on UTC days (PaymentService.GetPagedAsync).
+        // which already buckets on UTC days (PaymentService.GetFilteredAsync).
         var today = DateTime.UtcNow.Date;
         var from = today.AddDays(-(days - 1));
         // Exclusive upper bound, same reason as PaymentService: `<= today` would drop

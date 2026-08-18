@@ -39,14 +39,12 @@ public class LoanApprovalController : ControllerBase
 
   [HttpGet("queue")]
   [Authorize(Roles = RoleNames.Approver)]
-  public async Task<ActionResult<PagedResponse<LoanApplicationResponse>>> GetQueue (
+  public async Task<ActionResult<List<LoanApplicationResponse>>> GetQueue (
     [FromQuery] ApplicationQueryRequest applicationQueryRequest)
   {
-    var (queue, totalCount) = await _loanApprovalService.GetQueueAsync(
+    var queue = await _loanApprovalService.GetQueueAsync(
       User.GetTenantId(), applicationQueryRequest);
 
-    return Ok(PagedResponse<LoanApplicationResponse>.Of(
-      LoanApplicationResponse.From(queue, User.CanSeeStaffNames()),
-      applicationQueryRequest.Page, applicationQueryRequest.PageSize, totalCount));
+    return Ok(LoanApplicationResponse.From(queue, User.CanSeeStaffNames()));
   }
 }

@@ -66,7 +66,7 @@ public class ReviewApplicationService
     /// The first-pass desk: applications sitting at PENDING_REVIEW, oldest first, so the
     /// longest wait is worked first.
     /// </summary>
-    public async Task<(List<LoanApplication> Items, int TotalCount)> GetQueueAsync (
+    public async Task<List<LoanApplication>> GetQueueAsync (
         int tenantId, ApplicationQueryRequest applicationQueryRequest)
     {
         var query = _context.LoanApplications
@@ -76,17 +76,12 @@ public class ReviewApplicationService
             .WhereStatusCode(LoanApplicationStatusCodes.PendingReview)
             .WhereMatches(applicationQueryRequest.Search);
 
-        var totalCount = await query.CountAsync();
-
-        var items = await query
+        return await query
             .WithApplicationDetail()
             .OrderBy(l => l.DateRequested)
             .ThenBy(l => l.LoanApplicationId)
-            .Skip(applicationQueryRequest.Skip)
-            .Take(applicationQueryRequest.PageSize)
+            .Take(ListLimit.MaxRows)
             .AsSplitQuery()
             .ToListAsync();
-
-        return (items, totalCount);
     }
 }

@@ -29,7 +29,7 @@ public class FundReleaseService
     /// No AsSplitQuery here: every Include on this query is a reference, so there is no
     /// collection to fan out and a single query returns exactly one row per approval.
     /// </summary>
-    public async Task<(List<LoanApproval> Items, int TotalCount)> GetQueueAsync (
+    public async Task<List<LoanApproval>> GetQueueAsync (
         int tenantId, ApplicationQueryRequest applicationQueryRequest)
     {
         var query = _context.LoanApprovals
@@ -38,23 +38,19 @@ public class FundReleaseService
 
         query = ApplySearch(query, applicationQueryRequest.Search);
 
-        var totalCount = await query.CountAsync();
-
-        var items = await query
+        return await query
             .Include(a => a.Approver).ThenInclude(u => u.Account)
             .Include(a => a.Status)
             .Include(a => a.LoanApplication).ThenInclude(l => l.Borrower).ThenInclude(b => b.Account)
             .Include(a => a.LoanApplication).ThenInclude(l => l.Status)
             .Include(a => a.LoanApplication).ThenInclude(l => l.PaymentPlan)
             // LoanApprovalId breaks ties: ApprovalDate is a UtcNow stamp, so two decisions
-            // recorded in the same tick would let Skip/Take repeat one and drop another.
+            // recorded in the same tick would otherwise swap places between requests, and
+            // the client pages this list by position.
             .OrderBy(a => a.ApprovalDate)
             .ThenBy(a => a.LoanApprovalId)
-            .Skip(applicationQueryRequest.Skip)
-            .Take(applicationQueryRequest.PageSize)
+            .Take(ListLimit.MaxRows)
             .ToListAsync();
-
-        return (items, totalCount);
     }
 
     /// <summary>

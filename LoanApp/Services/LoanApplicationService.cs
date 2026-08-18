@@ -60,10 +60,11 @@ public class LoanApplicationService
     /// whole history. Borrower is included here — unlike the /me query, which does
     /// not need it — because it is the column that makes a tenant-wide list usable.
     ///
-    /// Returns a tuple rather than a PagedResponse so the service stays DTO-free and the
-    /// controller owns the envelope — the PaymentService.GetPagedAsync convention.
+    /// Returns the filtered list whole, up to ListLimit.MaxRows. The reader's screen
+    /// decides how much of it is visible at once, and the reader's screen is not
+    /// something this layer can see.
     /// </summary>
-    public async Task<(List<LoanApplication> Items, int TotalCount)> GetLoanApplicationsByTenantAsync (
+    public async Task<List<LoanApplication>> GetLoanApplicationsByTenantAsync (
         int tenantId, ApplicationQueryRequest applicationQueryRequest)
     {
         var query = _context.LoanApplications
@@ -71,28 +72,23 @@ public class LoanApplicationService
             .WhereStatusCode(applicationQueryRequest.Status)
             .WhereMatches(applicationQueryRequest.Search);
 
-        // Counted before the Includes: a bare COUNT over the filtered set, no joins.
-        var totalCount = await query.CountAsync();
-
-        var items = await query
+        return await query
             .WithApplicationDetail()
             // LoanApplicationId breaks ties: DateRequested is a UtcNow stamp, so two
-            // applications submitted in the same tick would let Skip/Take repeat one row
-            // on two pages and drop another entirely.
+            // applications submitted in the same tick would otherwise come back in
+            // whatever order the server found convenient, and the client pages this
+            // list by position.
             .OrderByDescending(l => l.DateRequested)
             .ThenByDescending(l => l.LoanApplicationId)
-            .Skip(applicationQueryRequest.Skip)
-            .Take(applicationQueryRequest.PageSize)
+            .Take(ListLimit.MaxRows)
             // Reviews and Approvals are collections — two reviews and one approval per
             // application in live data — so one query would drag six joined rows back
             // per application, times the page size.
             .AsSplitQuery()
             .ToListAsync();
-
-        return (items, totalCount);
     }
 
-    public async Task<(List<LoanApplication> Items, int TotalCount)> GetLoanApplicationsByUserAsync (
+    public async Task<List<LoanApplication>> GetLoanApplicationsByUserAsync (
         int borrowerId, ApplicationQueryRequest applicationQueryRequest)
     {
         var query = _context.LoanApplications
@@ -100,22 +96,17 @@ public class LoanApplicationService
             .WhereStatusCode(applicationQueryRequest.Status)
             .WhereMatches(applicationQueryRequest.Search);
 
-        var totalCount = await query.CountAsync();
-
-        // This query carried no OrderBy at all before it was paged. Skip/Take over an
-        // unordered set returns whatever the server finds convenient, so the ordering is
-        // load-bearing here rather than cosmetic.
-        var items = await query
+        // This query carried no OrderBy at all before. An unordered list is returned in
+        // whatever order the server finds convenient, which is a different order on two
+        // requests — so the ordering is load-bearing here rather than cosmetic.
+        return await query
             // includeBorrower: false — the reader is the borrower.
             .WithApplicationDetail(includeBorrower: false)
             .OrderByDescending(l => l.DateRequested)
             .ThenByDescending(l => l.LoanApplicationId)
-            .Skip(applicationQueryRequest.Skip)
-            .Take(applicationQueryRequest.PageSize)
+            .Take(ListLimit.MaxRows)
             .AsSplitQuery()
             .ToListAsync();
-
-        return (items, totalCount);
     }
 
     public async Task<LoanApplication?> UpdatePaymentPlanAsync (int loanApplicationId, int borrowerId, int paymentPlanId)

@@ -37,14 +37,12 @@ public class FundReleaseController : ControllerBase
   }
 
   [HttpGet("queue")]
-  public async Task<ActionResult<PagedResponse<FundReleaseQueueResponse>>> GetQueue (
+  public async Task<ActionResult<List<FundReleaseQueueResponse>>> GetQueue (
     [FromQuery] ApplicationQueryRequest applicationQueryRequest)
   {
-    var (queue, totalCount) = await _fundReleaseService.GetQueueAsync(
+    var queue = await _fundReleaseService.GetQueueAsync(
       User.GetTenantId(), applicationQueryRequest);
 
-    return Ok(PagedResponse<FundReleaseQueueResponse>.Of(
-      FundReleaseQueueResponse.From(queue),
-      applicationQueryRequest.Page, applicationQueryRequest.PageSize, totalCount));
+    return Ok(FundReleaseQueueResponse.From(queue));
   }
 }

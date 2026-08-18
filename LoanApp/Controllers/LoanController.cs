@@ -24,14 +24,12 @@ public class LoanController : ControllerBase
 
   [HttpGet("me")]
   [Authorize(Roles = RoleNames.Loaner)]
-  public async Task<ActionResult<PagedResponse<LoanResponse>>> GetMine (
+  public async Task<ActionResult<List<LoanResponse>>> GetMine (
     [FromQuery] LoanQueryRequest loanQueryRequest)
   {
-    var (loans, totalCount) = await _loanService.GetLoansByBorrowerAsync(User.GetUserId(), loanQueryRequest);
+    var loans = await _loanService.GetLoansByBorrowerAsync(User.GetUserId(), loanQueryRequest);
 
-    return Ok(PagedResponse<LoanResponse>.Of(
-      LoanResponse.From(loans, DateTime.UtcNow, User.CanSeeLoanGrading()),
-      loanQueryRequest.Page, loanQueryRequest.PageSize, totalCount));
+    return Ok(LoanResponse.From(loans, DateTime.UtcNow, User.CanSeeLoanGrading()));
   }
 
   [HttpGet("{id}")]

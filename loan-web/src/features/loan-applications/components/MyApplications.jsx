@@ -24,7 +24,7 @@ function MyApplications() {
       <ListView
         query={query}
         onQueryChange={onQueryChange}
-        result={data}
+        items={data}
         isLoading={isLoading}
         error={error}
         emptyMessage="You have not applied for a loan yet."

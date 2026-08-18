@@ -45,20 +45,19 @@ public class LoanApplicationController : ControllerBase
   /// Tenant-wide list for staff. Loaner is excluded from the role list on purpose:
   /// a borrower reads their own records through "me", and must not see the tenant.
   ///
-  /// Paged. PagedRequest's defaults mean a caller that sends no query string still gets
-  /// page 1 at 20 rows, so the parameter is additive rather than required.
+  /// The filters are optional: a caller that sends no query string gets the whole list,
+  /// capped at ListLimit.MaxRows. There is no page parameter — the client pages what it
+  /// is given, against the height of the screen it is drawing on.
   /// </summary>
   [HttpGet]
   [Authorize(Roles = $"{RoleNames.Reviewer},{RoleNames.Approver},{RoleNames.Admin}")]
-  public async Task<ActionResult<PagedResponse<LoanApplicationResponse>>> GetAll (
+  public async Task<ActionResult<List<LoanApplicationResponse>>> GetAll (
     [FromQuery] ApplicationQueryRequest applicationQueryRequest)
   {
-    var (loanApplications, totalCount) = await _loanApplicationService.GetLoanApplicationsByTenantAsync(
+    var loanApplications = await _loanApplicationService.GetLoanApplicationsByTenantAsync(
       User.GetTenantId(), applicationQueryRequest);
 
-    return Ok(PagedResponse<LoanApplicationResponse>.Of(
-      LoanApplicationResponse.From(loanApplications, User.CanSeeStaffNames()),
-      applicationQueryRequest.Page, applicationQueryRequest.PageSize, totalCount));
+    return Ok(LoanApplicationResponse.From(loanApplications, User.CanSeeStaffNames()));
   }
 
   [HttpGet("{id}")]
@@ -73,15 +72,13 @@ public class LoanApplicationController : ControllerBase
 
   [HttpGet("me")]
   [Authorize(Roles = RoleNames.Loaner)]
-  public async Task<ActionResult<PagedResponse<LoanApplicationResponse>>> GetMine (
+  public async Task<ActionResult<List<LoanApplicationResponse>>> GetMine (
     [FromQuery] ApplicationQueryRequest applicationQueryRequest)
   {
-    var (loanApplications, totalCount) = await _loanApplicationService.GetLoanApplicationsByUserAsync(
+    var loanApplications = await _loanApplicationService.GetLoanApplicationsByUserAsync(
       User.GetUserId(), applicationQueryRequest);
 
-    return Ok(PagedResponse<LoanApplicationResponse>.Of(
-      LoanApplicationResponse.From(loanApplications, User.CanSeeStaffNames()),
-      applicationQueryRequest.Page, applicationQueryRequest.PageSize, totalCount));
+    return Ok(LoanApplicationResponse.From(loanApplications, User.CanSeeStaffNames()));
   }
 
   [HttpPut("{id}/payment-plan")]

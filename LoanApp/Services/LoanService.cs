@@ -45,7 +45,7 @@ public class LoanService
     /// A borrower's own loans, newest first. Every Include here is a reference, so there
     /// is no collection to fan out and no split query to reach for.
     /// </summary>
-    public async Task<(List<Loan> Items, int TotalCount)> GetLoansByBorrowerAsync (
+    public async Task<List<Loan>> GetLoansByBorrowerAsync (
         int borrowerId, LoanQueryRequest loanQueryRequest)
     {
         var query = _context.Loans.Where(l => l.BorrowerId == borrowerId);
@@ -72,19 +72,14 @@ public class LoanService
                 : query.Where(l => false);
         }
 
-        var totalCount = await query.CountAsync();
-
-        var items = await query
+        return await query
             .Include(l => l.Status)
             // LoanId breaks ties: StartDate is the release stamp, so loans released in
-            // one batch share it and Skip/Take would be free to repeat a row.
+            // one batch share it and would otherwise swap places between requests.
             .OrderByDescending(l => l.StartDate)
             .ThenByDescending(l => l.LoanId)
-            .Skip(loanQueryRequest.Skip)
-            .Take(loanQueryRequest.PageSize)
+            .Take(ListLimit.MaxRows)
             .ToListAsync();
-
-        return (items, totalCount);
     }
 
     public async Task<Loan?> GetLoanAsync (int loanId, int tenantId, int requesterId, bool isStaff)

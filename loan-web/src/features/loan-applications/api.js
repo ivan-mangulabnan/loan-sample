@@ -2,10 +2,10 @@ import { apiClient } from '../../lib/apiClient.js'
 import { withQuery } from '../../lib/query.js'
 
 /**
- * Both list endpoints return a `PagedResponse` envelope — `{ items, page, pageSize,
- * totalCount, totalPages, hasNext, hasPrevious }` — not a bare array. `params` carries
- * `{ page, search, status }`; `status` is the backend's status CODE, and withQuery drops
- * whatever is unset so an untouched filter sends no parameter at all.
+ * Both list endpoints return a bare array of rows — the whole filtered list, capped
+ * server-side. `params` carries `{ search, status }`; `status` is the backend's status
+ * CODE, and withQuery drops whatever is unset so an untouched filter sends no parameter
+ * at all. There is no page parameter: paging happens in the browser.
  */
 export function fetchMyApplications(params, options) {
   return apiClient.get(withQuery('/LoanApplication/me', params), options)

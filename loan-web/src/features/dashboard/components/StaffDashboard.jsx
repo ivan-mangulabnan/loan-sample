@@ -7,10 +7,6 @@ import DashboardAside from './DashboardAside.jsx'
 import DashboardGreeting from './DashboardGreeting.jsx'
 import './StaffDashboard.css'
 
-// The dashboard wants the queue's size, not its contents — the rows have their own area
-// page. Asking for one row rather than the default twenty keeps the count exact (it comes
-// from totalCount either way) without dragging a page of joined detail along with it.
-const COUNT_ONLY = { pageSize: 1 }
 
 const currency = new Intl.NumberFormat(undefined, {
   style: 'currency',
@@ -33,7 +29,7 @@ function StaffDashboard({ config }) {
   const navigate = useNavigate()
   const { name } = useSession()
 
-  const queue = useRoleQueue(config.queue, COUNT_ONLY)
+  const queue = useRoleQueue(config.queue)
   const stats = useDashboardStats(config.stats)
   const data = stats.data
 
@@ -41,9 +37,10 @@ function StaffDashboard({ config }) {
   // an empty queue, which meant the role most likely to have work — the Reviewer — was
   // the one role that never saw it at all.
   //
-  // totalCount, not items.length: the rows are one page now, so counting them would cap
-  // the notice at the page size and tell a Reviewer with 40 waiting that 20 are.
-  const waiting = queue.data?.totalCount ?? 0
+  // The queue arrives whole, so its length IS the number waiting — there is no page size
+  // for the count to be capped at. It costs the rows themselves, which is the trade the
+  // list endpoints make everywhere: one honest request instead of two clever ones.
+  const waiting = queue.data?.length ?? 0
   const showQueueNotice = !queue.isLoading && !queue.error
   const queueMessage =
     waiting === 0
