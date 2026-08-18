@@ -1,0 +1,75 @@
+.release__lead {
+  margin: 0 0 var(--space-5);
+  color: var(--text-muted);
+  font-size: var(--text-base);
+  line-height: 1.55;
+}
+
+.release__facts {
+  margin: 0 0 var(--space-6);
+  display: grid;
+  gap: var(--space-3);
+}
+
+.release__fact {
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  align-items: baseline;
+  gap: var(--space-4);
+}
+
+.release__fact dt {
+  color: var(--text-faint);
+  font-size: var(--text-sm);
+}
+
+.release__fact dd {
+  margin: 0;
+  color: var(--text);
+  font-size: var(--text-base);
+}
+
+/* The principal is the sum actually leaving the ledger, so it is separated from the rest
+   by a rule rather than sitting as one line among five. */
+.release__fact--lead {
+  padding-bottom: var(--space-3);
+  border-bottom: 1px solid var(--border);
+}
+
+.release__amount {
+  color: var(--text-strong);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-tight);
+}
+
+.release__label {
+  display: flex;
+  align-items: baseline;
+  justify-content: space-between;
+  gap: var(--space-3);
+  margin-bottom: var(--space-2);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.release__hint {
+  color: var(--text-faint);
+  font-size: var(--text-xs);
+}
+
+/* Same override as the decision box: `.field` fixes a 44px single-line height. */
+.release__remarks {
+  display: block;
+  height: auto;
+  min-height: 78px;
+  padding: var(--space-3) var(--space-4);
+  resize: vertical;
+  line-height: 1.5;
+}
+
+.release__error {
+  margin: var(--space-4) 0 0;
+  color: var(--danger);
+  font-size: var(--text-sm);
+}

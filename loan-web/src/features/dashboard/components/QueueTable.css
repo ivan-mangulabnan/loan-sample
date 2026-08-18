@@ -44,3 +44,17 @@
   font-weight: var(--weight-bold);
   color: var(--text-strong);
 }
+
+/* Right-aligned and shrink-wrapped so the button sits at the edge of the table and the
+   data columns keep the width they had before the column existed. */
+.queue__action {
+  width: 1%;
+  white-space: nowrap;
+  text-align: right;
+}
+
+/* Only when the row does something. The pointer is the affordance; the button inside is
+   what actually carries the action for keyboard and screen readers. */
+.queue__row--actionable {
+  cursor: pointer;
+}

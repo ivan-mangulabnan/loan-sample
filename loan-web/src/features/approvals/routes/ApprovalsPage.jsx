@@ -1,20 +1,43 @@
+import { useCallback } from 'react'
 import Button from '../../../components/Button.jsx'
+import Callout from '../../../components/Callout.jsx'
 import { useListQuery } from '../../../hooks/useListQuery.js'
+import { useWriteAction } from '../../../hooks/useWriteAction.js'
 import { ListView, QueueTable, configFor, useRoleQueue } from '../../dashboard/index.js'
+import { DECISIONS, DecisionModal } from '../../loan-applications/index.js'
 import { useSession } from '../../auth/index.js'
+import { submitApproval } from '../api.js'
 
 /**
  * Approval decisions: applications at PENDING_APPROVAL, already reviewed. Its
  * own component rather than a shared queue page — approving is not reviewing,
- * and the decision action will live here.
+ * and the decision action lives here.
  *
  * No status filter: the endpoint is pinned to one stage server-side.
  */
+
+// Two, not three. LoanApprovalService has no case for Return and throws on it: sending
+// an application back for changes is the reviewer's move, and by this desk it has
+// already passed one.
+const APPROVAL_DECISIONS = [DECISIONS.Approve, DECISIONS.Reject]
+
 export function ApprovalsPage() {
   const { role } = useSession()
   const config = configFor(role)
   const [query, onQueryChange] = useListQuery()
   const queue = useRoleQueue(config?.queue, query)
+
+  const send = useCallback(
+    (application, { decision, remarks }) =>
+      submitApproval({
+        loanApplicationId: application.loanApplicationId,
+        decision,
+        remarks,
+      }),
+    [],
+  )
+
+  const approval = useWriteAction(send, queue.reload)
 
   return (
     <>
@@ -28,6 +51,10 @@ export function ApprovalsPage() {
         </Button>
       </header>
 
+      {approval.notice && (
+        <Callout onDismiss={approval.dismissNotice}>{approval.notice}</Callout>
+      )}
+
       <ListView
         query={query}
         onQueryChange={onQueryChange}
@@ -38,8 +65,26 @@ export function ApprovalsPage() {
         searchPlaceholder="Search by reference or borrower name"
         searchLabel="Search the approval queue"
       >
-        {(rows) => <QueueTable shape="application" rows={rows} />}
+        {(rows) => (
+          <QueueTable
+            shape="application"
+            rows={rows}
+            actionLabel="Decide"
+            onAction={approval.open}
+          />
+        )}
       </ListView>
+
+      <DecisionModal
+        key={approval.target?.loanApplicationId}
+        application={approval.target}
+        decisions={APPROVAL_DECISIONS}
+        title="Approval"
+        onSubmit={approval.run}
+        onClose={approval.close}
+        isSubmitting={approval.isSubmitting}
+        error={approval.error}
+      />
     </>
   )
 }

@@ -1,21 +1,43 @@
+import { useCallback } from 'react'
 import Button from '../../../components/Button.jsx'
+import Callout from '../../../components/Callout.jsx'
 import { useListQuery } from '../../../hooks/useListQuery.js'
+import { useWriteAction } from '../../../hooks/useWriteAction.js'
 import { ListView, QueueTable, configFor, useRoleQueue } from '../../dashboard/index.js'
+import { DECISIONS, DecisionModal } from '../../loan-applications/index.js'
 import { useSession } from '../../auth/index.js'
+import { submitReview } from '../api.js'
 
 /**
  * First-pass review: applications at PENDING_REVIEW. Its own component rather
  * than a shared queue page, so the URL means this area and the review action has
- * somewhere to land when it is built.
+ * somewhere to land.
  *
  * No status filter: the endpoint is pinned to one stage server-side, so a dropdown
  * here could only ever offer the stage the reader is already looking at.
  */
+
+// The reviewer's full vocabulary. Return sends the application back to the borrower to
+// change the plan; the approver, one desk on, has no such option.
+const REVIEW_DECISIONS = [DECISIONS.Approve, DECISIONS.Return, DECISIONS.Reject]
+
 export function ReviewPage() {
   const { role } = useSession()
   const config = configFor(role)
   const [query, onQueryChange] = useListQuery()
   const queue = useRoleQueue(config?.queue, query)
+
+  const send = useCallback(
+    (application, { decision, remarks }) =>
+      submitReview({
+        loanApplicationId: application.loanApplicationId,
+        decision,
+        remarks,
+      }),
+    [],
+  )
+
+  const review = useWriteAction(send, queue.reload)
 
   return (
     <>
@@ -29,6 +51,10 @@ export function ReviewPage() {
         </Button>
       </header>
 
+      {review.notice && (
+        <Callout onDismiss={review.dismissNotice}>{review.notice}</Callout>
+      )}
+
       <ListView
         query={query}
         onQueryChange={onQueryChange}
@@ -39,8 +65,28 @@ export function ReviewPage() {
         searchPlaceholder="Search by reference or borrower name"
         searchLabel="Search the review queue"
       >
-        {(rows) => <QueueTable shape="application" rows={rows} />}
+        {(rows) => (
+          <QueueTable
+            shape="application"
+            rows={rows}
+            actionLabel="Review"
+            onAction={review.open}
+          />
+        )}
       </ListView>
+
+      {/* Keyed on the row so the remarks box starts empty for each application — the
+          modal unmounts between rows, and a key change is what guarantees it. */}
+      <DecisionModal
+        key={review.target?.loanApplicationId}
+        application={review.target}
+        decisions={REVIEW_DECISIONS}
+        title="Review"
+        onSubmit={review.run}
+        onClose={review.close}
+        isSubmitting={review.isSubmitting}
+        error={review.error}
+      />
     </>
   )
 }

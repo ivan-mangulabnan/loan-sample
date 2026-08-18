@@ -124,6 +124,10 @@
   /* ---- Elevation ---- */
   --shadow-raised: 0 30px 80px rgba(0, 0, 0, 0.5);
 
+  /* Dims the page behind a modal. Darker than it looks: the page is already near
+     black, so a lighter scrim leaves the dialog and the page at similar weight. */
+  --surface-backdrop: rgba(0, 0, 0, 0.62);
+
   /* ---- Layout ---- */
   --rail-width: 96px;
   --aside-width: 308px;

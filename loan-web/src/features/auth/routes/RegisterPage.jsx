@@ -3,6 +3,7 @@ import { Link, Navigate, useNavigate } from 'react-router-dom'
 import Button from '../../../components/Button.jsx'
 import Stepper from '../../../components/Stepper.jsx'
 import AuthScreen from '../components/AuthScreen.jsx'
+import { messageFrom } from '../../../lib/apiError.js'
 import { register } from '../api.js'
 import { useSession } from '../hooks.js'
 import './RegisterPage.css'
@@ -19,24 +20,14 @@ const EMPTY = {
   birthdate: '',
 }
 
-// The API rejects a bad payload three different ways and none of them match the
-// { message } shape apiClient reads, so err.message would just say "Bad Request".
+// Only the 409 needs saying differently here: the server answers a duplicate username
+// with a bare "Conflict", which names no field. Everything else — ProblemDetails
+// validation, the raw string an unknown tenant produces — is the shared decoding.
 function messageFor(error) {
   if (error.status === 409)
     return 'That username is already taken for this tenant.'
 
-  // Model validation: ProblemDetails carries { errors: { Field: [msg, ...] } }.
-  const validation = error.body?.errors
-  if (validation) {
-    const first = Object.values(validation).flat()[0]
-    if (first) return first
-  }
-
-  // RegisterUserAsync throws InvalidOperationException for an unknown tenant or
-  // an unseeded Loaner role; the controller returns the raw string as the body.
-  if (typeof error.body === 'string' && error.body) return error.body
-
-  return error.message ?? 'Could not create the account.'
+  return messageFrom(error, 'Could not create the account.')
 }
 
 export function RegisterPage() {
