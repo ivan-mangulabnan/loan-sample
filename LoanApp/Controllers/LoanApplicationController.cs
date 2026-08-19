@@ -81,19 +81,28 @@ public class LoanApplicationController : ControllerBase
     return Ok(LoanApplicationResponse.From(loanApplications, User.CanSeeStaffNames()));
   }
 
-  [HttpPut("{id}/payment-plan")]
+  /// <summary>
+  /// Sends a returned application back to the reviewer, with whatever the borrower
+  /// changed. Named for what it does rather than for the field it edits: the plan is no
+  /// longer the only thing that can move.
+  ///
+  /// The plan is checked here, before the service, so a bad id is a 400 that names the
+  /// problem rather than a foreign-key error out of SaveChanges.
+  /// </summary>
+  [HttpPut("{id}/resubmit")]
   [Authorize(Roles = RoleNames.Loaner)]
-  public async Task<ActionResult<MessageResponse>> UpdatePaymentPlan (int id, UpdatePaymentPlanRequest updatePaymentPlanRequest)
+  public async Task<ActionResult<MessageResponse>> Resubmit (int id, ResubmitApplicationRequest resubmitApplicationRequest)
   {
-    var paymentPlan = await _paymentPlanService.GetPaymentPlanByIdAsync(updatePaymentPlanRequest.PaymentPlanId);
+    var paymentPlan = await _paymentPlanService.GetPaymentPlanByIdAsync(resubmitApplicationRequest.PaymentPlanId);
     if (paymentPlan is null) return BadRequest("Payment plan does not exist.");
 
     try
     {
-      var loanApplication = await _loanApplicationService.UpdatePaymentPlanAsync(id, User.GetUserId(), updatePaymentPlanRequest.PaymentPlanId);
+      var loanApplication = await _loanApplicationService.ResubmitAsync(
+        id, User.GetUserId(), resubmitApplicationRequest.PaymentPlanId, resubmitApplicationRequest.Amount);
       if (loanApplication is null) return NotFound();
 
-      return Ok(MessageResponse.Of("Payment plan updated and resubmitted."));
+      return Ok(MessageResponse.Of("Application resubmitted for review."));
     }
     catch (InvalidOperationException ex)
     {

@@ -6,13 +6,13 @@ import { useWriteAction } from '../../../hooks/useWriteAction.js'
 import { ListView, QueueTable, configFor, useRoleQueue } from '../../dashboard/index.js'
 import { useSession } from '../../auth/index.js'
 import ReleaseModal from '../components/ReleaseModal.jsx'
-import { releaseFunds } from '../api.js'
+import { decideRelease } from '../api.js'
 
 /**
- * Disbursement: approved loans at PENDING_RELEASE. Rows are
- * FundReleaseQueueResponse[] — a different shape from the two application
- * queues, which is why this area cannot share their columns, and why the release
- * dialog is its own component rather than a DecisionModal with one button.
+ * Disbursement: approved loans at PENDING_RELEASE, which the admin either funds or
+ * refuses. Rows are FundReleaseQueueResponse[] — a different shape from the two
+ * application queues, which is why this area cannot share their columns, and why the
+ * release dialog is its own component rather than a DecisionModal.
  *
  * No status filter: the endpoint is pinned to one stage server-side. Search still
  * matches the *application's* reference, which is the number the table prints.
@@ -23,11 +23,11 @@ export function FundReleasesPage() {
   const [query, onQueryChange] = useListQuery()
   const queue = useRoleQueue(config?.queue, query)
 
-  // Keyed on the approval, not the application: the sum released is the principal the
-  // approver settled on.
+  // Keyed on the approval, not the application: the sum at stake is the principal the
+  // approver settled on. The decision comes from the dialog and is always present.
   const send = useCallback(
-    (release, { remarks }) =>
-      releaseFunds({ loanApprovalId: release.loanApprovalId, remarks }),
+    (release, { decision, remarks }) =>
+      decideRelease({ loanApprovalId: release.loanApprovalId, decision, remarks }),
     [],
   )
 
@@ -63,7 +63,7 @@ export function FundReleasesPage() {
           <QueueTable
             shape="release"
             rows={rows}
-            actionLabel="Release"
+            actionLabel="Decide"
             onAction={release.open}
           />
         )}

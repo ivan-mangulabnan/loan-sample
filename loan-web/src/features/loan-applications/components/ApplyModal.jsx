@@ -2,6 +2,7 @@ import { useState } from 'react'
 import Button from '../../../components/Button.jsx'
 import Modal from '../../../components/Modal.jsx'
 import { usePaymentPlans } from '../hooks.js'
+import { repaymentPreview } from '../repayment.js'
 import './ApplyModal.css'
 
 const currency = new Intl.NumberFormat(undefined, {
@@ -9,23 +10,6 @@ const currency = new Intl.NumberFormat(undefined, {
   currency: 'PHP',
   maximumFractionDigits: 2,
 })
-
-/**
- * What the borrower will owe if this application is approved.
- *
- * The same flat calculation the approver's endpoint performs — principal plus a flat
- * percentage, not an amortised schedule (LoanApprovalService). Mirrored here so the form
- * can show a figure rather than leaving the reader to guess what "13%" costs.
- *
- * Indicative, and labelled as such: the rate is read from the plan at APPROVAL time, so
- * a plan repriced in between would settle on a different number. Stating it as the
- * amount owed would be a promise this screen cannot keep.
- */
-function repaymentPreview(amount, plan) {
-  if (!plan || !Number.isFinite(amount) || amount <= 0) return null
-
-  return Math.round(amount * (1 + plan.interestRate / 100) * 100) / 100
-}
 
 /**
  * Applies for a loan — amount plus a plan.

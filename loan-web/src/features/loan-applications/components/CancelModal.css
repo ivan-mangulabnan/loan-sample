@@ -1,0 +1,45 @@
+/* Stated before the figures, not after: the reader should know what the button does
+   before they start checking whether this is the right application. */
+.cancelapp__lead {
+  margin: 0 0 var(--space-5);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  line-height: 1.55;
+}
+
+.cancelapp__facts {
+  margin: 0;
+  display: grid;
+  gap: var(--space-3);
+}
+
+.cancelapp__fact {
+  display: grid;
+  grid-template-columns: 92px 1fr;
+  align-items: baseline;
+  gap: var(--space-4);
+}
+
+.cancelapp__fact dt {
+  color: var(--text-faint);
+  font-size: var(--text-sm);
+}
+
+.cancelapp__fact dd {
+  margin: 0;
+  color: var(--text);
+  font-size: var(--text-base);
+}
+
+.cancelapp__amount {
+  color: var(--text-strong);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-tight);
+}
+
+.cancelapp__error {
+  margin: var(--space-5) 0 0;
+  color: var(--danger);
+  font-size: var(--text-sm);
+}

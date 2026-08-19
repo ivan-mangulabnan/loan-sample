@@ -109,7 +109,17 @@ public class LoanApplicationService
             .ToListAsync();
     }
 
-    public async Task<LoanApplication?> UpdatePaymentPlanAsync (int loanApplicationId, int borrowerId, int paymentPlanId)
+    /// <summary>
+    /// The way out of RETURNED_BY_REVIEWER: fix what the reviewer objected to and send
+    /// it back to the front of the queue.
+    ///
+    /// The switch below is what keeps this from becoming a general-purpose edit. Only a
+    /// returned application has a target status, so one still under review — or already
+    /// approved — throws rather than quietly rewriting its own figures.
+    ///
+    /// A null amount keeps the one on record. See ResubmitApplicationRequest.
+    /// </summary>
+    public async Task<LoanApplication?> ResubmitAsync (int loanApplicationId, int borrowerId, int paymentPlanId, decimal? amount)
     {
         var loanApplication = await GetOwnedAsync(loanApplicationId, borrowerId);
 
@@ -124,6 +134,7 @@ public class LoanApplicationService
         var targetStatus = await _statusService.GetRequiredApplicationStatusAsync(targetCode);
 
         loanApplication.PaymentPlanId = paymentPlanId;
+        if (amount.HasValue) loanApplication.Amount = amount.Value;
         loanApplication.StatusId = targetStatus.StatusId;
         await _context.SaveChangesAsync();
 

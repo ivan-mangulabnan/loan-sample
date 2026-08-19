@@ -24,9 +24,13 @@ const date = new Intl.DateTimeFormat(undefined, {
  * column of dashes, and it is the reader's own name in any case.
  *
  * `actionLabel` + `onAction` add a trailing action column. Opt-in, because most places
- * this table appears are not places you act: /applications spans all eight statuses and
- * most of its rows are not actionable, and the dashboard queue is a preview. Passing
+ * this table appears are not places you act: the dashboard queue is a preview. Passing
  * neither prop leaves the table exactly as it was.
+ *
+ * `actionLabel` may be a **function of the row** returning a label or null, for the
+ * case /applications forced: one list spanning all eight statuses, where a returned
+ * application offers Resubmit, a pending one offers Cancel, and a released one offers
+ * nothing. A row whose label is null gets an empty cell and no click.
  *
  * `onAction` receives the whole row, not an id — the two shapes are keyed differently
  * (loanApplicationId vs loanApprovalId) and picking the right one is the caller's job.
@@ -37,28 +41,40 @@ function QueueTable({ shape, rows, hideBorrower = false, actionLabel, onAction }
   const showBorrower = !hideBorrower
   const canAct = Boolean(actionLabel && onAction)
 
+  // One resolution point for both forms of the prop, so nothing below has to care
+  // which one the caller passed.
+  const labelFor = (row) =>
+    typeof actionLabel === 'function' ? actionLabel(row) : actionLabel
+
   // The row click is a convenience on top of the button, never instead of it: the button
   // is what a keyboard or a screen reader reaches, so nothing is lost by ignoring the row.
+  // A row with no label is not clickable either — there would be nothing to open.
   const rowProps = (row) =>
-    canAct
+    canAct && labelFor(row)
       ? { className: 'queue__row--actionable', onClick: () => onAction(row) }
       : null
 
-  // Without this a click on the button fires the row handler too, opening and
-  // immediately reopening the same dialog.
-  const actionCell = (row) => (
-    <td className="queue__action">
-      <Button
-        size="sm"
-        onClick={(event) => {
-          event.stopPropagation()
-          onAction(row)
-        }}
-      >
-        {actionLabel}
-      </Button>
-    </td>
-  )
+  // Without stopPropagation a click on the button fires the row handler too, opening
+  // and immediately reopening the same dialog.
+  const actionCell = (row) => {
+    const label = labelFor(row)
+
+    return (
+      <td className="queue__action">
+        {label && (
+          <Button
+            size="sm"
+            onClick={(event) => {
+              event.stopPropagation()
+              onAction(row)
+            }}
+          >
+            {label}
+          </Button>
+        )}
+      </td>
+    )
+  }
 
   return (
     <div className="queue">

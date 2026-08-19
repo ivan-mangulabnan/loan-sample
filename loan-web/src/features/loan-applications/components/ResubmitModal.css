@@ -1,0 +1,76 @@
+/* The reviewer's words, given the weight of a quotation rather than of a warning. It is
+   the first thing on the dialog because it is the reason the dialog exists — the fields
+   below only make sense once it has been read.
+
+   `--info` matches the tone statuses.js already gives "returned by reviewer", so the
+   dialog and the badge that led to it say the same thing in the same colour. */
+.resub__remarks {
+  margin: 0 0 var(--space-6);
+  padding: var(--space-4) var(--space-5);
+  border-left: 3px solid var(--info);
+  background: var(--info-tint);
+  border-radius: 0 var(--radius-md) var(--radius-md) 0;
+}
+
+.resub__remarks-text {
+  margin: 0;
+  color: var(--text);
+  font-size: var(--text-base);
+  line-height: 1.55;
+  /* Borrower-authored text is not, but reviewer remarks are free text in a fixed-width
+     panel — a long unbroken string would otherwise widen the dialog. */
+  overflow-wrap: anywhere;
+}
+
+.resub__remarks-by {
+  margin-top: var(--space-2);
+  color: var(--text-faint);
+  font-size: var(--text-xs);
+}
+
+.resub__lead {
+  margin: 0 0 var(--space-6);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+.resub__label {
+  display: block;
+  margin-bottom: var(--space-2);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.resub__label--spaced {
+  margin-top: var(--space-5);
+}
+
+.resub__preview {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+  margin: var(--space-5) 0 0;
+  padding: var(--space-4);
+  background: var(--surface-sunken);
+  border-radius: var(--radius-md);
+}
+
+.resub__preview-figure {
+  color: var(--text-strong);
+  font-size: var(--text-2xl);
+  font-weight: var(--weight-bold);
+  letter-spacing: var(--tracking-tight);
+}
+
+.resub__preview-note {
+  color: var(--text-faint);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+}
+
+.resub__error {
+  margin: var(--space-4) 0 0;
+  color: var(--danger);
+  font-size: var(--text-sm);
+}

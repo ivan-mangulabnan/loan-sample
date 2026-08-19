@@ -24,6 +24,19 @@ export function createApplication(payload) {
   return apiClient.post('/LoanApplication', payload)
 }
 
+/**
+ * Sends a returned application back to the reviewer with whatever the borrower
+ * changed. PUT, not POST: it edits a record that already exists.
+ *
+ * `amount` is optional server-side, but this always sends it — the form has the
+ * figure in a box either way, and omitting it would make "I did not touch the
+ * amount" and "I cleared the amount" the same request.
+ */
+export function resubmitApplication(id, { paymentPlanId, amount }) {
+  return apiClient.put(`/LoanApplication/${id}/resubmit`, { paymentPlanId, amount })
+}
+
+/** Terminal, and the API has no undo. Confirm before calling this. */
 export function cancelApplication(id) {
   return apiClient.post(`/LoanApplication/${id}/cancel`)
 }

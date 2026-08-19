@@ -20,15 +20,25 @@ public class FundReleaseController : ControllerBase
     _fundReleaseService = fundReleaseService;
   }
 
+  /// <summary>
+  /// Release the funds, or refuse to. One endpoint rather than two because the desk
+  /// makes one decision, the same shape the review and approval desks take.
+  ///
+  /// The sentence branches on the decision. useWriteAction shows whatever comes back
+  /// verbatim as the reader's notice, so a fixed "Funds released." would announce a
+  /// disbursement that did not happen.
+  /// </summary>
   [HttpPost]
-  public async Task<ActionResult<MessageResponse>> Release (FundReleaseRequest fundReleaseRequest)
+  public async Task<ActionResult<MessageResponse>> Decide (FundReleaseRequest fundReleaseRequest)
   {
     try
     {
-      var fundRelease = await _fundReleaseService.ReleaseFundsAsync(User.GetUserId(), User.GetTenantId(), fundReleaseRequest);
+      var fundRelease = await _fundReleaseService.DecideAsync(User.GetUserId(), User.GetTenantId(), fundReleaseRequest);
       if (fundRelease is null) return NotFound();
 
-      return Ok(MessageResponse.Of("Funds released."));
+      return Ok(MessageResponse.Of(fundReleaseRequest.Decision == Decision.Reject
+        ? "Release rejected."
+        : "Funds released."));
     }
     catch (InvalidOperationException ex)
     {
