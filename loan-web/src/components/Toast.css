@@ -1,0 +1,108 @@
+/* Quieter than a Callout by design: no glow. A Callout sits in the page and can afford
+   the treatment; a toast slides in over content and a glowing box that comes and goes
+   reads as noise. The tone is carried by one edge instead. */
+.toast {
+  position: relative;
+  display: flex;
+  align-items: flex-start;
+  gap: var(--space-4);
+  width: min(380px, calc(100vw - var(--space-7)));
+  padding: var(--space-4) var(--space-5);
+  background: var(--surface-panel);
+  border: 1px solid var(--border);
+  border-left: 3px solid var(--accent);
+  border-radius: var(--radius-lg);
+  box-shadow: var(--shadow-raised);
+  /* Clips the timer bar to the rounded corner. */
+  overflow: hidden;
+  animation: toast-in 0.22s ease-out;
+}
+
+.toast--danger {
+  border-left-color: var(--danger);
+}
+
+.toast__text {
+  flex: 1;
+  margin: 0;
+  font-size: var(--text-md);
+  line-height: 1.45;
+  color: var(--text);
+}
+
+.toast__dismiss {
+  flex-shrink: 0;
+  width: var(--space-5);
+  height: var(--space-5);
+  display: grid;
+  place-items: center;
+  background: none;
+  border: none;
+  padding: 0;
+  border-radius: var(--radius-sm);
+  color: var(--text-subtle);
+  font-family: inherit;
+  font-size: var(--text-sm);
+  cursor: pointer;
+}
+
+.toast__dismiss:hover {
+  color: var(--text-strong);
+}
+
+.toast__dismiss:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+/* The countdown, drawn along the bottom edge. Pinned to the left so it drains toward
+   the corner it started from. */
+.toast__timer {
+  position: absolute;
+  left: 0;
+  bottom: 0;
+  height: 2px;
+  width: 100%;
+  background: var(--accent);
+  opacity: 0.45;
+  transform-origin: left;
+  animation-name: toast-drain;
+  animation-timing-function: linear;
+  animation-fill-mode: forwards;
+}
+
+.toast--danger .toast__timer {
+  background: var(--danger);
+}
+
+@keyframes toast-in {
+  from {
+    opacity: 0;
+    transform: translateY(8px);
+  }
+}
+
+@keyframes toast-drain {
+  to {
+    transform: scaleX(0);
+  }
+}
+
+/* The slide becomes a fade, and the timer bar simply holds — an animated countdown is
+   exactly the kind of persistent motion this setting asks to be spared. The toast still
+   dismisses on schedule; only its depiction stops moving. */
+@media (prefers-reduced-motion: reduce) {
+  .toast {
+    animation: toast-fade-in 0.22s ease-out;
+  }
+
+  .toast__timer {
+    animation: none;
+  }
+
+  @keyframes toast-fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+}

@@ -1,7 +1,6 @@
 import { useCallback } from 'react'
 import { Link, useParams } from 'react-router-dom'
 import Button from '../../../components/Button.jsx'
-import Callout from '../../../components/Callout.jsx'
 import { useWriteAction } from '../../../hooks/useWriteAction.js'
 import LoanProgress from '../components/LoanProgress.jsx'
 import PayModal from '../components/PayModal.jsx'
@@ -79,8 +78,6 @@ export function LoanDetailPage() {
           </Button>
         )}
       </header>
-
-      {pay.notice && <Callout onDismiss={pay.dismissNotice}>{pay.notice}</Callout>}
 
       <div className="loandetail">
         <LoanProgress loan={loan.data} />

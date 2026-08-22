@@ -99,6 +99,14 @@
     flex-shrink: 0;
   }
 
+  /* The bar's height, stated once so a fixed overlay can clear it: two rows of
+     --space-8 items with a --space-2 gap, inside --space-2 padding top and bottom.
+     On :root, not .shell — ToastStack renders outside the shell, as a sibling, so it
+     could not inherit it from there. Without this the toast sits over the navigation. */
+  :root {
+    --rail-bar-height: calc(var(--space-8) * 2 + var(--space-2) * 3);
+  }
+
   .rail__items {
     flex: none;
     flex-direction: row;

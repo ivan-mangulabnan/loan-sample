@@ -1,6 +1,5 @@
 import { useCallback } from 'react'
 import Button from '../../../components/Button.jsx'
-import Callout from '../../../components/Callout.jsx'
 import { useListQuery } from '../../../hooks/useListQuery.js'
 import { useWriteAction } from '../../../hooks/useWriteAction.js'
 import { ListView, QueueTable, configFor, useRoleQueue } from '../../dashboard/index.js'
@@ -50,10 +49,6 @@ export function ReviewPage() {
           Refresh
         </Button>
       </header>
-
-      {review.notice && (
-        <Callout onDismiss={review.dismissNotice}>{review.notice}</Callout>
-      )}
 
       <ListView
         query={query}

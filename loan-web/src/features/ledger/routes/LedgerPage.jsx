@@ -75,10 +75,6 @@ export function LedgerPage() {
         </div>
       </header>
 
-      {deposit.notice && (
-        <Callout onDismiss={deposit.dismissNotice}>{deposit.notice}</Callout>
-      )}
-
       {noLedger ? (
         <Callout>{ledger.error.message}</Callout>
       ) : (

@@ -1,6 +1,5 @@
 import { useCallback } from 'react'
 import Button from '../../../components/Button.jsx'
-import Callout from '../../../components/Callout.jsx'
 import { useListQuery } from '../../../hooks/useListQuery.js'
 import { useWriteAction } from '../../../hooks/useWriteAction.js'
 import { ListView, QueueTable } from '../../dashboard/index.js'
@@ -39,32 +38,18 @@ function MyApplications() {
   const resubmit = useWriteAction(sendResubmit, reload)
   const cancel = useWriteAction(sendCancel, reload)
 
-  const writes = [apply, resubmit, cancel]
-
-  // Each hook keeps its own notice until dismissed, and one line shows them all — so
-  // opening any dialog clears what the last one left behind. Without this the newest
-  // result loses to an older notice still on screen, and a cancelled application
-  // announces "resubmitted for review".
-  const openOnly = (write, row) => {
-    for (const other of writes) if (other !== write) other.dismissNotice()
-    write.open(row)
-  }
-
   // One button per row, so the row's status decides which write it belongs to. A
   // returned application is both resubmittable and cancellable and offers Resubmit —
   // ResubmitModal carries the other way out, next to the remarks that should decide it.
   const openFor = (row) =>
-    openOnly(actionFor(row) === BORROWER_ACTIONS.Resubmit ? resubmit : cancel, row)
+    (actionFor(row) === BORROWER_ACTIONS.Resubmit ? resubmit : cancel).open(row)
 
   // Swap one dialog for the other rather than stacking two <dialog>s. close() refuses
   // mid-flight, so this cannot fire while a resubmission is in the air.
   const cancelInstead = (application) => {
     resubmit.close()
-    openOnly(cancel, application)
+    cancel.open(application)
   }
-
-  // Whichever write just finished. openOnly guarantees at most one is set.
-  const notice = writes.find((write) => write.notice)
 
   return (
     <>
@@ -77,13 +62,11 @@ function MyApplications() {
           <Button size="sm" onClick={reload}>
             Refresh
           </Button>
-          <Button variant="accent" size="sm" onClick={() => openOnly(apply, true)}>
+          <Button variant="accent" size="sm" onClick={() => apply.open(true)}>
             Apply for a loan
           </Button>
         </div>
       </header>
-
-      {notice && <Callout onDismiss={notice.dismissNotice}>{notice.notice}</Callout>}
 
       <ListView
         query={query}

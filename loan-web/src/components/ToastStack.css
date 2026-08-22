@@ -1,0 +1,37 @@
+.toaststack {
+  position: fixed;
+  bottom: var(--space-6);
+  right: var(--space-6);
+  z-index: var(--z-toast);
+  display: flex;
+  flex-direction: column;
+  /* Newest nearest the corner, so a burst of writes reads bottom-up in the order the
+     eye already lands. */
+  justify-content: flex-end;
+  gap: var(--space-3);
+  /* Load-bearing. The column spans dead space most of the time, and without this it
+     swallows clicks on whatever sits beneath it — on every list page, that is the row
+     action button in the last column. Only the toasts themselves take the pointer. */
+  pointer-events: none;
+}
+
+.toaststack > * {
+  pointer-events: auto;
+}
+
+/* The rail becomes a bottom bar here, so the stack has to clear it. It stays at the
+   bottom rather than moving to the top: the top is where the page heading and its
+   action buttons are, and covering the button that raised the toast is worse than
+   covering nothing.
+
+   `--rail-bar-height` is declared on `.shell` at this breakpoint from the rail's own
+   parts, so the offset tracks the bar instead of guessing a number that a taller
+   glyph or an extra nav item would silently break. */
+@media (max-width: 768px) {
+  .toaststack {
+    bottom: calc(var(--rail-bar-height) + var(--space-4));
+    left: var(--space-4);
+    right: var(--space-4);
+    align-items: stretch;
+  }
+}

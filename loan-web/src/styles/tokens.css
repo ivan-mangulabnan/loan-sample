@@ -128,6 +128,13 @@
      black, so a lighter scrim leaves the dialog and the page at similar weight. */
   --surface-backdrop: rgba(0, 0, 0, 0.62);
 
+  /* ---- Stacking ----
+     The only z-index in the codebase. A modal needs none: <dialog>.showModal() puts
+     the element in the browser's top layer, above every stacking context, which is
+     also why a toast cannot paint over an open dialog. It does not need to — a write
+     closes its dialog before it reports success. */
+  --z-toast: 100;
+
   /* ---- Layout ---- */
   --rail-width: 96px;
   --aside-width: 308px;
