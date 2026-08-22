@@ -12,6 +12,11 @@
   --surface-card: #1a2124;
   --surface-sunken: #191f23;
   --surface-track: #1d2427;
+  /* Zebra striping on table rows. A hair lighter than --surface-panel rather than
+     darker: --surface-card is already the row hover, and a stripe that matched it
+     would make every other row look permanently hovered. */
+  --surface-row-alt: #1f272b;
+
   --surface-control: #252e33;
   --surface-control-hover: #2e3a40;
 

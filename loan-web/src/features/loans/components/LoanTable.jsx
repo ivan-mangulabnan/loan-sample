@@ -35,8 +35,8 @@ function LoanTable({ rows, actionLabel, onAction }) {
         <thead>
           <tr>
             <th scope="col">Ref</th>
-            <th scope="col">Principal</th>
-            <th scope="col">Balance</th>
+            <th scope="col" className="loans__num-head">Principal</th>
+            <th scope="col" className="loans__num-head">Balance</th>
             <th scope="col">Repaid</th>
             <th scope="col">Due</th>
             <th scope="col">Status</th>

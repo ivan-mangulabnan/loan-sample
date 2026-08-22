@@ -24,23 +24,42 @@
 .queue__table td {
   padding: var(--space-4) var(--space-5);
   color: var(--text);
-  border-bottom: 1px solid var(--border);
 }
 
-.queue__table tbody tr:last-child td {
-  border-bottom: none;
+/* Zebra striping instead of a rule between every row: the tint alone separates them,
+   and carrying both made a dark table read as busy. Even rows are the tinted ones, so
+   the first row of data stays flush with the panel and does not merge into the header.
+
+   On the <td>, not the <tr>: the hover rule below also paints cells, and a background
+   on the row would sit underneath it — the stripe would win on half the rows and the
+   hover would appear not to work. */
+.queue__table tbody tr:nth-child(even) td {
+  background: var(--surface-row-alt);
 }
 
 .queue__table tbody tr:hover td {
   background: var(--surface-card);
 }
 
-.queue__ref {
+/* All qualified with `.queue__table`: at (0,1,0) a bare class loses to
+   `.queue__table td` (0,1,1), which sets `color: var(--text)` on every cell — so these
+   never applied and the whole column hierarchy rendered one flat grey. Measured in the
+   browser, not inferred. */
+.queue__table .queue__ref {
   color: var(--text-faint);
   font-family: var(--mono);
 }
 
-.queue__num {
+/* Money reads right-aligned so the column can be scanned for magnitude — the same
+   treatment the ledger's Amount column gets. Both the cell and its heading, qualified
+   with the table so neither loses to `.queue__table th`'s `text-align: left`. */
+.queue__table .queue__num,
+.queue__table .queue__num-head {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.queue__table .queue__num {
   font-weight: var(--weight-bold);
   color: var(--text-strong);
 }

@@ -83,7 +83,9 @@ function QueueTable({ shape, rows, hideBorrower = false, actionLabel, onAction }
           <tr>
             <th scope="col">Ref</th>
             {showBorrower && <th scope="col">Borrower</th>}
-            <th scope="col">{isRelease ? 'Principal' : 'Amount'}</th>
+            <th scope="col" className="queue__num-head">
+              {isRelease ? 'Principal' : 'Amount'}
+            </th>
             <th scope="col">Plan</th>
             <th scope="col">{isRelease ? 'Approved' : 'Requested'}</th>
             <th scope="col">{isRelease ? 'Approver' : 'Status'}</th>

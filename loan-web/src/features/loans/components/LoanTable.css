@@ -25,23 +25,42 @@
 .loans__table td {
   padding: var(--space-4) var(--space-5);
   color: var(--text);
-  border-bottom: 1px solid var(--border);
 }
 
-.loans__table tbody tr:last-child td {
-  border-bottom: none;
+/* Zebra striping instead of a rule between every row: the tint alone separates them,
+   and carrying both made a dark table read as busy. Even rows are the tinted ones, so
+   the first row of data stays flush with the panel and does not merge into the header.
+
+   On the <td>, not the <tr>: the hover rule below also paints cells, and a background
+   on the row would sit underneath it — the stripe would win on half the rows and the
+   hover would appear not to work. */
+.loans__table tbody tr:nth-child(even) td {
+  background: var(--surface-row-alt);
 }
 
 .loans__table tbody tr:hover td {
   background: var(--surface-card);
 }
 
-.loans__ref {
+/* All qualified with `.loans__table`: at (0,1,0) a bare class loses to
+   `.loans__table td` (0,1,1), which sets `color: var(--text)` on every cell — so these
+   never applied and the whole column hierarchy rendered one flat grey. Measured in the
+   browser, not inferred. */
+.loans__table .loans__ref {
   color: var(--text-faint);
   font-family: var(--mono);
 }
 
-.loans__num {
+/* Money reads right-aligned so the column can be scanned for magnitude — the same
+   treatment the ledger's Amount column gets. Both the cell and its heading, qualified
+   with the table so neither loses to `.loans__table th`'s `text-align: left`. */
+.loans__table .loans__num,
+.loans__table .loans__num-head {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.loans__table .loans__num {
   font-weight: var(--weight-bold);
   color: var(--text-strong);
 }
@@ -53,7 +72,7 @@
   width: 100%;
 }
 
-.loans__progress-note {
+.loans__table .loans__progress-note {
   display: block;
   margin-top: var(--space-2);
   font-size: var(--text-xs);
