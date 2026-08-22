@@ -1,0 +1,64 @@
+/* Same frame as QueueTable: the table scrolls inside its own box so the page never
+   scrolls sideways (rule 15). Not shared with it — these are two different tables, and
+   a common stylesheet would couple them for the sake of a border. */
+.txn {
+  overflow-x: auto;
+  background: var(--surface-panel);
+  border-radius: var(--radius-lg);
+}
+
+.txn__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-base);
+  white-space: nowrap;
+}
+
+.txn__table th {
+  text-align: left;
+  padding: var(--space-4) var(--space-5);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  border-bottom: 1px solid var(--border);
+}
+
+.txn__table td {
+  padding: var(--space-4) var(--space-5);
+  color: var(--text);
+  border-bottom: 1px solid var(--border);
+}
+
+.txn__table tbody tr:last-child td {
+  border-bottom: none;
+}
+
+.txn__table tbody tr:hover td {
+  background: var(--surface-card);
+}
+
+.txn__ref {
+  color: var(--text-faint);
+  font-family: var(--mono);
+}
+
+/* Figures align on their last digit, so the column can be scanned for magnitude. */
+.txn__amount-head,
+.txn__amount {
+  text-align: right;
+  font-variant-numeric: tabular-nums;
+}
+
+.txn__amount {
+  font-weight: var(--weight-bold);
+}
+
+/* Reinforces the sign, never replaces it — the +/− is already in the formatted value,
+   so the colour is redundant by design rather than load-bearing. */
+.txn__amount--credit {
+  color: var(--success);
+}
+
+.txn__amount--debit {
+  color: var(--danger);
+}

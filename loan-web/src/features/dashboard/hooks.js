@@ -1,6 +1,6 @@
 import { useCallback } from 'react'
 import { useApiResource } from '../../hooks/useApiResource.js'
-import { fetchDashboardStats, fetchLedgerBalance, fetchQueue } from './api.js'
+import { fetchDashboardStats, fetchQueue } from './api.js'
 
 /**
  * Loads whichever queue the signed-in role owns — the whole filtered queue, as an
@@ -38,12 +38,3 @@ export function useDashboardStats(stats) {
   return useApiResource(fetcher, [path, days])
 }
 
-/** Admin-only: the tenant's capital ledger balance. */
-export function useLedgerBalance(enabled) {
-  const fetcher = useCallback(
-    (options) => (enabled ? fetchLedgerBalance(options) : Promise.resolve(null)),
-    [enabled],
-  )
-
-  return useApiResource(fetcher, [enabled])
-}

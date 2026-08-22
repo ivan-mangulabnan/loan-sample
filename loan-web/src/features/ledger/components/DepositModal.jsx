@@ -1,0 +1,102 @@
+import { useState } from 'react'
+import Button from '../../../components/Button.jsx'
+import Modal from '../../../components/Modal.jsx'
+import './DepositModal.css'
+
+const currency = new Intl.NumberFormat(undefined, {
+  style: 'currency',
+  currency: 'PHP',
+  maximumFractionDigits: 0,
+})
+
+/**
+ * Posts capital into the operating ledger.
+ *
+ * `open` rather than a row: unlike the three decision dialogs this one acts on the
+ * ledger itself, so there is nothing to key it on and nothing to summarise back.
+ *
+ * The amount is validated here only to keep an obviously bad value from becoming a round
+ * trip — the API's [Range(0.01, ...)] is the real gate (rule 18). A number input still
+ * yields '' for junk, so the parse is what actually catches it.
+ */
+function DepositModal({ open, balance, onSubmit, onClose, isSubmitting = false, error = null }) {
+  const [amount, setAmount] = useState('')
+  const [invalid, setInvalid] = useState(false)
+
+  if (!open) return null
+
+  const parsed = Number(amount)
+  const isPositive = amount !== '' && Number.isFinite(parsed) && parsed > 0
+
+  function handleSubmit() {
+    if (!isPositive) {
+      setInvalid(true)
+      return
+    }
+
+    setInvalid(false)
+    onSubmit({ amount: parsed })
+  }
+
+  return (
+    <Modal
+      open
+      title="Post a capital deposit"
+      onClose={onClose}
+      footer={
+        <>
+          <Button variant="ghost" onClick={onClose} disabled={isSubmitting}>
+            Cancel
+          </Button>
+          <Button variant="accent" onClick={handleSubmit} disabled={isSubmitting}>
+            {isSubmitting ? 'Posting…' : 'Post deposit'}
+          </Button>
+        </>
+      }
+    >
+      <p className="deposit__lead">
+        The deposit credits the operating ledger immediately and becomes capital available
+        to fund loans. There is no undo in the API.
+      </p>
+
+      {typeof balance === 'number' && (
+        <p className="deposit__balance">
+          Current balance <strong>{currency.format(balance)}</strong>
+        </p>
+      )}
+
+      <label className="deposit__label" htmlFor="deposit-amount">
+        Amount
+      </label>
+      <input
+        id="deposit-amount"
+        type="number"
+        inputMode="decimal"
+        min="0.01"
+        step="0.01"
+        className="field field--input"
+        value={amount}
+        placeholder="0.00"
+        onChange={(event) => {
+          setAmount(event.target.value)
+          if (invalid) setInvalid(false)
+        }}
+      />
+
+      {invalid && (
+        <p className="deposit__error" role="alert">
+          Enter an amount greater than zero.
+        </p>
+      )}
+
+      {/* The 409 lands here: the tenant has no operating ledger to deposit into. */}
+      {error && (
+        <p className="deposit__error" role="alert">
+          {error}
+        </p>
+      )}
+    </Modal>
+  )
+}
+
+export default DepositModal

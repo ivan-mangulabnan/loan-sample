@@ -127,6 +127,21 @@ export const router = createBrowserRouter([
           },
         ],
       },
+      {
+        path: 'ledger',
+        element: <RequireRole allow={[ROLES.Admin]} />,
+        children: [
+          {
+            index: true,
+            lazy: async () => {
+              const { LedgerPage } = await import(
+                './features/ledger/routes/LedgerPage.jsx'
+              )
+              return { Component: LedgerPage }
+            },
+          },
+        ],
+      },
       { path: '*', element: <NotFound /> },
     ],
   },

@@ -1,0 +1,35 @@
+.deposit__lead {
+  margin: 0 0 var(--space-5);
+  color: var(--text-muted);
+  font-size: var(--text-base);
+  line-height: 1.55;
+}
+
+/* What the deposit is being added to, stated before the field so the figure typed below
+   has something to be judged against. */
+.deposit__balance {
+  margin: 0 0 var(--space-6);
+  padding-bottom: var(--space-4);
+  border-bottom: 1px solid var(--border);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.deposit__balance strong {
+  color: var(--text-strong);
+  font-size: var(--text-lg);
+  font-weight: var(--weight-bold);
+}
+
+.deposit__label {
+  display: block;
+  margin-bottom: var(--space-2);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}
+
+.deposit__error {
+  margin: var(--space-4) 0 0;
+  color: var(--danger);
+  font-size: var(--text-sm);
+}

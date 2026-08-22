@@ -22,8 +22,11 @@ import { ROLES } from '../../lib/roles.js'
  *   Reviewer → GET /api/ReviewApplication/queue   (PENDING_REVIEW)
  *   Approver → GET /api/LoanApproval/queue        (PENDING_APPROVAL)
  *   Admin    → GET /api/FundRelease/queue         (PENDING_RELEASE)
- *              GET /api/Ledger/balance
  *   Loaner   → GET /api/LoanApplication/me, GET /api/Loan/me
+ *
+ * The Admin also reads /api/Ledger/*, but that is not named here: the ledger area owns
+ * its own endpoints in features/ledger/api.js, and this config only carries what the
+ * dashboard itself fetches.
  */
 export const roleConfig = {
   [ROLES.Reviewer]: {
@@ -114,8 +117,6 @@ export const roleConfig = {
       chartCaption: 'Payments collected per day',
       emptyChartMessage: 'No payments collected in this period.',
     },
-    // Only Admin can read the capital ledger.
-    ledger: { path: '/Ledger/balance' },
     nav: [
       { to: '/', glyph: '⌂', label: 'Overview', end: true },
       { to: '/releases', glyph: '⇄', label: 'Release queue' },

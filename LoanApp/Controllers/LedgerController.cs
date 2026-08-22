@@ -1,4 +1,5 @@
 using Constants;
+using Dtos.Requests;
 using Dtos.Responses;
 using Extensions;
 using Microsoft.AspNetCore.Authorization;
@@ -32,5 +33,29 @@ public class LedgerController : ControllerBase
     {
       return Conflict(ex.Message);
     }
+  }
+
+  [HttpGet("transactions")]
+  public async Task<ActionResult<List<TransactionResponse>>> GetTransactions (
+    [FromQuery] LedgerQueryRequest ledgerQueryRequest)
+  {
+    var tenantId = User.GetTenantId();
+
+    try
+    {
+      // Resolved but not otherwise used: a tenant with no ledger must get the same 409
+      // as /balance rather than an empty list, which would read as "no movements yet".
+      // One condition, one story.
+      await _ledgerService.GetOperatingLedgerAsync(tenantId);
+    }
+    catch (InvalidOperationException ex)
+    {
+      return Conflict(ex.Message);
+    }
+
+    var transactions = await _ledgerService.GetTransactionsAsync(
+      tenantId, ledgerQueryRequest.Search, ledgerQueryRequest.Type);
+
+    return Ok(TransactionResponse.From(transactions));
   }
 }
