@@ -1,5 +1,7 @@
 // Public surface of this feature. Other features import only from here.
 export { default as ApplicationStatusBadge } from './components/ApplicationStatusBadge.jsx'
 export { default as DecisionModal } from './components/DecisionModal.jsx'
-export { DECISIONS, REQUIRES_REMARKS } from './decisions.js'
+export { default as ModalProgress } from './components/ModalProgress.jsx'
+export { DECISIONS, DECISION_GLYPHS, REQUIRES_REMARKS } from './decisions.js'
+export { stagesFor, stagesForCode } from './progress.js'
 export { useApplication, useMyApplications } from './hooks.js'

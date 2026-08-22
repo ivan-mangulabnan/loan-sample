@@ -25,7 +25,7 @@ const RETURNED = 'RETURNED_BY_REVIEWER'
  * to match does not throw, it silently reports "no action available", which is the exact
  * dead end this module exists to remove.
  */
-function codeFor(label) {
+export function codeFor(label) {
   if (!label) return null
 
   const wanted = label.trim().toLowerCase()

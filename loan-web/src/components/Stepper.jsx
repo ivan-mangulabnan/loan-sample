@@ -10,6 +10,7 @@ import './Stepper.css'
  *          status: 'done'     — finished and valid, shows a check mark
  *                  'active'   — the current step
  *                  'waiting'  — blocked on someone else, pulses
+ *                  'pending'  — blocked on the READER, pulses in warning
  *                  'todo'     — not reached yet
  *                  'invalid'  — visited but needs fixing
  *          Plain strings derive done/active/todo from `current`.
@@ -29,9 +30,23 @@ function Stepper({ steps, current = 1, size = 'md' }) {
     typeof step === 'string' ? { label: step, status: null } : step,
   )
 
-  const activeIndex = items.findIndex((item, index) =>
-    item.status ? item.status === 'active' || item.status === 'waiting' : index + 1 === current,
+  const markedIndex = items.findIndex((item, index) =>
+    item.status
+      ? item.status === 'active' || item.status === 'waiting' || item.status === 'pending'
+      : index + 1 === current,
   )
+
+  // A live step ('active'/'waiting'/'pending') is the usual marker, but a flow can end
+  // with none of them — every
+  // stage done, or stopped on an 'invalid' one. Without a fallback findIndex returns -1,
+  // the bar fill collapses to `0 || current` and the group names itself after step 1: a
+  // finished flow drew as though it had never started, and a failed one announced its
+  // first stage. The furthest step that is not 'todo' is how far it actually reached.
+  const lastReached = items.reduce(
+    (found, item, index) => (item.status && item.status !== 'todo' ? index : found),
+    -1,
+  )
+  const activeIndex = markedIndex !== -1 ? markedIndex : lastReached
   const activeLabel = items[activeIndex]?.label ?? items[current - 1]?.label
 
   return (
@@ -55,7 +70,7 @@ function Stepper({ steps, current = 1, size = 'md' }) {
               <span
                 className={`stepper__bar${
                   // Fill the connector up to the furthest step reached, so a
-                  // 'waiting' or 'invalid' step still reads as arrived-at.
+                  // 'waiting', 'pending' or 'invalid' step still reads as arrived-at.
                   step <= (activeIndex + 1 || current) ? ' stepper__bar--filled' : ''
                 }`}
                 aria-hidden="true"
@@ -82,7 +97,7 @@ function Stepper({ steps, current = 1, size = 'md' }) {
                     step
                   )}
                 </span>
-                {state === 'waiting' && (
+                {(state === 'waiting' || state === 'pending') && (
                   <span className="stepper__pulse" aria-hidden="true" />
                 )}
               </span>
@@ -92,9 +107,11 @@ function Stepper({ steps, current = 1, size = 'md' }) {
                   ? ' (completed)'
                   : state === 'waiting'
                     ? ' (waiting)'
-                    : state === 'invalid'
-                      ? ' (needs attention)'
-                      : ''}
+                    : state === 'pending'
+                      ? ' (waiting for you)'
+                      : state === 'invalid'
+                        ? ' (needs attention)'
+                        : ''}
               </span>
             </div>
           </Fragment>

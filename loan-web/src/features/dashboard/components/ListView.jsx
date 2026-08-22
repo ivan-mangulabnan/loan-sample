@@ -196,15 +196,15 @@ function ListView({
         {error ? (
           <p className="muted">Could not load: {error.message}</p>
         ) : isFirstLoad ? (
-          <p className="muted">Loading…</p>
+          <p className="list__empty">Loading…</p>
         ) : pageRows.length > 0 ? (
           children(pageRows)
         ) : isFiltered ? (
           // A filtered miss is a different state from an empty list, and saying so is
           // what tells the reader the filter is working rather than the data missing.
-          <p className="muted">Nothing matches that search.</p>
+          <p className="list__empty">Nothing matches that search.</p>
         ) : (
-          <p className="muted">{emptyMessage}</p>
+          <p className="list__empty">{emptyMessage}</p>
         )}
       </div>
 

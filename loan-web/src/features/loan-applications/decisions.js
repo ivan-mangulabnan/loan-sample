@@ -32,3 +32,20 @@ export const DECISION_LABELS = {
   [DECISIONS.Reject]: 'Reject',
   [DECISIONS.Return]: 'Return for changes',
 }
+
+/**
+ * The mark each decision carries on a button.
+ *
+ * The same three glyphs `dashboard/components/PipelineMetric.jsx` already uses for the
+ * outcomes these produce — approved ✓, rejected ✕, returned ↺. Reusing them means the
+ * button that *causes* an outcome wears the mark of the tile that *counts* it; a second
+ * icon vocabulary for one set of concepts is how the two drift apart.
+ *
+ * Unicode rather than SVG: there is no icon library here, and `Modal`'s ✕ and
+ * PipelineMetric's chips are both already plain glyphs.
+ */
+export const DECISION_GLYPHS = {
+  [DECISIONS.Approve]: '✓',
+  [DECISIONS.Reject]: '✕',
+  [DECISIONS.Return]: '↺',
+}

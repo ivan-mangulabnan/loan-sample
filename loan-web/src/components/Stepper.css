@@ -5,13 +5,27 @@
      as its own band of chrome instead of another form row. */
   justify-content: center;
   gap: var(--space-3);
+  /* Wrap rather than a breakpoint (rule 16): four stages do not fit one phone
+     row, and where they stop fitting is a function of the labels, not of the
+     viewport. Two stages never wrap, so registration is unaffected. */
+  flex-wrap: wrap;
+  row-gap: var(--space-4);
 }
 
+/* The label sits UNDER the dot. Beside it, four stages clip at every width a
+   modal can offer — measured down to 2px of a 59px word at a 390px viewport.
+   Stacked, nothing clips at any width. */
 .stepper__step {
   display: flex;
+  flex-direction: column;
   align-items: center;
   gap: var(--space-2);
   min-width: 0;
+  text-align: center;
+  flex: 0 1 auto;
+  /* Bounds a long outcome word ("Awaiting resubmission") into two short lines
+     rather than one wide column that shoulders its neighbours off the row. */
+  max-width: 6.5rem;
 }
 
 .stepper__dot {
@@ -49,12 +63,12 @@
   height: 12px;
 }
 
+/* Wraps rather than truncating: nowrap + ellipsis is what clipped the labels when
+   they sat beside the dots, and a stacked step has a column to wrap inside. */
 .stepper__label {
   font-size: var(--text-sm);
   color: var(--text-muted);
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  line-height: 1.25;
   transition: color 0.25s ease;
 }
 
@@ -75,13 +89,31 @@
 
 /* Capped rather than flex:1 — a connector that eats all the leftover width
    pushes the steps to opposite edges, so the row reads as two corner items
-   instead of one centred group. It still shrinks when space is tight. */
+   instead of one centred group. It still shrinks when space is tight.
+
+   flex-basis is 0 with a grow, not a fixed --space-8: once the row can wrap, a
+   fixed-basis connector that lands first on a new line still claims its width and
+   draws a rule joining nothing. Growing from zero means a wrapped-to-front bar has
+   no leftover space to claim on its own line and collapses, while a bar between two
+   steps still fills the gap. max-width keeps it from eating the row, which is what
+   the original cap was defending against.
+
+   align-self + margin-top pin it to the dot. The step is a column now, so the
+   default centring would drop the connector to the middle of the dot-plus-label
+   stack instead of across the dots. 15px is half a 30px dot; 11px half of 22px. */
 .stepper__bar {
-  flex: 0 1 var(--space-8);
+  flex: 1 1 0;
+  max-width: var(--space-8);
   height: 1px;
-  min-width: var(--space-4);
+  min-width: 0;
+  align-self: flex-start;
+  margin-top: 15px;
   background: var(--border);
   transition: background 0.25s ease;
+}
+
+.stepper--sm .stepper__bar {
+  margin-top: 11px;
 }
 
 .stepper__bar--filled {
@@ -127,9 +159,11 @@
   position: absolute;
   inset: -1px;
   border-radius: 50%;
-  border: 2px solid var(--accent);
+  /* Ring and halo read from one pair of variables so a state can retint the pulse
+     without redeclaring the animation — see --pulse-ring on 'pending' below. */
+  border: 2px solid var(--pulse-ring, var(--accent));
   /* A soft halo under the ring so the pulse carries further than a hairline. */
-  box-shadow: 0 0 0 0 var(--glow-accent-soft);
+  box-shadow: 0 0 0 0 var(--pulse-glow, var(--glow-accent-soft));
   animation: stepper-pulse 1.6s ease-out infinite;
   pointer-events: none;
 }
@@ -142,7 +176,7 @@
   0% {
     transform: scale(1);
     opacity: 0.85;
-    box-shadow: 0 0 0 0 var(--glow-accent-soft);
+    box-shadow: 0 0 0 0 var(--pulse-glow, var(--glow-accent-soft));
   }
   35% {
     opacity: 0.6;
@@ -152,6 +186,23 @@
     opacity: 0;
     box-shadow: 0 0 0 6px transparent;
   }
+}
+
+/* Pending: waiting on the READER, not on another desk. Orange rather than the red of
+   'invalid' — nothing has failed and nothing is terminal, the application is simply
+   parked until they act — and it pulses for the same reason 'waiting' does, because
+   something is expected of somebody. The two are distinguished by colour: accent means
+   another desk has it, warning means you do. */
+.stepper__step--pending .stepper__dot {
+  background: var(--warning-tint);
+  border-color: var(--warning);
+  color: var(--warning);
+  --pulse-ring: var(--warning);
+  --pulse-glow: var(--glow-warning-soft);
+}
+
+.stepper__step--pending .stepper__label {
+  color: var(--warning);
 }
 
 /* Invalid: visited but needs fixing. */

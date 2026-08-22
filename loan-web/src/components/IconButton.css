@@ -1,0 +1,94 @@
+/* A square the size of a rail item, so a row of these matches the app's other controls.
+   `position: relative` is what the label anchors to. */
+.iconbtn {
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  width: var(--space-8);
+  height: var(--space-8);
+  padding: 0;
+  border: none;
+  border-radius: var(--radius);
+  background: var(--surface-control);
+  color: var(--text-strong);
+  font-family: var(--sans);
+  font-size: var(--text-xl);
+  line-height: 1;
+  cursor: pointer;
+  transition: background 0.15s ease, opacity 0.15s ease;
+}
+
+.iconbtn:hover {
+  background: var(--surface-control-hover);
+}
+
+.iconbtn:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.iconbtn:disabled {
+  opacity: 0.5;
+  cursor: not-allowed;
+}
+
+.iconbtn--accent {
+  background: var(--accent);
+  color: var(--surface-page);
+}
+
+.iconbtn--accent:hover {
+  background: var(--accent-hover);
+}
+
+/* Tinted rather than filled. A solid red square beside a solid green one gives the two
+   equal visual weight, and on a screen where one of them refuses a loan they should not
+   invite the click equally. */
+.iconbtn--danger {
+  background: var(--danger-tint);
+  color: var(--danger);
+}
+
+.iconbtn--danger:hover {
+  background: var(--danger-tint);
+  color: var(--text-strong);
+}
+
+/* Out of flow, so revealing it cannot move the button or its neighbours — the whole
+   point of the pattern. Centred under the button; `pointer-events: none` so the label
+   can never intercept the click it is describing. */
+.iconbtn__label {
+  position: absolute;
+  top: calc(100% + var(--space-1));
+  left: 50%;
+  transform: translateX(-50%) translateY(-3px);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  color: var(--text-muted);
+  white-space: nowrap;
+  pointer-events: none;
+  opacity: 0;
+  transition: opacity 0.14s ease, transform 0.14s ease;
+}
+
+.iconbtn:hover .iconbtn__label,
+.iconbtn:focus-visible .iconbtn__label,
+.iconbtn--busy .iconbtn__label {
+  opacity: 1;
+  transform: translateX(-50%) translateY(0);
+}
+
+/* The slide is the only decorative part; the reveal itself still needs to happen. */
+@media (prefers-reduced-motion: reduce) {
+  .iconbtn__label {
+    transition: opacity 0.14s ease;
+    transform: translateX(-50%);
+  }
+
+  .iconbtn:hover .iconbtn__label,
+  .iconbtn:focus-visible .iconbtn__label,
+  .iconbtn--busy .iconbtn__label {
+    transform: translateX(-50%);
+  }
+}

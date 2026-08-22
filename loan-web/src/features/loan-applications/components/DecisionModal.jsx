@@ -1,8 +1,9 @@
 import { useState } from 'react'
-import Button from '../../../components/Button.jsx'
+import IconButton from '../../../components/IconButton.jsx'
 import Modal from '../../../components/Modal.jsx'
 import ApplicationStatusBadge from './ApplicationStatusBadge.jsx'
-import { DECISION_LABELS, DECISIONS, REQUIRES_REMARKS } from '../decisions.js'
+import ModalProgress from './ModalProgress.jsx'
+import { DECISION_GLYPHS, DECISION_LABELS, DECISIONS, REQUIRES_REMARKS } from '../decisions.js'
 import './DecisionModal.css'
 
 const currency = new Intl.NumberFormat(undefined, {
@@ -16,6 +17,12 @@ const date = new Intl.DateTimeFormat(undefined, {
   day: 'numeric',
   year: 'numeric',
 })
+
+// Approve is the affirmative, Reject the destructive one; Return is neither — it hands
+// the application back for changes, so it stays neutral rather than borrowing a warning
+// colour it has not earned.
+const toneFor = (decision) =>
+  decision === DECISIONS.Approve ? 'accent' : decision === DECISIONS.Reject ? 'danger' : 'default'
 
 /**
  * The decision dialog behind both staff queues. Review and approval differ only in which
@@ -64,26 +71,27 @@ function DecisionModal({
       title={`${title} #${application.loanApplicationId}`}
       onClose={onClose}
       footer={
-        <>
-          <Button variant="ghost" onClick={onClose} disabled={isSubmitting}>
-            Cancel
-          </Button>
-
-          {decisions.map((decision) => (
-            <Button
-              key={decision}
-              variant={decision === DECISIONS.Approve ? 'accent' : 'default'}
-              onClick={() => handle(decision)}
-              disabled={isSubmitting}
-            >
-              {isSubmitting && pending === decision
-                ? 'Working…'
-                : DECISION_LABELS[decision]}
-            </Button>
-          ))}
-        </>
+        /* No Cancel button: it called the same `onClose` as the header ✕, so the dialog
+           carried two controls for one behaviour — and "Cancel" here collided with the
+           row action that cancels the application itself. The ✕ is the single dismiss
+           and has been given a resting background to match. */
+        decisions.map((decision) => (
+          <IconButton
+            key={decision}
+            glyph={DECISION_GLYPHS[decision]}
+            label={DECISION_LABELS[decision]}
+            tone={toneFor(decision)}
+            busy={isSubmitting && pending === decision}
+            onClick={() => handle(decision)}
+            disabled={isSubmitting}
+          />
+        ))
       }
     >
+      {/* Where this sits in the journey, before the detail of it. The badge below still
+          carries the server's exact wording; this carries the shape. */}
+      <ModalProgress status={application.status} />
+
       <dl className="decision__facts">
         {application.borrower && (
           <div className="decision__fact">

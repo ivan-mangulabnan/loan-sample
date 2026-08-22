@@ -50,3 +50,25 @@
   opacity: 0.55;
   transition: opacity 0.15s ease;
 }
+
+/* The empty, loading and no-match states.
+
+   `.list__rows` is a tall region with a 16px radius, so a plain <p> began at its exact
+   top-left corner — inside the curve — leaving a 13px sentence jammed into a rounded
+   edge above ~640px of empty panel. Centring on both axes puts the message where the
+   reader is already looking, and away from the corner entirely.
+
+   Not a `.muted` override: that class is used in about twenty places, most of them
+   paragraphs that should stay top-left. */
+.list__empty {
+  height: 100%;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+  padding: var(--space-6);
+  text-align: center;
+  /* Evens the line lengths rather than leaving one orphaned word on line two. */
+  text-wrap: balance;
+  font-size: var(--text-lg);
+  color: var(--text-subtle);
+}

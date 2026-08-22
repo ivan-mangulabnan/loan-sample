@@ -59,3 +59,13 @@
   text-overflow: ellipsis;
   white-space: nowrap;
 }
+
+/* Names the bars for a sighted reader — the caption was previously only an aria-label
+   and a visually-hidden figcaption, so on screen the chart never said what it plotted.
+   A step below the bar labels in colour, and --text-sm rather than .muted's 13px: it
+   sits directly under 10px labels, and .muted would outweigh the thing it describes. */
+.bars__caption {
+  margin: var(--space-2) 0 0;
+  font-size: var(--text-sm);
+  color: var(--text-faint);
+}

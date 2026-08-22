@@ -1,6 +1,8 @@
 import { useState } from 'react'
-import Button from '../../../components/Button.jsx'
+import IconButton from '../../../components/IconButton.jsx'
 import Modal from '../../../components/Modal.jsx'
+import ModalProgress from './ModalProgress.jsx'
+import { DECISION_GLYPHS, DECISIONS } from '../decisions.js'
 import { usePaymentPlans } from '../hooks.js'
 import { repaymentPreview } from '../repayment.js'
 import './ResubmitModal.css'
@@ -89,29 +91,36 @@ function ResubmitModal({
       onClose={onClose}
       footer={
         <>
-          {/* "Close" rather than "Cancel": there is a real Cancel on this screen and it
-              ends the application. Two different Cancels in one footer is how the wrong
-              one gets clicked. */}
-          <Button variant="ghost" onClick={onClose} disabled={isSubmitting}>
-            Close
-          </Button>
-          <Button
-            variant="ghost"
+          {/* Glyphs, as on the staff decision modals — three labelled buttons is what
+              wrapped those footers onto two rows, and the shorter row also buys back the
+              height that made this dialog scroll.
+
+              No plain "Close": the header ✕ already dismisses, and a second dismiss in
+              the footer was dropped from the staff modals for that reason. What stays is
+              the pair of real outcomes, with the destructive one tinted rather than
+              filled so it does not invite the click as strongly as Resubmit. */}
+          <IconButton
+            glyph={DECISION_GLYPHS[DECISIONS.Reject]}
+            label="Cancel application"
+            tone="danger"
             onClick={() => onCancelInstead(application)}
             disabled={isSubmitting}
-          >
-            Cancel application
-          </Button>
-          <Button
-            variant="accent"
+          />
+          <IconButton
+            glyph={DECISION_GLYPHS[DECISIONS.Return]}
+            label="Resubmit"
+            tone="accent"
+            busy={isSubmitting}
             onClick={handleSubmit}
             disabled={isSubmitting || plans.isLoading}
-          >
-            {isSubmitting ? 'Resubmitting…' : 'Resubmit'}
-          </Button>
+          />
         </>
       }
     >
+      {/* Always the returned state: stage one, "Awaiting resubmission", which is
+          exactly what the remarks below are asking for. */}
+      <ModalProgress status={application.status} />
+
       {remarks ? (
         <blockquote className="resub__remarks">
           <p className="resub__remarks-text">{remarks.remarks}</p>
@@ -172,9 +181,11 @@ function ResubmitModal({
       {preview !== null && (
         <p className="resub__preview">
           <span className="resub__preview-figure">{currency.format(preview)}</span>
+          {/* Beside the figure rather than under it, and shorter: the plan select
+              directly above already states the term and the rate, so repeating them
+              here cost two lines of a dialog that scrolled on a laptop. */}
           <span className="resub__preview-note">
-            to repay over {selected.numberOfMonths} months — indicative, the rate is fixed
-            when your application is approved
+            to repay over {selected.numberOfMonths} months · indicative until approved
           </span>
         </p>
       )}

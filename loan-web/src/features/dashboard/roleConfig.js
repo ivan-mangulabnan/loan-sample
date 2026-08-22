@@ -83,8 +83,11 @@ export const roleConfig = {
     stats: {
       path: '/Stats/dashboard',
       days: 7,
-      headline: 'amount',
-      chartCaption: 'Approved principal per day',
+      // Count, not amount: an approval's principal is not money until the funds are
+      // released, so the value is not what this desk's week should be measured by.
+      // The server states that meaning in HeadlineLabel; this states the formatting.
+      headline: 'count',
+      chartCaption: 'Approved applications per day',
       emptyChartMessage: 'No approvals in this period.',
     },
     nav: [

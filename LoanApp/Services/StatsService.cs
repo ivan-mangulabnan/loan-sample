@@ -61,7 +61,15 @@ public class StatsService
             case DashboardAudience.Approver:
                 var approvals = await ApprovedSeriesAsync(tenantId, from, toExclusive);
                 response.Series = ZeroFill(from, days, approvals);
-                response.HeadlineLabel = "Approved value";
+                // Applications, not value: a principal is not money until FundRelease
+                // disburses it, so quoting it as the week's result reports something
+                // that may never leave the ledger. ApprovedSeriesAsync above already
+                // documents the related trap — a rejected decision writes an approval
+                // row with PrincipalAmount set. The count has neither problem: it is
+                // true the moment the decision posts and is never revised at release.
+                // HeadlineAmount stays populated; the DTO fills both for every role
+                // and the client's roleConfig picks which one is the figure on screen.
+                response.HeadlineLabel = "Approved applications";
                 response.HeadlineCount = response.Series.Sum(p => p.Count);
                 response.HeadlineAmount = response.Series.Sum(p => p.Amount);
                 response.HeadlineCaption = Caption(response.HeadlineLabel, days);

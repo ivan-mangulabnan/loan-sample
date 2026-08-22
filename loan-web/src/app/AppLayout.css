@@ -83,6 +83,17 @@
   gap: var(--space-6);
   overflow-y: auto;
   overscroll-behavior: contain;
+  /* Room for a focus ring. `overflow-y: auto` computes overflow-x to auto too, so this
+     box clips on all four sides, and every edge control sits flush against it — the
+     list's search and status fields, and the page-head button. The ring is 2px at 2px
+     offset, so it needs exactly --space-1 (4px) and was getting none.
+
+     Here rather than on the list: the page-head button is clipped as well, and it is
+     not inside the list. This is their common ancestor and the element doing the
+     clipping. The negative margin gives the padding back to the layout, so no page
+     shifts and the content box stays where it was. */
+  padding: var(--space-1);
+  margin: calc(var(--space-1) * -1);
 }
 
 /* ---- Narrow screens ---- */

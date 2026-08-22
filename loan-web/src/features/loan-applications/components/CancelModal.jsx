@@ -1,6 +1,8 @@
-import Button from '../../../components/Button.jsx'
+import IconButton from '../../../components/IconButton.jsx'
 import Modal from '../../../components/Modal.jsx'
 import ApplicationStatusBadge from './ApplicationStatusBadge.jsx'
+import ModalProgress from './ModalProgress.jsx'
+import { DECISION_GLYPHS, DECISIONS } from '../decisions.js'
 import './CancelModal.css'
 
 const currency = new Intl.NumberFormat(undefined, {
@@ -38,16 +40,33 @@ function CancelModal({ application, onSubmit, onClose, isSubmitting = false, err
       footer={
         <>
           {/* "Keep it" rather than "Cancel": on a dialog about cancelling, a Cancel
-              button is ambiguous in exactly the wrong direction. */}
-          <Button variant="ghost" onClick={onClose} disabled={isSubmitting}>
-            Keep it
-          </Button>
-          <Button variant="accent" onClick={() => onSubmit({})} disabled={isSubmitting}>
-            {isSubmitting ? 'Cancelling…' : 'Yes, cancel it'}
-          </Button>
+              button is ambiguous in exactly the wrong direction. It survives as the
+              hover label; the ↺ reads as "put it back".
+
+              Danger tone on the confirm, not accent: this one ends the application, and
+              on this dialog it is the destructive choice even though it is the one the
+              reader came to make. */}
+          <IconButton
+            glyph={DECISION_GLYPHS[DECISIONS.Return]}
+            label="Keep it"
+            onClick={onClose}
+            disabled={isSubmitting}
+          />
+          <IconButton
+            glyph={DECISION_GLYPHS[DECISIONS.Reject]}
+            label="Cancel application"
+            tone="danger"
+            busy={isSubmitting}
+            onClick={() => onSubmit({})}
+            disabled={isSubmitting}
+          />
         </>
       }
     >
+      {/* Shown before the warning: how far this got is the context for deciding
+          whether to withdraw it. */}
+      <ModalProgress status={application.status} />
+
       <p className="cancelapp__lead">
         This withdraws the application for good. It cannot be reopened — applying again
         starts a new one at the back of the queue.

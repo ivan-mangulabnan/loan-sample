@@ -66,6 +66,8 @@
   --glow-accent: rgba(79, 192, 166, 0.5);
   --glow-accent-soft: rgba(79, 192, 166, 0.38);
   --glow-info: rgba(95, 127, 216, 0.42);
+  /* The Stepper's 'pending' pulse — a stage waiting on the reader, not on another desk. */
+  --glow-warning-soft: rgba(214, 124, 90, 0.38);
   --glow-info-soft: rgba(95, 127, 216, 0.4);
 
   /* ---- Bar / progress gradients ---- */

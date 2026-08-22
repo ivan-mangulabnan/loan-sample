@@ -1,7 +1,12 @@
 import { useState } from 'react'
-import Button from '../../../components/Button.jsx'
+import IconButton from '../../../components/IconButton.jsx'
 import Modal from '../../../components/Modal.jsx'
-import { DECISIONS, REQUIRES_REMARKS } from '../../loan-applications/index.js'
+import {
+  DECISION_GLYPHS,
+  DECISIONS,
+  ModalProgress,
+  REQUIRES_REMARKS,
+} from '../../loan-applications/index.js'
 import './ReleaseModal.css'
 
 const currency = new Intl.NumberFormat(undefined, {
@@ -58,25 +63,34 @@ function ReleaseModal({ release, onSubmit, onClose, isSubmitting = false, error 
       title={`Release funds · #${release.application.loanApplicationId}`}
       onClose={onClose}
       footer={
+        /* Same two glyphs the review dialog uses, so a ✓ means the same thing at every
+           desk. The label still reads "Release funds" rather than "Approve" — see the
+           note above; the wire value is shared, the wording is not. No Cancel: the
+           header ✕ is the one dismiss. */
         <>
-          <Button variant="ghost" onClick={onClose} disabled={isSubmitting}>
-            Cancel
-          </Button>
-          <Button onClick={() => handle(DECISIONS.Reject)} disabled={isSubmitting}>
-            {isSubmitting && pending === DECISIONS.Reject ? 'Working…' : 'Reject'}
-          </Button>
-          <Button
-            variant="accent"
+          <IconButton
+            glyph={DECISION_GLYPHS[DECISIONS.Reject]}
+            label="Reject"
+            tone="danger"
+            busy={isSubmitting && pending === DECISIONS.Reject}
+            onClick={() => handle(DECISIONS.Reject)}
+            disabled={isSubmitting}
+          />
+          <IconButton
+            glyph={DECISION_GLYPHS[DECISIONS.Approve]}
+            label="Release funds"
+            tone="accent"
+            busy={isSubmitting && pending === DECISIONS.Approve}
             onClick={() => handle(DECISIONS.Approve)}
             disabled={isSubmitting}
-          >
-            {isSubmitting && pending === DECISIONS.Approve
-              ? 'Releasing…'
-              : 'Release funds'}
-          </Button>
+          />
         </>
       }
     >
+      {/* By construction, not by lookup: this queue only ever holds PENDING_RELEASE,
+          and the release payload carries no status field to read. */}
+      <ModalProgress code="PENDING_RELEASE" />
+
       <p className="release__lead">
         Releasing pays out to the borrower and draws down the operating ledger. It opens
         the loan — there is no undo in the API. Rejecting closes the application for good

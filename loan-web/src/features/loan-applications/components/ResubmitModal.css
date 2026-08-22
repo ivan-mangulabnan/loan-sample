@@ -1,14 +1,15 @@
-/* The reviewer's words, given the weight of a quotation rather than of a warning. It is
-   the first thing on the dialog because it is the reason the dialog exists — the fields
-   below only make sense once it has been read.
+/* The reviewer's words, and the reason the dialog exists — the fields below only make
+   sense once it has been read.
 
-   `--info` matches the tone statuses.js already gives "returned by reviewer", so the
-   dialog and the badge that led to it say the same thing in the same colour. */
+   `--warning`, not `--info`: blue reads as a footnote the eye skips, and this is the one
+   block on the dialog that must be read. It matches the stepper's 'pending' stage above
+   it, so the colour says "this is waiting on you" in both places at once rather than
+   splitting the signal between an orange dot and a blue quote. */
 .resub__remarks {
-  margin: 0 0 var(--space-6);
+  margin: 0 0 var(--space-4);
   padding: var(--space-4) var(--space-5);
-  border-left: 3px solid var(--info);
-  background: var(--info-tint);
+  border-left: 3px solid var(--warning);
+  background: var(--warning-tint);
   border-radius: 0 var(--radius-md) var(--radius-md) 0;
 }
 
@@ -42,16 +43,22 @@
   font-size: var(--text-sm);
 }
 
+/* The gap between the two fields. --space-4, matching the rhythm the progress block and
+   the preview now use, so the dialog fits a 668px-tall laptop window without scrolling. */
 .resub__label--spaced {
-  margin-top: var(--space-5);
+  margin-top: var(--space-4);
 }
 
+/* A row, wrapping only if it must: stacked, the figure and its note ran to 105px and
+   were the tallest block on a dialog that scrolled at laptop heights. Baseline-aligned
+   so the small note sits on the figure's feet rather than its middle. */
 .resub__preview {
   display: flex;
-  flex-direction: column;
-  gap: var(--space-1);
-  margin: var(--space-5) 0 0;
-  padding: var(--space-4);
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-1) var(--space-3);
+  margin: var(--space-4) 0 0;
+  padding: var(--space-3) var(--space-4);
   background: var(--surface-sunken);
   border-radius: var(--radius-md);
 }
@@ -64,6 +71,9 @@
 }
 
 .resub__preview-note {
+  /* Takes the leftover width so it wraps within the row instead of forcing a break. */
+  flex: 1 1 auto;
+  min-width: 0;
   color: var(--text-faint);
   font-size: var(--text-sm);
   line-height: 1.5;

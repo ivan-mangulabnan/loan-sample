@@ -1,6 +1,15 @@
 /* The element is in the browser's top layer, so it is positioned against the viewport
    and needs no z-index — nothing in the document can paint over it. `margin: auto`
    centres it in both axes, which is the one part <dialog> does not do by default. */
+/* The breathing room the dialog leaves around itself, named once because the dialog and
+   its panel both bound their height by it and must not disagree. It shrinks on a short
+   window: 48px is comfortable at 900px tall and is pure cost at 668px, where it was the
+   difference between the resubmit dialog fitting and scrolling. min() rather than a
+   media query — the constraint is available height, not device class (rule 16). */
+:root {
+  --modal-gutter: min(var(--space-8), 4vh);
+}
+
 .modal {
   margin: auto;
   padding: 0;
@@ -10,7 +19,7 @@
   width: 100%;
   /* Leaves the dialog room to breathe on a short window; the body scrolls, not the page
      (rule 15). */
-  max-height: calc(100svh - var(--space-8));
+  max-height: calc(100svh - var(--modal-gutter));
   overflow: visible;
   color: var(--text);
 }
@@ -26,7 +35,7 @@
   display: flex;
   flex-direction: column;
   /* Bounded by the dialog's max-height so the body, not the panel, is what scrolls. */
-  max-height: calc(100svh - var(--space-8));
+  max-height: calc(100svh - var(--modal-gutter));
   background: var(--surface-panel);
   border: 1px solid var(--border);
   border-radius: var(--radius-xl);
@@ -51,23 +60,27 @@
   letter-spacing: var(--tracking-tight);
 }
 
+/* Given a resting background rather than appearing only on hover: it is now the dialog's
+   only dismiss — the decision footers dropped their duplicate Cancel — so it has to be
+   findable without hunting for it. */
 .modal__close {
   flex-shrink: 0;
-  width: 30px;
-  height: 30px;
+  width: 34px;
+  height: 34px;
   display: grid;
   place-items: center;
-  background: transparent;
+  background: var(--surface-control);
   border: none;
   border-radius: var(--radius-sm);
-  color: var(--text-muted);
+  color: var(--text);
   font-family: var(--sans);
-  font-size: var(--text-base);
+  font-size: var(--text-lg);
   cursor: pointer;
+  transition: background 0.15s ease, color 0.15s ease;
 }
 
 .modal__close:hover {
-  background: var(--surface-control);
+  background: var(--surface-control-hover);
   color: var(--text-strong);
 }
 
@@ -93,6 +106,8 @@
   flex-shrink: 0;
   /* Wraps rather than crushing three decision buttons on a narrow window (rule 16). */
   flex-wrap: wrap;
-  padding: var(--space-5) var(--space-6);
+  /* Deeper at the bottom than the top: an IconButton's label is absolutely positioned
+     below the button and would otherwise hang past the panel's rounded edge. */
+  padding: var(--space-5) var(--space-6) var(--space-7);
   border-top: 1px solid var(--border);
 }

@@ -27,6 +27,10 @@ function DashboardAside({
   averageValue = 0,
   trend = [],
   trendCaption = 'Average approved loan size by month',
+  // Short, and deliberately not a third "average": the section label names the figure
+  // and the figure states it, so the bars only need to say what a column is. The long
+  // sentence above stays as the chart's spoken description.
+  trendLabel = 'Monthly average',
   format,
   isLoading,
 }) {
@@ -76,6 +80,7 @@ function DashboardAside({
             }))}
             format={format}
             caption={trendCaption}
+            label={trendLabel}
           />
         </div>
       </section>
