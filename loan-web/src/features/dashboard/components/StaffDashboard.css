@@ -155,3 +155,56 @@
     grid-template-columns: minmax(0, 1fr);
   }
 }
+
+/* ---- Arrival ----
+
+   Each block fades up as its own request lands. Same keyframe, curve and 6px as every
+   other swap in the app (`list-page-in`, rule 16a) — a swap is a swap, and a second
+   timing would read as two different apps.
+
+   It exists because the dashboard's sections arrive independently and at different
+   times: without it a figure, a chart and four pipeline cells simply appeared, which is
+   the "blitz of data" the staggered fade is meant to soften. The list pages already had
+   this on their rows, which is why they never needed a placeholder.
+
+   The stagger is small and in reading order — the eye follows the page down rather than
+   watching four things pop at once. It is not a queue: each section still animates when
+   ITS data arrives, so a slow chart does not hold up a fast notice; the delay only
+   separates blocks that happen to land together, which is the common case. */
+.staff__arrive {
+  animation: list-page-in 0.28s cubic-bezier(0.4, 0, 0.2, 1) both;
+  /* The wrapper inherits the flex-item role from whatever it wraps, and a default
+     `flex-shrink: 1` would undo `.callout`'s own `0` — the notice would compress and clip
+     its button on a narrow viewport, which is precisely what rule 12b's flex-shrink
+     exists to prevent. Measured at 1 before this line. */
+  flex-shrink: 0;
+  /* It must also not become a horizontal constraint of its own: the callout and the
+     chart both stretch to the column, and a shrink-to-fit wrapper would pull them in. */
+  min-width: 0;
+}
+
+.staff__arrive--notice {
+  animation-delay: 0.04s;
+}
+
+.staff__arrive--chart {
+  animation-delay: 0.08s;
+}
+
+.staff__arrive--pipeline {
+  animation-delay: 0.06s;
+}
+
+.staff__arrive--trend {
+  animation-delay: 0.12s;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Not `animation: none` alone — with `both` filling backwards that strands the content
+     at the keyframe's starting opacity, i.e. invisible (rule 16a). */
+  .staff__arrive {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
+}

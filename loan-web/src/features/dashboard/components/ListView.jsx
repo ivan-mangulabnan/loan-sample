@@ -286,10 +286,20 @@ function ListView({
         )}
       </div>
 
-      <div className={`list__rows${isLoading && items ? ' list__rows--busy' : ''}`} ref={scrollRef}>
+      {/* aria-busy so a screen reader is told the region is filling rather than hearing
+          it as merely empty. */}
+      <div
+        className={`list__rows${isLoading && items ? ' list__rows--busy' : ''}`}
+        aria-busy={isLoading || undefined}
+        ref={scrollRef}
+      >
         {error ? (
           <p className="muted">Could not load: {error.message}</p>
         ) : isFirstLoad ? (
+          // Text, not placeholder rows. A skeleton was tried here and removed: the rows
+          // already fade in (.list__page), which covers the swap, and on a local response
+          // the placeholder painted for two frames and read as a flicker rather than as
+          // loading. The dashboard keeps one because its blocks have no such animation.
           <p className="list__empty">Loading…</p>
         ) : pageRows.length > 0 ? (
           // Keyed on the four things the reader deliberately changed, and on nothing

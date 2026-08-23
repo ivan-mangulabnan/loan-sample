@@ -1,4 +1,5 @@
 import BarChart from '../../../components/BarChart.jsx'
+import Skeleton from '../../../components/Skeleton.jsx'
 import PipelineMetric from './PipelineMetric.jsx'
 
 // Full names rather than initials: five bars across the aside leave room for them, and
@@ -32,7 +33,13 @@ function DashboardAside({
   // sentence above stays as the chart's spoken description.
   trendLabel = 'Monthly average',
   format,
-  isLoading,
+  // Three states, not two: `hasData` draws the real thing, `isPending` draws
+  // placeholders, and neither draws nothing at all. That third case is the quiet window
+  // before the delay elapses, and collapsing it into "not loaded, so show a skeleton" is
+  // what made the whole aside flash on a fast response. The host owns both flags because
+  // it owns the request (see StaffDashboard).
+  hasData,
+  isPending,
 }) {
   // Bars are relative to the largest metric in the set; counts alone have no ceiling.
   const metrics = pipeline ?? []
@@ -52,10 +59,8 @@ function DashboardAside({
       {pipeline && (
         <section>
           <p className="section-label">Pipeline</p>
-          {isLoading ? (
-            <p className="muted">Loading…</p>
-          ) : (
-            <div className="pipeline">
+          {hasData ? (
+            <div key="pipeline" className="pipeline staff__arrive staff__arrive--pipeline">
               {metrics.map((metric) => (
                 <PipelineMetric
                   key={metric.key}
@@ -65,23 +70,76 @@ function DashboardAside({
                 />
               ))}
             </div>
-          )}
+          ) : isPending ? (
+            /* Four cells, matching PipelineMetric's own three parts — chip + label, the
+               figure, the bar. Not an arbitrary number of grey boxes: every staff
+               audience returns exactly four metrics (StatsService.BuildPipelineAsync),
+               so the 2x2 grid this occupies is the one the real data will occupy, and
+               the aside does not resize underneath the reader when it lands. */
+            <div className="pipeline">
+              {Array.from({ length: 4 }, (_, index) => (
+                <div key={index} className="pipeline__metric">
+                  <div className="pipeline__head">
+                    <Skeleton variant="chip" className="icon-chip" />
+                    {/* `skel--label`, not width:100%: inside the flex head a percentage
+                        resolves against the whole row rather than the space left beside
+                        the chip, so the bar overshot the aside by the chip's width and
+                        hung 16px off the right edge at 390px. It has to flex into what
+                        remains, which is what the real label does by other means. */}
+                    <Skeleton variant="label" />
+                  </div>
+                  <p className="pipeline__value">
+                    <Skeleton variant="figure" width="4ch" />
+                  </p>
+                  {/* The real .progress track, with a skeleton fill inside it: the
+                      track's own height and radius come from utilities.css, so the cell
+                      ends exactly where the real bar will put it. */}
+                  <div className="progress">
+                    <Skeleton variant="bar" />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ) : null}
         </section>
       )}
 
       <section>
         <p className="section-label">{averageLabel}</p>
         <div className="aside__trend">
-          <p className="aside__average">{format(averageValue)}</p>
-          <BarChart
-            bars={trend.map((m) => ({
-              label: labelFor(m),
-              value: m.amount,
-            }))}
-            format={format}
-            caption={trendCaption}
-            label={trendLabel}
-          />
+          {/* Not `format(0)` while loading: "₱0" is a figure, and a reader has no way to
+              tell a real zero from a placeholder one — it states something false and then
+              silently corrects itself. The bar states nothing. */}
+          <p className="aside__average">
+            {hasData ? (
+              format(averageValue)
+            ) : isPending ? (
+              <Skeleton variant="figure" width="8ch" />
+            ) : null}
+          </p>
+          {hasData ? (
+            <div key="trend" className="staff__arrive staff__arrive--trend">
+              <BarChart
+                bars={trend.map((m) => ({
+                  label: labelFor(m),
+                  value: m.amount,
+                }))}
+                format={format}
+                caption={trendCaption}
+                label={trendLabel}
+              />
+            </div>
+          ) : isPending ? (
+            /* The bar row AND its caption line: BarChart renders a visible
+               `.bars__caption` under the columns, so a placeholder for the row alone
+               left the aside 26px short and the column shifted when the chart landed. */
+            <>
+              <Skeleton variant="bars" />
+              <p className="bars__caption">
+                <Skeleton variant="text" width="11ch" />
+              </p>
+            </>
+          ) : null}
         </div>
       </section>
     </aside>

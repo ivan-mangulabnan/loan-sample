@@ -1,13 +1,12 @@
 .chart {
   margin: 0;
 
-  /* The y-axis column. A constant, not a fraction of the plot: the SVG is
-     preserveAspectRatio="none", so anything reserved *inside* the viewBox scales with
-     the rendered width — too narrow for "₱224,000" on a phone and a tenth of the chart
-     wasted on a desktop. Sized from the longest label a caller can produce, at
-     --text-xs, plus the gap to the gridline. The x-axis tick row is indented by the
-     same amount so its labels stay under their points. */
-  --chart-gutter: 58px;
+  /* The y-axis column (--chart-gutter, in tokens.css) is a constant, not a fraction of
+     the plot: the SVG is preserveAspectRatio="none", so anything reserved *inside* the
+     viewBox scales with the rendered width — too narrow for "₱224,000" on a phone and a
+     tenth of the chart wasted on a desktop. Sized from the longest label a caller can
+     produce, at --text-xs, plus the gap to the gridline. The x-axis tick row is indented
+     by the same amount so its labels stay under their points. */
 
   /* Diameter of the peak's bloom. A constant rather than a share of the plot: it is a
      light source, and a light source does not get wider because the window did. */

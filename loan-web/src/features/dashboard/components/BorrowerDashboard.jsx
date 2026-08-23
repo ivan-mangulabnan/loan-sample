@@ -1,6 +1,8 @@
 import { useNavigate } from 'react-router-dom'
 import AreaChart from '../../../components/AreaChart.jsx'
 import Callout from '../../../components/Callout.jsx'
+import Skeleton from '../../../components/Skeleton.jsx'
+import { useDeferredPending } from '../../../hooks/useDeferredPending.js'
 import { useSession } from '../../auth/index.js'
 import { useDashboardStats } from '../hooks.js'
 import DashboardAside from './DashboardAside.jsx'
@@ -90,7 +92,14 @@ function BorrowerDashboard({ config }) {
 
   const data = stats.data
 
-  const notice = stats.isLoading ? null : noticeFor(data)
+  // See StaffDashboard: held briefly once shown, and never shown at all for a response
+  // fast enough that a placeholder would only flash.
+  // Three states — data, placeholder, or nothing at all. See StaffDashboard: rendering
+  // the placeholder as the `else` of `showStats` defeats the deferral entirely.
+  const statsPending = useDeferredPending(stats.isLoading)
+  const showStats = !statsPending && !stats.isLoading
+
+  const notice = showStats ? noticeFor(data) : null
 
   const points = (data?.series ?? []).map((p) => ({
     label: weekday.format(new Date(p.date)),
@@ -108,33 +117,51 @@ function BorrowerDashboard({ config }) {
           </Callout>
         )}
 
+        {/* The notice comes from the same /Stats/me response as the chart, so it holds
+            the callout's space while that is pending — otherwise the chart starts higher
+            and is pushed down when the figures arrive. */}
+        {statsPending && <Skeleton variant="callout" />}
+
+        {/* Keyed so the fade runs on arrival — see StaffDashboard. */}
         {notice && (
-          <Callout action={notice.action} onAction={() => navigate(notice.to)}>
-            {notice.message}
-          </Callout>
+          <div key="notice" className="staff__arrive staff__arrive--notice">
+            <Callout action={notice.action} onAction={() => navigate(notice.to)}>
+              {notice.message}
+            </Callout>
+          </div>
         )}
 
         {/* Chart with its header, one sentence — see StaffDashboard. */}
         <section className="staff__chart">
           <p className="staff__headline">
             <span className="dot dot--sm staff__key" />
-            <span className="staff__figure">
-              {stats.isLoading ? '—' : currency.format(data?.headlineAmount ?? 0)}
-            </span>
-            {stats.isLoading ? '' : ` ${data?.headlineCaption ?? ''}`}
+            {/* One bar in place of figure and caption together — see StaffDashboard. */}
+            {showStats ? (
+              <span key="headline" className="staff__arrive">
+                <span className="staff__figure">
+                  {currency.format(data?.headlineAmount ?? 0)}
+                </span>
+                {` ${data?.headlineCaption ?? ''}`}
+              </span>
+            ) : statsPending ? (
+              // Sized by .staff__figure's own line — see StaffDashboard.
+              <Skeleton variant="figure" className="staff__figure" width="9ch" />
+            ) : null}
           </p>
 
-          {stats.isLoading ? (
-            <p className="muted">Loading…</p>
-          ) : (
-            <AreaChart
-              points={points}
-              format={(v) => currency.format(v)}
-              tone="accent"
-              caption={config.stats.chartCaption}
-              emptyMessage={config.stats.emptyChartMessage}
-            />
-          )}
+          {showStats ? (
+            <div key="chart" className="staff__arrive staff__arrive--chart">
+              <AreaChart
+                points={points}
+                format={(v) => currency.format(v)}
+                tone="accent"
+                caption={config.stats.chartCaption}
+                emptyMessage={config.stats.emptyChartMessage}
+              />
+            </div>
+          ) : statsPending ? (
+            <Skeleton variant="chart" />
+          ) : null}
         </section>
       </div>
 
@@ -148,7 +175,8 @@ function BorrowerDashboard({ config }) {
         trend={data?.averageTrend ?? []}
         trendCaption="Your average payment by month"
         format={(v) => currency.format(v)}
-        isLoading={stats.isLoading}
+        hasData={showStats}
+        isPending={statsPending}
       />
     </div>
   )

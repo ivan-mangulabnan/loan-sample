@@ -20,6 +20,18 @@
   --surface-control: #252e33;
   --surface-control-hover: #2e3a40;
 
+  /* Skeleton placeholders. It has to read on TWO grounds — the bare --surface-page
+     behind the dashboard's blocks, and --surface-panel behind a table's rows — which is
+     what rules out the darker surfaces: the first attempt sat between --surface-sunken
+     and --surface-track and measured 1.012:1 against the panel, i.e. invisible, while
+     looking perfectly fine on the page. This is 1.18:1 on the panel and 1.43:1 on the
+     page. Check both if it ever changes.
+
+     The sheen is what travels across it — near-transparent, because on a dark ground a
+     bright sweep reads as a highlight moving over a real object rather than as waiting. */
+  --surface-skeleton: #262f34;
+  --surface-skeleton-sheen: rgba(255, 255, 255, 0.055);
+
   /* Sidebar reads as a vertical gradient, not a flat fill. */
   --surface-rail: linear-gradient(180deg, #161d21 0%, #1a2b2c 45%, #151b1f 100%);
   --surface-rail-hover: rgba(255, 255, 255, 0.05);
@@ -158,4 +170,12 @@
   --rail-width: 96px;
   --aside-width: 308px;
   --chart-height: 240px;
+  /* The y-axis label column beside a plot. Lives here rather than on `.chart` because
+     the chart's skeleton has to reserve the same column while standing outside it —
+     a custom property set on .chart does not reach a sibling. */
+  --chart-gutter: 58px;
+  /* The bar row's fixed height — percentage bar heights need something to resolve
+     against. Shared with the skeleton that stands in for the chart, for the same
+     reason as --chart-gutter. */
+  --bars-height: 72px;
 }

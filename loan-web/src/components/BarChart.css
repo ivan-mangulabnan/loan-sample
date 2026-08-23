@@ -2,13 +2,13 @@
   margin: 0;
 }
 
-/* Fixed height so the percentage heights have something to resolve against; bars grow
-   from the baseline up. */
+/* Fixed height (--bars-height) so the percentage heights have something to resolve
+   against; bars grow from the baseline up. */
 .bars__row {
   display: flex;
   align-items: flex-end;
   gap: var(--space-3);
-  height: 72px;
+  height: var(--bars-height);
 }
 
 /* The band the bars actually occupy. The label is a sibling in the same fixed-height
