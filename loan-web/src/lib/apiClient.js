@@ -46,7 +46,10 @@ async function request(path, { method = 'GET', body, signal } = {}) {
     try {
       payload = JSON.parse(text)
     } catch {
-      if (response.ok) throw new ApiError('Malformed JSON in response.', response.status, text)
+      // A diagnostic, not a sentence: the reader cannot act on it and did nothing to
+      // cause it. The raw text stays on .body for a developer reading the console.
+      if (response.ok)
+        throw new ApiError('The server sent something unexpected.', response.status, text)
       payload = text
     }
   }

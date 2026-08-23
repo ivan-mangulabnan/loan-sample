@@ -2,6 +2,7 @@ using Microsoft.EntityFrameworkCore;
 using Data;
 using Services;
 using Security;
+using Microsoft.AspNetCore.Authorization;
 using Microsoft.AspNetCore.Authentication.JwtBearer;
 using Microsoft.IdentityModel.Tokens;
 using System.Text;
@@ -64,6 +65,21 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             }
         };
     });
+
+// Authentication is the floor, not something each action opts into. Without this,
+// [Authorize] is the only thing standing between an action and the public: an action
+// added without one is anonymous, not merely under-restricted. Controllers that mix
+// roles across their actions carry no class-level attribute, so the omission would be
+// easy to make and silent when made.
+//
+// Actions still opt DOWN to a role with [Authorize(Roles = ...)], and [AllowAnonymous]
+// still opts out entirely (AuthController's login, logout and register do).
+builder.Services.AddAuthorization(options =>
+{
+    options.FallbackPolicy = new AuthorizationPolicyBuilder()
+        .RequireAuthenticatedUser()
+        .Build();
+});
 
 builder.Services.AddControllers()
     .AddJsonOptions(options => options.JsonSerializerOptions.Converters.Add(new JsonStringEnumConverter()));

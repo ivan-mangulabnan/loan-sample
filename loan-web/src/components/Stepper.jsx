@@ -78,12 +78,17 @@ function Stepper({ steps, current = 1, size = 'md' }) {
             )}
             <div className={`stepper__step stepper__step--${state}`}>
               <span className="stepper__dot">
-                {/* The numeral is decorative once a check replaces it; the state
-                    is carried by the visually-hidden text below either way. */}
+                {/* The numeral is decorative once a glyph replaces it; the state
+                    is carried by the visually-hidden text below either way.
+
+                    'invalid' gets a cross for the same reason 'done' gets a check: a
+                    bare numeral in a red ring says "this one is different" without
+                    saying how, and the colour alone is not a message anyone should have
+                    to decode — least of all a reader who cannot see it. */}
                 <span aria-hidden="true">
-                  {isDone ? (
+                  {isDone || state === 'invalid' ? (
                     <svg
-                      className="stepper__check"
+                      className={state === 'invalid' ? 'stepper__cross' : 'stepper__check'}
                       viewBox="0 0 16 16"
                       fill="none"
                       stroke="currentColor"
@@ -91,7 +96,14 @@ function Stepper({ steps, current = 1, size = 'md' }) {
                       strokeLinecap="round"
                       strokeLinejoin="round"
                     >
-                      <path d="M3.5 8.5l3 3 6-6.5" />
+                      {state === 'invalid' ? (
+                        <>
+                          <path d="M4.5 4.5l7 7" />
+                          <path d="M11.5 4.5l-7 7" />
+                        </>
+                      ) : (
+                        <path d="M3.5 8.5l3 3 6-6.5" />
+                      )}
                     </svg>
                   ) : (
                     step

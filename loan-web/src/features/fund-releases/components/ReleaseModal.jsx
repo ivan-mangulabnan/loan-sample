@@ -93,8 +93,8 @@ function ReleaseModal({ release, onSubmit, onClose, isSubmitting = false, error 
 
       <p className="release__lead">
         Releasing pays out to the borrower and draws down the operating ledger. It opens
-        the loan — there is no undo in the API. Rejecting closes the application for good
-        and moves no money.
+        the loan and cannot be undone. Rejecting closes the application for good and
+        moves no money.
       </p>
 
       <dl className="release__facts">
@@ -142,7 +142,7 @@ function ReleaseModal({ release, onSubmit, onClose, isSubmitting = false, error 
 
       {missingRemarks && (
         <p className="release__error" role="alert">
-          Add remarks before rejecting — the API requires them, and they are the only
+          Add remarks before rejecting — they are required, and they are the only
           explanation the borrower gets for a refused release.
         </p>
       )}

@@ -82,6 +82,7 @@ internal static class LoanApplicationQueries
             .Include(l => l.Reviews).ThenInclude(r => r.Reviewer).ThenInclude(u => u.Account)
             .Include(l => l.Reviews).ThenInclude(r => r.Status)
             .Include(l => l.Approvals).ThenInclude(a => a.Approver).ThenInclude(u => u.Account)
-            .Include(l => l.Approvals).ThenInclude(a => a.Status);
+            .Include(l => l.Approvals).ThenInclude(a => a.Status)
+            .Include(l => l.Approvals).ThenInclude(a => a.FundReleases).ThenInclude(f => f.Status);
     }
 }

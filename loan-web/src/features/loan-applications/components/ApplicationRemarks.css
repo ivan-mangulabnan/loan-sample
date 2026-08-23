@@ -1,0 +1,74 @@
+/* A vertical thread rather than a list of cards: the entries are one conversation in
+   order, and the rail is what says "these happened in sequence" without numbering them.
+   Numbered <ol> semantically, unnumbered visually — the dates carry the order. */
+.appremarks {
+  list-style: none;
+  margin: 0;
+  padding: 0 0 0 var(--space-5);
+  border-left: 2px solid var(--border);
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-5);
+}
+
+.appremarks__item {
+  position: relative;
+}
+
+/* The node on the rail. Drawn on the item rather than as a list marker so it lines up
+   with the first line of the heading whatever the text below does. */
+.appremarks__item::before {
+  content: '';
+  position: absolute;
+  left: calc(var(--space-5) * -1 - 5px);
+  top: 4px;
+  width: 8px;
+  height: 8px;
+  border-radius: 50%;
+  background: var(--accent);
+  /* Sits over the rail, so it needs the panel colour behind it to punch a clean hole. */
+  box-shadow: 0 0 0 3px var(--surface-panel);
+}
+
+.appremarks__head {
+  display: flex;
+  flex-wrap: wrap;
+  align-items: baseline;
+  gap: var(--space-2);
+  margin-bottom: var(--space-2);
+}
+
+.appremarks__step {
+  color: var(--text);
+  font-size: var(--text-sm);
+  font-weight: 600;
+}
+
+/* The outcome, not the desk: "Rejected" is the word that changes what the remark means.
+   Faint, because the remark itself is what the reader came for. */
+.appremarks__outcome {
+  color: var(--text-muted);
+  font-size: var(--text-xs);
+}
+
+.appremarks__date {
+  margin-left: auto;
+  color: var(--text-faint);
+  font-size: var(--text-xs);
+}
+
+.appremarks__text {
+  margin: 0;
+  color: var(--text);
+  font-size: var(--text-base);
+  line-height: 1.55;
+  /* Staff-authored free text in a fixed-width panel: one long unbroken string would
+     otherwise widen the column. Same reason ResubmitModal breaks its quote. */
+  overflow-wrap: anywhere;
+}
+
+.appremarks__empty {
+  margin: 0;
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+}

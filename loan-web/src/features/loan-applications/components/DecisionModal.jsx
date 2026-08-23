@@ -90,7 +90,7 @@ function DecisionModal({
     >
       {/* Where this sits in the journey, before the detail of it. The badge below still
           carries the server's exact wording; this carries the shape. */}
-      <ModalProgress status={application.status} />
+      <ModalProgress application={application} />
 
       <dl className="decision__facts">
         {application.borrower && (
@@ -143,7 +143,7 @@ function DecisionModal({
 
       {missingRemarks && (
         <p className="decision__error" role="alert">
-          Add remarks before rejecting or returning — the API requires them, and they are
+          Add remarks before rejecting or returning — they are required, and they are
           the only explanation the borrower gets.
         </p>
       )}

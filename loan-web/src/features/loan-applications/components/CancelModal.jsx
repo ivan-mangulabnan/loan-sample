@@ -65,7 +65,7 @@ function CancelModal({ application, onSubmit, onClose, isSubmitting = false, err
     >
       {/* Shown before the warning: how far this got is the context for deciding
           whether to withdraw it. */}
-      <ModalProgress status={application.status} />
+      <ModalProgress application={application} />
 
       <p className="cancelapp__lead">
         This withdraws the application for good. It cannot be reopened — applying again

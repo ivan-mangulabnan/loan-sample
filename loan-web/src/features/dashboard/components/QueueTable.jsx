@@ -30,16 +30,27 @@ const date = new Intl.DateTimeFormat(undefined, {
  * `actionLabel` may be a **function of the row** returning a label or null, for the
  * case /applications forced: one list spanning all eight statuses, where a returned
  * application offers Resubmit, a pending one offers Cancel, and a released one offers
- * nothing. A row whose label is null gets an empty cell and no click.
+ * nothing. A row whose label is null gets an empty cell and no button.
+ *
+ * `onRowOpen` is the separate question of whether a row can be *read*. It exists because
+ * the two were once the same thing: the row click was wired to `onAction`, so a row with
+ * no action was also unopenable — and that silently hid four of the eight application
+ * statuses, including Released and Pending Release, the two a borrower most wants to
+ * look at. Acting on a record and viewing it are different rights; a settled record is
+ * readable forever and actionable never.
+ *
+ * When `onRowOpen` is passed, every row is clickable regardless of its label, and the
+ * action button (when there is one) stops propagation so one click is one destination.
  *
  * `onAction` receives the whole row, not an id — the two shapes are keyed differently
  * (loanApplicationId vs loanApprovalId) and picking the right one is the caller's job.
  * This table stays ignorant of what the action means (rule 4).
  */
-function QueueTable({ shape, rows, hideBorrower = false, actionLabel, onAction }) {
+function QueueTable({ shape, rows, hideBorrower = false, actionLabel, onAction, onRowOpen }) {
   const isRelease = shape === 'release'
   const showBorrower = !hideBorrower
   const canAct = Boolean(actionLabel && onAction)
+  const canOpen = Boolean(onRowOpen)
 
   // One resolution point for both forms of the prop, so nothing below has to care
   // which one the caller passed.
@@ -48,11 +59,17 @@ function QueueTable({ shape, rows, hideBorrower = false, actionLabel, onAction }
 
   // The row click is a convenience on top of the button, never instead of it: the button
   // is what a keyboard or a screen reader reaches, so nothing is lost by ignoring the row.
-  // A row with no label is not clickable either — there would be nothing to open.
-  const rowProps = (row) =>
-    canAct && labelFor(row)
+  //
+  // onRowOpen wins when both are given. Opening a record is the safe, always-available
+  // reading of a click; firing a write — a cancellation, say — because someone clicked a
+  // row to look at it is not. The button remains the way to act.
+  const rowProps = (row) => {
+    if (canOpen) return { className: 'queue__row--actionable', onClick: () => onRowOpen(row) }
+
+    return canAct && labelFor(row)
       ? { className: 'queue__row--actionable', onClick: () => onAction(row) }
       : null
+  }
 
   // Without stopPropagation a click on the button fires the row handler too, opening
   // and immediately reopening the same dialog.

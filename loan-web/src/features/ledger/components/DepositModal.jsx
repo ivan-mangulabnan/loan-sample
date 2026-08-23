@@ -56,7 +56,7 @@ function DepositModal({ open, balance, onSubmit, onClose, isSubmitting = false, 
     >
       <p className="deposit__lead">
         The deposit credits the operating ledger immediately and becomes capital available
-        to fund loans. There is no undo in the API.
+        to fund loans. It cannot be undone.
       </p>
 
       {typeof balance === 'number' && (

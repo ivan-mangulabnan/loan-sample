@@ -1,4 +1,4 @@
-import { useCallback } from 'react'
+import { useCallback, useState } from 'react'
 import Button from '../../../components/Button.jsx'
 import { useListQuery } from '../../../hooks/useListQuery.js'
 import { useWriteAction } from '../../../hooks/useWriteAction.js'
@@ -6,6 +6,7 @@ import { ListView, QueueTable } from '../../dashboard/index.js'
 import ApplyModal from './ApplyModal.jsx'
 import CancelModal from './CancelModal.jsx'
 import ResubmitModal from './ResubmitModal.jsx'
+import ViewApplicationModal from './ViewApplicationModal.jsx'
 import { actionFor, BORROWER_ACTIONS } from '../actions.js'
 import { cancelApplication, createApplication, resubmitApplication } from '../api.js'
 import { useMyApplications } from '../hooks.js'
@@ -22,6 +23,10 @@ import { RECORD_SORT_OPTIONS } from '../sortOptions.js'
 function MyApplications() {
   const [query, onQueryChange] = useListQuery()
   const { data, error, isLoading, reload } = useMyApplications(query)
+
+  // Plain state, not useWriteAction: nothing is sent, so there is no in-flight request
+  // or error for that hook to hold.
+  const [viewing, setViewing] = useState(null)
 
   // No target: applying is not an action on a row, so the modal opens on a sentinel
   // rather than on a record. `true` is enough for useWriteAction to consider it open.
@@ -44,6 +49,20 @@ function MyApplications() {
   // ResubmitModal carries the other way out, next to the remarks that should decide it.
   const openFor = (row) =>
     (actionFor(row) === BORROWER_ACTIONS.Resubmit ? resubmit : cancel).open(row)
+
+  // Reading is separate from acting. Every row opens, including the four statuses that
+  // offer no action at all — those were unreachable while the row click and the action
+  // were the same handler.
+  const view = (row) => setViewing(row)
+
+  // Acting from inside the viewer. Closes it first: <dialog>.showModal() puts the
+  // element in the top layer, so two open at once would stack rather than replace, and
+  // the confirm would appear behind the thing it is confirming. Same swap cancelInstead
+  // makes between the resubmit and cancel dialogs.
+  const actFromViewer = (application) => {
+    setViewing(null)
+    openFor(application)
+  }
 
   // Swap one dialog for the other rather than stacking two <dialog>s. close() refuses
   // mid-flight, so this cannot fire while a resubmission is in the air.
@@ -83,7 +102,8 @@ function MyApplications() {
       >
         {/* hideBorrower: the endpoint does not include it, and it is the reader.
             actionLabel is a function here because this list spans all eight statuses
-            and most rows are not actionable (rule 19b). */}
+            and most rows are not actionable (rule 19b) — onRowOpen is what makes those
+            rows readable anyway. */}
         {(rows) => (
           <QueueTable
             shape="application"
@@ -91,6 +111,7 @@ function MyApplications() {
             hideBorrower
             actionLabel={actionFor}
             onAction={openFor}
+            onRowOpen={view}
           />
         )}
       </ListView>
@@ -125,6 +146,16 @@ function MyApplications() {
           onClose={cancel.close}
           isSubmitting={cancel.isSubmitting}
           error={cancel.error}
+        />
+      )}
+
+      {/* Keyed on the row so the fetched record cannot leak between applications. */}
+      {viewing && (
+        <ViewApplicationModal
+          key={viewing.loanApplicationId}
+          application={viewing}
+          onClose={() => setViewing(null)}
+          onAct={actFromViewer}
         />
       )}
     </>

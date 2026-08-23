@@ -39,14 +39,13 @@ public class LoanApplicationService
     public async Task<LoanApplication?> GetLoanApplicationAsync (
         int loanApplicationId, int tenantId, int requesterId, bool isStaff)
     {
+        // WithApplicationDetail rather than a second hand-written Include chain: this
+        // method used to carry its own copy, and it silently fell behind when the read
+        // graph grew a release. One list means the detail read cannot drift from the
+        // list reads again.
         var loanApplication = await _context.LoanApplications
-            .Include(l => l.Borrower).ThenInclude(b => b.Account)
-            .Include(l => l.PaymentPlan).ThenInclude(p => p.Interest)
-            .Include(l => l.Status)
-            .Include(l => l.Reviews).ThenInclude(r => r.Reviewer).ThenInclude(u => u.Account)
-            .Include(l => l.Reviews).ThenInclude(r => r.Status)
-            .Include(l => l.Approvals).ThenInclude(a => a.Approver).ThenInclude(u => u.Account)
-            .Include(l => l.Approvals).ThenInclude(a => a.Status)
+            .WithApplicationDetail()
+            .AsSplitQuery()
             .FirstOrDefaultAsync(l => l.LoanApplicationId == loanApplicationId
                                    && l.Borrower.TenantId == tenantId
                                    && (isStaff || l.BorrowerId == requesterId));

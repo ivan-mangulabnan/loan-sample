@@ -15,6 +15,13 @@ public class LoanApprovalResponse
     public int NumberOfMonths { get; set; }
     public decimal TotalRepaymentAmount { get; set; }
 
+    /// <summary>
+    /// Nested under the approval rather than beside it on the application, because that
+    /// is the real relationship: a release is a decision about one approval. Usually one
+    /// entry, and empty until the application reaches a release desk.
+    /// </summary>
+    public List<FundReleaseResponse> Releases { get; set; } = [];
+
     public static LoanApprovalResponse From (LoanApproval loanApproval, bool showStaffNames) => new()
     {
         ApprovalDate = loanApproval.ApprovalDate,
@@ -24,6 +31,11 @@ public class LoanApprovalResponse
         InterestRate = loanApproval.InterestRate,
         PrincipalAmount = loanApproval.PrincipalAmount,
         NumberOfMonths = loanApproval.NumberOfMonths,
-        TotalRepaymentAmount = loanApproval.TotalRepaymentAmount
+        TotalRepaymentAmount = loanApproval.TotalRepaymentAmount,
+
+        Releases = loanApproval.FundReleases
+            .OrderBy(f => f.ReleaseDate)
+            .Select(FundReleaseResponse.From)
+            .ToList()
     };
 }

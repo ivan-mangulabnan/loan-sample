@@ -52,13 +52,18 @@
   font-size: var(--text-xs);
 }
 
-.stepper__check {
+/* The cross carries its own class rather than reusing the check's: they mean opposite
+   things, and a probe (or a stylesheet) asking "does this step show a check?" must not
+   be answered yes by a rejection. Same box, so the two never shift the dot. */
+.stepper__check,
+.stepper__cross {
   width: 15px;
   height: 15px;
   display: block;
 }
 
-.stepper--sm .stepper__check {
+.stepper--sm .stepper__check,
+.stepper--sm .stepper__cross {
   width: 12px;
   height: 12px;
 }

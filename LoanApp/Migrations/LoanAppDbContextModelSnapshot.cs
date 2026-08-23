@@ -972,7 +972,7 @@ namespace LoanApp.Migrations
             modelBuilder.Entity("Models.FundRelease", b =>
                 {
                     b.HasOne("Models.LoanApproval", "LoanApproval")
-                        .WithMany()
+                        .WithMany("FundReleases")
                         .HasForeignKey("LoanApprovalId")
                         .OnDelete(DeleteBehavior.Cascade)
                         .IsRequired();
@@ -1204,6 +1204,11 @@ namespace LoanApp.Migrations
                     b.Navigation("Approvals");
 
                     b.Navigation("Reviews");
+                });
+
+            modelBuilder.Entity("Models.LoanApproval", b =>
+                {
+                    b.Navigation("FundReleases");
                 });
 
             modelBuilder.Entity("Models.Tenant", b =>

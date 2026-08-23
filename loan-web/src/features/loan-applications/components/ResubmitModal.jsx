@@ -119,7 +119,7 @@ function ResubmitModal({
     >
       {/* Always the returned state: stage one, "Awaiting resubmission", which is
           exactly what the remarks below are asking for. */}
-      <ModalProgress status={application.status} />
+      <ModalProgress application={application} />
 
       {remarks ? (
         <blockquote className="resub__remarks">

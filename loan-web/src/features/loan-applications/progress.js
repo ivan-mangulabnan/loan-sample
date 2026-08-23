@@ -35,6 +35,12 @@ const AT = {
   PENDING_RELEASE: { at: 4, status: 'waiting' },
   RELEASED: { at: 4, status: 'done' },
 
+  // Approved but not yet handed to a release desk. Absent from this map until a detail
+  // page made it visible: stagesFor returned null and the stepper drew nothing at all,
+  // which read as "this application has no progress" for the one status that has most
+  // of it. Stage 3 is done; the wait is for stage 4 to begin.
+  APPROVED: { at: 3, status: 'done' },
+
   // Back to stage 1, named for what it needs rather than for what happened: the borrower
   // is the one who has to move, and "Review" sitting red would blame the wrong desk.
   //
@@ -44,13 +50,15 @@ const AT = {
   // stepper onto an extra row and was the single largest block in the resubmit modal.
   RETURNED_BY_REVIEWER: { at: 1, status: 'pending', label: 'Resubmission' },
 
-  // The outcome word replaces the final stage's name, so a dead end never reads as
-  // progress towards release. Which desk ended it is derivable from the Reviews and
-  // Approvals arrays, but the modal already prints their remarks underneath — marking a
-  // middle stage instead would make the reader decode a colour to learn the outcome.
+  // Where a dead end sits when nothing better is known. The status alone does not say
+  // which desk ended it, so the mark goes on the last stage and every earlier one reads
+  // as done — see stagesForApplication, which does know and puts it in the right place.
   REJECTED: { at: 4, status: 'invalid', label: 'Rejected' },
   CANCELLED: { at: 4, status: 'invalid', label: 'Cancelled' },
 }
+
+/** Which stage each kind of decision belongs to, matching STAGES' 1-based positions. */
+const DECISION_STAGE = { review: 2, approval: 3, release: 4 }
 
 /**
  * Steps for a status CODE. The honest entry point for a caller that knows the code
@@ -79,4 +87,57 @@ export function stagesForCode(code) {
  */
 export function stagesFor(status) {
   return stagesForCode(codeFor(status))
+}
+
+/**
+ * The stage a rejection happened at, or null if nothing was rejected.
+ *
+ * A rejected application carries the refusal on the desk that made it: the review row,
+ * the approval row, or a release. Reading it back is what stops the stepper marking the
+ * rejecting desk 'done'.
+ */
+function rejectedAt(application) {
+  if ((application?.reviews ?? []).some((r) => codeFor(r.status) === 'REJECTED'))
+    return DECISION_STAGE.review
+
+  for (const approval of application?.approvals ?? []) {
+    if ((approval.releases ?? []).some((r) => codeFor(r.status) === 'REJECTED'))
+      return DECISION_STAGE.release
+    if (codeFor(approval.status) === 'REJECTED') return DECISION_STAGE.approval
+  }
+
+  return null
+}
+
+/**
+ * Steps for a whole application rather than for its status alone.
+ *
+ * The status says an application was rejected; only the decision rows say *where*. With
+ * the status alone the mark lands on the last stage and every earlier one is drawn
+ * 'done' — so an application refused at approval showed a green tick on Approval,
+ * directly above that desk's own "Rejected" note. Use this wherever the record is in
+ * hand; stagesFor stays for the callers that hold nothing but a label.
+ *
+ * Stages after the failure stay 'todo': they never happened. Only a rejection moves —
+ * a cancellation is the borrower's own act, not a desk's refusal, and belongs at the
+ * end where the status map already puts it.
+ */
+export function stagesForApplication(application) {
+  const steps = stagesFor(application?.status)
+  if (!steps) return null
+
+  if (codeFor(application?.status) !== 'REJECTED') return steps
+
+  const at = rejectedAt(application)
+  if (!at) return steps
+
+  return steps.map((step, index) => {
+    const position = index + 1
+
+    if (position < at) return { ...step, status: 'done' }
+    if (position === at) return { ...step, status: 'invalid', label: 'Rejected' }
+
+    // Never reached, so not 'done' and not the failure either.
+    return { label: STAGES[index], status: 'todo' }
+  })
 }

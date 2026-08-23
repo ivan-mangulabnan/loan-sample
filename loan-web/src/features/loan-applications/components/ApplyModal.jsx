@@ -116,9 +116,11 @@ function ApplyModal({ onSubmit, onClose, isSubmitting = false, error = null }) {
       {preview !== null && (
         <p className="apply__preview">
           <span className="apply__preview-figure">{currency.format(preview)}</span>
+          {/* Short form, matching ResubmitModal: the plan picker directly above
+              already states the term and the rate, so spelling out when the rate is
+              fixed repeated three facts to make one point. */}
           <span className="apply__preview-note">
-            to repay over {selected.numberOfMonths} months — indicative, the rate is
-            fixed when your application is approved
+            to repay over {selected.numberOfMonths} months · indicative until approved
           </span>
         </p>
       )}
