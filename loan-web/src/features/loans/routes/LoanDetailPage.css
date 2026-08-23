@@ -1,13 +1,19 @@
-/* The one scrolling region on this page, for the same reason ListView has one: the
-   heading and the pay action stay put while the history grows (rule 15). */
+/* Two columns: progress on the left, payments on the right.
+   
+   This container deliberately does NOT scroll. It used to, wrapping both panels, so a
+   long history scrolled the progress dial off the top of the screen — the reader lost
+   the thing they came for in order to see the thing they were browsing. Now the payment
+   rows own the only scroll on the page, and the dial cannot leave.
+
+   Intrinsic sizing rather than a breakpoint (rule 16): one column until the payments
+   panel can hold its order control and a few rows without crushing the dial. */
 .loandetail {
   flex: 1;
   min-height: 0;
-  overflow-y: auto;
-  overscroll-behavior: contain;
-  display: flex;
-  flex-direction: column;
+  display: grid;
+  grid-template-columns: repeat(auto-fit, minmax(320px, 1fr));
   gap: var(--space-6);
+  overflow: hidden;
 }
 
 .loandetail__back {
@@ -22,7 +28,27 @@
   color: var(--text-strong);
 }
 
+/* Fills the row rather than hugging its content: hugging left a band of dead panel
+   under the facts while the payments column beside it ran full height, and two columns
+   of visibly different length read as a rendering fault rather than a layout.
+
+   The overflow guard stays. It is not about stretching — it is the short-window case,
+   where this panel's own content wants more room than the row has (586px into 566px at
+   1024x768) and the grid would otherwise clip the bottom facts away with no way to
+   reach them. */
+.loandetail > .loanp {
+  min-height: 0;
+  overflow-y: auto;
+  overscroll-behavior: contain;
+}
+
+/* A column of three: heading, order control, and the rows that take what is left.
+   `min-height: 0` is load-bearing — without it the grid item refuses to shrink below
+   its content and the rows push the panel past the viewport instead of scrolling. */
 .loandetail__payments {
+  display: flex;
+  flex-direction: column;
+  min-height: 0;
   padding: var(--space-6);
   background: var(--surface-panel);
   border: 1px solid var(--border);
@@ -30,5 +56,33 @@
 }
 
 .loandetail__payments .section-label {
+  flex-shrink: 0;
   margin-bottom: var(--space-4);
+}
+
+/* ListView is the panel's body: it brings the toolbar, the row region and the pager,
+   and takes the height left under the heading. It already owns its own scroll guard, so
+   nothing here adds one — the page size is measured to fit and should not need it. */
+.loandetail__payments .list {
+  min-height: 0;
+}
+
+/* Below the grid's wrap point the two panels are stacked and the left one is tall, so
+   there is no longer a second column to keep the dial on screen. Hand the scroll back
+   to the page — a 320px column cannot hold both panels any other way (rule 15).
+   700px sits under the `minmax(320px, 1fr)` wrap point so the two never disagree. */
+@media (max-width: 700px) {
+  .loandetail {
+    overflow-y: auto;
+    overscroll-behavior: contain;
+  }
+
+  .loandetail__payments {
+    min-height: 0;
+  }
+
+  /* Both panels grow freely; the page is the scroller down here. */
+  .loandetail > .loanp {
+    overflow-y: visible;
+  }
 }

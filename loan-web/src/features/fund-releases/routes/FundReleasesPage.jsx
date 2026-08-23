@@ -5,6 +5,7 @@ import { useWriteAction } from '../../../hooks/useWriteAction.js'
 import { ListView, QueueTable, configFor, useRoleQueue } from '../../dashboard/index.js'
 import { useSession } from '../../auth/index.js'
 import ReleaseModal from '../components/ReleaseModal.jsx'
+import { RELEASE_SORT_OPTIONS } from '../sortOptions.js'
 import { decideRelease } from '../api.js'
 
 /**
@@ -51,6 +52,9 @@ export function FundReleasesPage() {
         isLoading={queue.isLoading}
         error={queue.error}
         emptyMessage="Nothing is waiting for release."
+        // Its own options: these rows are approvals, keyed approvalDate, not
+        // applications keyed dateRequested. Oldest first (rule 20b).
+        sortOptions={RELEASE_SORT_OPTIONS}
         searchPlaceholder="Search by reference or borrower name"
         searchLabel="Search the release queue"
       >

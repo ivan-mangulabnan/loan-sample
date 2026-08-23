@@ -1,4 +1,4 @@
-import { useEffect, useId, useLayoutEffect, useRef, useState } from 'react'
+import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import Pagination from '../../../components/Pagination.jsx'
 import './ListView.css'
 
@@ -43,6 +43,16 @@ const NO_ROWS = []
  *   that scrollbar should never appear — `overflow-y: auto` is the guard for the case
  *   where a row turns out taller than the one that was measured.
  *
+ * - **What order the rows are in.** Optional: pass `sortOptions` and a select appears
+ *   beside the status filter. Each option carries its own `compare`, so this file
+ *   never learns what a `dateRequested` is (rule 4). **Option 0 is the default, and it
+ *   must be the order that endpoint already returns** — the queues are FIFO and the
+ *   record views are newest-first, and one global default would break half of them
+ *   (rule 20b).
+ * - **The swap animation.** A deliberate change of page, search, status or sort
+ *   remounts the rows and fades them in, the same cross-fade `AuthScreen` uses between
+ *   wizard steps (rule 16a).
+ *
  * Paging costs no request. `items` is the whole filtered list already in memory, so
  * Next is a slice, not a round trip — which is also why the pager can be re-derived on
  * every resize without hammering the API.
@@ -60,9 +70,24 @@ function ListView({
   emptyMessage,
   searchPlaceholder = 'Search',
   searchLabel = 'Search',
+  searchable = true,
   statusOptions = null,
   statusLabel = 'Status',
   statusAllLabel = 'All statuses',
+  // Must be a module-level constant in the caller, never an inline literal: the sort
+  // below memoises on its identity, and a fresh array every render would re-sort every time.
+  sortOptions = null,
+  sortLabel = 'Sort',
+  // Show the sort's name above it instead of only to a screen reader. Off by default —
+  // on a full list page the select sits beside a search box and reads fine unlabelled —
+  // and on where it shares a toolbar with other visibly-labelled controls.
+  showSortLabel = false,
+  // Extra controls for the toolbar, rendered after the built-in ones. A slot rather
+  // than a prop per field: a date range and a money range are the caller's vocabulary,
+  // and teaching this component about either would put a domain in `components`-
+  // adjacent shared code (rule 4). The caller owns their state and does its own
+  // filtering before handing `items` over.
+  filters = null,
   children,
 }) {
   const fieldId = useId()
@@ -75,6 +100,19 @@ function ListView({
   const [rowsPerPage, setRowsPerPage] = useState(UNMEASURED_ROWS)
 
   const rows = items ?? NO_ROWS
+
+  // Option 0 is the default, so an absent query.sort means "the order the server sent",
+  // which for every caller is already the right one. Copied before sorting: `sort`
+  // mutates, and this array belongs to the data hook's state.
+  const sorted = useMemo(() => {
+    if (!sortOptions?.length) return rows
+
+    const chosen =
+      sortOptions.find((option) => option.value === query.sort) ?? sortOptions[0]
+    if (!chosen.compare) return rows
+
+    return [...rows].sort(chosen.compare)
+  }, [rows, query.sort, sortOptions])
 
   useEffect(() => {
     if (draft === (query.search ?? '')) return
@@ -105,12 +143,34 @@ function ListView({
       for (const row of rendered) rowHeight = Math.max(rowHeight, row.getBoundingClientRect().height)
       if (rowHeight === 0) return
 
-      // The header is inside the scrolling region and does not scroll away, so the space
-      // left for rows is what remains under it.
-      const head = region.querySelector('thead')
-      const headHeight = head ? head.getBoundingClientRect().height : 0
+      // Row PITCH, not row height. Under `border-collapse: collapse` a <tr>'s box
+      // excludes the collapsed border, so consecutive rows sit further apart than they
+      // measure: nine 23px payment rows reported 207px and occupied 223px, and the page
+      // sized from the smaller figure overflowed by exactly the difference. Where there
+      // are two rows to compare, the distance between their tops is the truth.
+      if (rendered.length > 1) {
+        const pitch =
+          rendered[rendered.length - 1].getBoundingClientRect().top -
+          rendered[rendered.length - 2].getBoundingClientRect().top
+        if (pitch > rowHeight) rowHeight = pitch
+      }
 
-      const fits = Math.floor((region.clientHeight - headHeight) / rowHeight)
+      // The header is inside the scrolling region and does not scroll away, so the space
+      // left for rows is what remains under it. Measured from the region's own top to
+      // the first row's, so it picks up the same collapsed-border gap the pitch does
+      // (2px between thead's bottom and row one's top) rather than just the thead box.
+      const head = region.querySelector('thead')
+      const headHeight = head
+        ? rendered[0].getBoundingClientRect().top - region.getBoundingClientRect().top
+        : 0
+
+      // A pixel of slack before the divide. `clientHeight` is a rounded integer while
+      // the header and rows are fractional, so a page that divides evenly on paper can
+      // still need one more physical pixel than the region has — and the row it cannot
+      // fit is the scrollbar this measurement exists to prevent. Costs nothing when the
+      // division is not tight; a 253px region with a 23px header and 23px rows computed
+      // 10 rows and then needed 277px to draw them.
+      const fits = Math.floor((region.clientHeight - headHeight - 1) / rowHeight)
 
       setRowsPerPage(Math.min(MAX_ROWS, Math.max(MIN_ROWS, fits)))
     }
@@ -127,7 +187,7 @@ function ListView({
     // one are different heights, and the second one has to shrink the page.
   }, [items])
 
-  const totalPages = Math.ceil(rows.length / rowsPerPage)
+  const totalPages = Math.ceil(sorted.length / rowsPerPage)
 
   // Clamped rather than corrected through state. Growing the window mid-list can put the
   // stored page past the end, and an effect that wrote the clamped value back would fire
@@ -136,7 +196,7 @@ function ListView({
   const page = Math.min(Math.max(query.page, 1), Math.max(totalPages, 1))
 
   const start = (page - 1) * rowsPerPage
-  const pageRows = rows.slice(start, start + rowsPerPage)
+  const pageRows = sorted.slice(start, start + rowsPerPage)
 
   // Page 2 opens at row 21, not wherever page 1 was left scrolled to. Belt and braces
   // now that a page is sized to fit — but a row taller than the measured one can still
@@ -155,17 +215,23 @@ function ListView({
   return (
     <div className="list">
       <div className="list__toolbar">
-        <label className="visually-hidden" htmlFor={`${fieldId}-search`}>
-          {searchLabel}
-        </label>
-        <input
-          id={`${fieldId}-search`}
-          type="search"
-          className="field field--input list__search"
-          placeholder={searchPlaceholder}
-          value={draft}
-          onChange={(event) => setDraft(event.target.value)}
-        />
+        {/* Opt-out: a loan's payment history has no name or reference to search by, and
+            an input that filters nothing is worse than no input. */}
+        {searchable && (
+          <>
+            <label className="visually-hidden" htmlFor={`${fieldId}-search`}>
+              {searchLabel}
+            </label>
+            <input
+              id={`${fieldId}-search`}
+              type="search"
+              className="field field--input list__search"
+              placeholder={searchPlaceholder}
+              value={draft}
+              onChange={(event) => setDraft(event.target.value)}
+            />
+          </>
+        )}
 
         {statusOptions && (
           <>
@@ -190,6 +256,34 @@ function ListView({
             </select>
           </>
         )}
+
+        {filters}
+
+        {sortOptions && (
+          <div className={`list__sort-field${showSortLabel ? '' : ' list__sort-field--bare'}`}>
+            <label
+              className={showSortLabel ? 'list__sort-label' : 'visually-hidden'}
+              htmlFor={`${fieldId}-sort`}
+            >
+              {showSortLabel ? 'Order' : sortLabel}
+            </label>
+            <select
+              id={`${fieldId}-sort`}
+              className="field field--input list__sort"
+              // Falls back to option 0 rather than '': unlike status, "no sort" is not a
+              // meaningful state — the rows are always in some order, and the select has
+              // to name the one they are actually in.
+              value={query.sort ?? sortOptions[0].value}
+              onChange={(event) => onQueryChange({ sort: event.target.value, page: 1 })}
+            >
+              {sortOptions.map((option) => (
+                <option key={option.value} value={option.value}>
+                  {option.label}
+                </option>
+              ))}
+            </select>
+          </div>
+        )}
       </div>
 
       <div className={`list__rows${isLoading && items ? ' list__rows--busy' : ''}`} ref={scrollRef}>
@@ -198,7 +292,15 @@ function ListView({
         ) : isFirstLoad ? (
           <p className="list__empty">Loading…</p>
         ) : pageRows.length > 0 ? (
-          children(pageRows)
+          // Keyed on the four things the reader deliberately changed, and on nothing
+          // derived from the data: a background reload returning identical rows must not
+          // re-fade, or a poll reads as a flicker.
+          <div
+            className="list__page"
+            key={`${query.search ?? ''}|${query.status ?? ''}|${query.sort ?? ''}|${page}`}
+          >
+            {children(pageRows)}
+          </div>
         ) : isFiltered ? (
           // A filtered miss is a different state from an empty list, and saying so is
           // what tells the reader the filter is working rather than the data missing.

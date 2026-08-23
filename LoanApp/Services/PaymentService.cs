@@ -37,6 +37,11 @@ public class PaymentService
             .Where(p => p.LoanId == loanId)
             .OrderByDescending(p => p.PaymentDate)
             .ThenByDescending(p => p.PaymentId)
+            // The ceiling every other list endpoint carries; this one was missing it.
+            // The client pages this list now rather than scrolling it, which makes an
+            // unbounded response the one thing standing between a long-lived loan and a
+            // payload the size of its whole history.
+            .Take(ListLimit.MaxRows)
             .ToListAsync();
     }
 

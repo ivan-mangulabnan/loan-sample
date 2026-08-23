@@ -65,8 +65,13 @@
   /* ---- Glow colours: drive the radial-gradient utilities ---- */
   --glow-accent: rgba(79, 192, 166, 0.5);
   --glow-accent-soft: rgba(79, 192, 166, 0.38);
+  /* The travelling highlight on a progress bar or ring. White rather than a tinted
+     glow: it rides on top of whichever --bar-* tone the bar already carries, so it has
+     to read as light falling on that colour rather than as a colour of its own.
+     Near-opaque — at 0.55 it was lost against an already-light accent stroke, which is
+     the whole reason the first attempt read as "barely there". */
+  --glow-travel: rgba(255, 255, 255, 0.92);
   --glow-info: rgba(95, 127, 216, 0.42);
-  /* The Stepper's 'pending' pulse — a stage waiting on the reader, not on another desk. */
   --glow-warning-soft: rgba(214, 124, 90, 0.38);
   --glow-info-soft: rgba(95, 127, 216, 0.4);
 
@@ -76,6 +81,13 @@
   --bar-warning: linear-gradient(90deg, #d67c5a, #a85f47);
   --bar-success: linear-gradient(90deg, #8caa78, #4fc0a6);
   --bar-vertical: linear-gradient(180deg, #4fc0a6, #2b7f70);
+  /* The moving stripe texture on an animated bar. Low alpha and white for the same
+     reason as --glow-travel: it rides over whichever tone the bar carries. */
+  --bar-stripe: rgba(255, 255, 255, 0.11);
+  /* The ring's drift. Stronger than --bar-stripe because it is drawn as spaced dashes on
+     a curve rather than a dense texture on a 5px bar, so the same alpha disappears. */
+  --ring-flow: rgba(255, 255, 255, 0.2);
+  --bar-stripe-w: 7px;
 
   /* ---- Chart ---- */
   /* The area line fades to grey at both ends so the accent reads as a highlight in the

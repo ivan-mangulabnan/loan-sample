@@ -3,6 +3,7 @@ import { useListQuery } from '../../../hooks/useListQuery.js'
 import { ListView, QueueTable } from '../../dashboard/index.js'
 import { useAllApplications } from '../hooks.js'
 import { APPLICATION_STATUS_OPTIONS } from '../statusOptions.js'
+import { RECORD_SORT_OPTIONS } from '../sortOptions.js'
 
 /**
  * Every application in the tenant, at any status. The queue endpoints each show
@@ -36,6 +37,7 @@ function AllApplications() {
         searchPlaceholder="Search by reference or borrower name"
         searchLabel="Search applications"
         statusOptions={APPLICATION_STATUS_OPTIONS}
+        sortOptions={RECORD_SORT_OPTIONS}
       >
         {(rows) => <QueueTable shape="application" rows={rows} />}
       </ListView>

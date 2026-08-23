@@ -5,6 +5,7 @@ import { ListView } from '../../dashboard/index.js'
 import LoanTable from '../components/LoanTable.jsx'
 import { useMyLoans } from '../hooks.js'
 import { LOAN_STATUS_OPTIONS } from '../statusOptions.js'
+import { LOAN_SORT_OPTIONS } from '../sortOptions.js'
 
 /**
  * The borrower's own loans in full. The status dropdown is the loan lifecycle, a
@@ -37,6 +38,7 @@ export function LoanListPage() {
         searchPlaceholder="Search by reference"
         searchLabel="Search my loans"
         statusOptions={LOAN_STATUS_OPTIONS}
+        sortOptions={LOAN_SORT_OPTIONS}
       >
         {(rows) => (
           <LoanTable

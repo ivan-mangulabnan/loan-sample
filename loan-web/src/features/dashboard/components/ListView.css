@@ -27,10 +27,38 @@
   min-width: 200px;
 }
 
-/* Intrinsic width: a select stretched to the row would leave the search box a stub. */
-.list .list__status {
+/* Intrinsic width: a select stretched to the row would leave the search box a stub.
+   The sort select is the same kind of control and takes the same two rules; the toolbar
+   already wraps, so a third one needs no breakpoint (rule 16). */
+.list .list__status,
+.list .list__sort {
   width: auto;
   cursor: pointer;
+}
+
+/* The sort's wrapper. Stacks a visible name over the select so it lines up with other
+   labelled controls in the same toolbar; unlabelled it is a bare passthrough and the
+   select sits directly in the flex row as before. */
+.list__sort-field {
+  display: flex;
+  flex-direction: column;
+  gap: var(--space-1);
+}
+
+.list__sort-field--bare {
+  display: contents;
+}
+
+.list__sort-label {
+  color: var(--text-faint);
+  font-size: var(--text-xs);
+  padding-left: 2px;
+}
+
+/* Labelled controls stack a name over a field, so the row aligns on the fields rather
+   than on the tops of differently-tall boxes. */
+.list__toolbar {
+  align-items: flex-end;
 }
 
 /* The only scrolling region on a list page. `overscroll-behavior: contain` stops a
@@ -71,4 +99,32 @@
   text-wrap: balance;
   font-size: var(--text-lg);
   color: var(--text-subtle);
+}
+
+/* A deliberate change of page, filter or order swaps the rows out; the fade says a swap
+   happened rather than letting the content teleport. Same curve and same 6px as
+   `auth-pane-in` (rule 16a) — a swap is a swap, and a second timing would read as two
+   different apps.
+
+   No height animation, which is the hard half of AuthScreen: the page size is measured
+   to fit this region, so the row block is already the height it will stay.
+
+   `both` fills backwards as well as forwards, so the rows start hidden rather than
+   flashing at full opacity for one frame before the animation takes hold.
+
+   The keyframe itself is in utilities.css — the payment history uses it too, from a
+   route that does not import this file. */
+.list__page {
+  animation: list-page-in 0.28s cubic-bezier(0.4, 0, 0.2, 1) both;
+}
+
+
+@media (prefers-reduced-motion: reduce) {
+  /* Not just `animation: none` — with `both` still applied that would strand the rows
+     at the keyframe's starting opacity. The swap simply happens instantly. */
+  .list__page {
+    animation: none;
+    opacity: 1;
+    transform: none;
+  }
 }

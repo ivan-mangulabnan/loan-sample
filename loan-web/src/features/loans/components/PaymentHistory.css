@@ -1,29 +1,59 @@
+/* Two columns of short values, unlike .loans and .queue — so no sideways scroll box
+   here. Inside ListView's flex row region an `overflow-x: auto` wrapper shrink-wraps
+   its table instead of stretching it, which collapsed this to ~40% of the panel and
+   left the figures huddled against the left edge. `width: 100%` states the intent the
+   scroll box was accidentally overriding. */
 .paylist {
-  margin: 0;
-  padding: 0;
-  list-style: none;
+  width: 100%;
+  background: var(--surface-panel);
+  border-radius: var(--radius-lg);
 }
 
-.paylist__row {
-  display: flex;
-  align-items: baseline;
-  justify-content: space-between;
-  gap: var(--space-4);
-  padding: var(--space-3) 0;
+.paylist__table {
+  width: 100%;
+  border-collapse: collapse;
+  font-size: var(--text-base);
+  white-space: nowrap;
+}
+
+.paylist__table th {
+  text-align: left;
+  padding: var(--space-3) var(--space-4);
+  color: var(--text-muted);
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
   border-bottom: 1px solid var(--border);
 }
 
-.paylist__row:last-child {
-  border-bottom: none;
+.paylist__table td {
+  padding: var(--space-3) var(--space-4);
+  color: var(--text);
 }
 
+/* Zebra rather than a rule per row, matching .loans — and on the <td>, because a
+   background on the <tr> sits under the cell and the stripe would win on half of them. */
+.paylist__table tbody tr:nth-child(even) td {
+  background: var(--surface-row-alt);
+}
+
+/* Money right-aligns so the figures compare down the column: the decimal points line up
+   and a larger payment is visibly wider. Header follows the cells it labels. */
+.paylist__num-head,
+.paylist__amount {
+  text-align: right;
+}
+
+/* Takes the slack so the money column stays pinned to the right edge, where a column of
+   figures is read from. */
 .paylist__date {
+  width: 100%;
   color: var(--text-muted);
-  font-size: var(--text-base);
 }
 
 .paylist__amount {
   color: var(--text-strong);
-  font-size: var(--text-base);
   font-weight: var(--weight-bold);
+  /* Tabular figures so digits sit in equal columns; proportional ones make an aligned
+     column of currency look ragged. */
+  font-variant-numeric: tabular-nums;
 }

@@ -10,6 +10,7 @@ import { actionFor, BORROWER_ACTIONS } from '../actions.js'
 import { cancelApplication, createApplication, resubmitApplication } from '../api.js'
 import { useMyApplications } from '../hooks.js'
 import { APPLICATION_STATUS_OPTIONS } from '../statusOptions.js'
+import { RECORD_SORT_OPTIONS } from '../sortOptions.js'
 
 /**
  * The signed-in borrower's own applications, and everything they can do to one.
@@ -78,6 +79,7 @@ function MyApplications() {
         searchPlaceholder="Search by reference"
         searchLabel="Search my applications"
         statusOptions={APPLICATION_STATUS_OPTIONS}
+        sortOptions={RECORD_SORT_OPTIONS}
       >
         {/* hideBorrower: the endpoint does not include it, and it is the reader.
             actionLabel is a function here because this list spans all eight statuses

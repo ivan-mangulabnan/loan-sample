@@ -68,6 +68,7 @@ function LoanTable({ rows, actionLabel, onAction }) {
                     value={repaidPercent(loan)}
                     tone={behind ? 'warning' : 'accent'}
                     label={`Repaid on loan #${loan.loanId}`}
+                    animate
                   />
                   {behind && (
                     <span className="loans__progress-note">

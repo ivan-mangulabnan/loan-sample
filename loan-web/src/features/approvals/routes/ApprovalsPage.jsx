@@ -3,7 +3,7 @@ import Button from '../../../components/Button.jsx'
 import { useListQuery } from '../../../hooks/useListQuery.js'
 import { useWriteAction } from '../../../hooks/useWriteAction.js'
 import { ListView, QueueTable, configFor, useRoleQueue } from '../../dashboard/index.js'
-import { DECISIONS, DecisionModal } from '../../loan-applications/index.js'
+import { DECISIONS, DecisionModal, QUEUE_SORT_OPTIONS } from '../../loan-applications/index.js'
 import { useSession } from '../../auth/index.js'
 import { submitApproval } from '../api.js'
 
@@ -57,6 +57,9 @@ export function ApprovalsPage() {
         isLoading={queue.isLoading}
         error={queue.error}
         emptyMessage="No applications are waiting for approval."
+        // Oldest first: this is a queue, and the application that has waited
+        // longest is the one to work next (rule 20b).
+        sortOptions={QUEUE_SORT_OPTIONS}
         searchPlaceholder="Search by reference or borrower name"
         searchLabel="Search the approval queue"
       >
