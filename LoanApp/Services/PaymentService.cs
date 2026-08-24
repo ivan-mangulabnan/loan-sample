@@ -19,9 +19,6 @@ public class PaymentService
         _ledgerService = ledgerService;
     }
 
-    // Returns null when the loan is not visible to the caller, and an empty list when it is
-    // visible but has no payments yet. Collapsing the two would turn a 404 into 200-with-[],
-    // and would make the ownership test vacuous — an empty list proves nothing on its own.
     public async Task<List<Payment>?> GetForLoanAsync (int loanId, int tenantId, int requesterId, bool isStaff)
     {
         var loanIsVisible = await _context.Loans.AnyAsync(
@@ -31,22 +28,14 @@ public class PaymentService
 
         if (!loanIsVisible) return null;
 
-        // No Includes: the caller maps with showBorrower: false, so PersonName.Of is never
-        // reached and loading Borrower would be a wasted join.
         return await _context.Payments
             .Where(p => p.LoanId == loanId)
             .OrderByDescending(p => p.PaymentDate)
             .ThenByDescending(p => p.PaymentId)
-            // The ceiling every other list endpoint carries; this one was missing it.
-            // The client pages this list now rather than scrolling it, which makes an
-            // unbounded response the one thing standing between a long-lived loan and a
-            // payload the size of its whole history.
             .Take(ListLimit.MaxRows)
             .ToListAsync();
     }
 
-    // Tenant comes from the caller's token, never the query string. Returns the filtered
-    // list whole, up to ListLimit.MaxRows — the client pages it.
     public async Task<List<Payment>> GetFilteredAsync (
         int tenantId, int? borrowerId, DateTime? from, DateTime? to)
     {
@@ -55,8 +44,6 @@ public class PaymentService
         if (borrowerId is not null)
             query = query.Where(p => p.BorrowerUserId == borrowerId.Value);
 
-        // Whole UTC days. The upper bound is exclusive on the next day: `<= to` would drop
-        // payments made later in the day on the `to` date, since PaymentDate carries a time.
         if (from is not null)
         {
             var fromDate = from.Value.Date;
@@ -71,9 +58,6 @@ public class PaymentService
 
         return await query
             .Include(p => p.Borrower).ThenInclude(b => b.Account)
-            // PaymentId breaks ties: PostAsync stamps PaymentDate from a single UtcNow, so
-            // batch-posted payments share one timestamp and would otherwise swap places
-            // between requests.
             .OrderByDescending(p => p.PaymentDate)
             .ThenByDescending(p => p.PaymentId)
             .Take(ListLimit.MaxRows)

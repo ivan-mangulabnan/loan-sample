@@ -17,14 +17,6 @@ public class PaymentPlanController : ControllerBase
     _paymentPlanService = paymentPlanService;
   }
 
-  /// <summary>
-  /// The plans a borrower can apply under. Exists so an application form can offer them
-  /// by name and send back a PaymentPlanId — Create rejects an id that matches no plan.
-  ///
-  /// No role gate beyond a session, and no tenant filter: PaymentPlans carries no
-  /// TenantId. It is global reference data, which makes it the one list in this API that
-  /// is the same for every reader.
-  /// </summary>
   [HttpGet]
   public async Task<ActionResult<List<PaymentPlanResponse>>> GetAll ()
   {

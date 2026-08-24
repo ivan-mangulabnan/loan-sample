@@ -41,14 +41,6 @@ public class LoanApplicationController : ControllerBase
     }
   }
 
-  /// <summary>
-  /// Tenant-wide list for staff. Loaner is excluded from the role list on purpose:
-  /// a borrower reads their own records through "me", and must not see the tenant.
-  ///
-  /// The filters are optional: a caller that sends no query string gets the whole list,
-  /// capped at ListLimit.MaxRows. There is no page parameter — the client pages what it
-  /// is given, against the height of the screen it is drawing on.
-  /// </summary>
   [HttpGet]
   [Authorize(Roles = $"{RoleNames.Reviewer},{RoleNames.Approver},{RoleNames.Admin}")]
   public async Task<ActionResult<List<LoanApplicationResponse>>> GetAll (
@@ -81,14 +73,6 @@ public class LoanApplicationController : ControllerBase
     return Ok(LoanApplicationResponse.From(loanApplications, User.CanSeeStaffNames()));
   }
 
-  /// <summary>
-  /// Sends a returned application back to the reviewer, with whatever the borrower
-  /// changed. Named for what it does rather than for the field it edits: the plan is no
-  /// longer the only thing that can move.
-  ///
-  /// The plan is checked here, before the service, so a bad id is a 400 that names the
-  /// problem rather than a foreign-key error out of SaveChanges.
-  /// </summary>
   [HttpPut("{id}/resubmit")]
   [Authorize(Roles = RoleNames.Loaner)]
   public async Task<ActionResult<MessageResponse>> Resubmit (int id, ResubmitApplicationRequest resubmitApplicationRequest)

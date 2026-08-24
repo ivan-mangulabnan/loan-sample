@@ -20,15 +20,7 @@ public class FundReleaseService
         _ledgerService = ledgerService;
         _loanService = loanService;
     }
-    
-    /// <summary>
-    /// The disbursement desk. Rooted on LoanApproval rather than the application, because
-    /// the principal being released is the approval's figure — the application's Amount is
-    /// what was asked for, not what was granted.
-    ///
-    /// No AsSplitQuery here: every Include on this query is a reference, so there is no
-    /// collection to fan out and a single query returns exactly one row per approval.
-    /// </summary>
+
     public async Task<List<LoanApproval>> GetQueueAsync (
         int tenantId, ApplicationQueryRequest applicationQueryRequest)
     {
@@ -44,23 +36,12 @@ public class FundReleaseService
             .Include(a => a.LoanApplication).ThenInclude(l => l.Borrower).ThenInclude(b => b.Account)
             .Include(a => a.LoanApplication).ThenInclude(l => l.Status)
             .Include(a => a.LoanApplication).ThenInclude(l => l.PaymentPlan)
-            // LoanApprovalId breaks ties: ApprovalDate is a UtcNow stamp, so two decisions
-            // recorded in the same tick would otherwise swap places between requests, and
-            // the client pages this list by position.
             .OrderBy(a => a.ApprovalDate)
             .ThenBy(a => a.LoanApprovalId)
             .Take(ListLimit.MaxRows)
             .ToListAsync();
     }
 
-    /// <summary>
-    /// Matches the same two things the application queues do — reference number or
-    /// borrower name — but reaches them through LoanApplication, since this query is
-    /// rooted one level up. The reference shown in the UI is the application's, not the
-    /// approval's, so that is what a typed "#12" has to hit.
-    ///
-    /// Columns rather than PersonName.Of, and no ToLower: see LoanApplicationQueries.
-    /// </summary>
     private static IQueryable<LoanApproval> ApplySearch (IQueryable<LoanApproval> query, string? search)
     {
         if (string.IsNullOrWhiteSpace(search)) return query;
@@ -76,15 +57,6 @@ public class FundReleaseService
                               || a.LoanApplication.Borrower.Account.LastName.Contains(term)));
     }
 
-    /// <summary>
-    /// The disbursement desk's write. Both outcomes land here: releasing pays the
-    /// borrower and draws down the operating ledger, rejecting closes the application
-    /// without moving a centavo. Named for the decision rather than the release because
-    /// half its work is the refusal.
-    ///
-    /// Rooted on LoanApproval for the same reason the queue is — the figure at stake is
-    /// the approval's principal, not the amount the borrower originally asked for.
-    /// </summary>
     public async Task<FundRelease?> DecideAsync (int adminUserId, int tenantId, FundReleaseRequest fundReleaseRequest)
     {
         var loanApproval = await _context.LoanApprovals
@@ -114,11 +86,6 @@ public class FundReleaseService
         };
     }
 
-    /// <summary>
-    /// Pays out. Four tables move together — FundReleases, Loans, Transactions and the
-    /// Ledger — plus the application's own status, which is why this one carries an
-    /// explicit transaction while the rejection does not.
-    /// </summary>
     private async Task<FundRelease> ReleaseAsync (int adminUserId, int tenantId, LoanApproval loanApproval, string? remarks)
     {
         var loanApplication = loanApproval.LoanApplication;
@@ -175,20 +142,6 @@ public class FundReleaseService
         return fundRelease;
     }
 
-    /// <summary>
-    /// Refuses to pay out. The application goes terminal at REJECTED and no loan is
-    /// created.
-    ///
-    /// Two absences are load-bearing. There is no ledger sufficiency check: an empty
-    /// ledger is the likeliest reason to reject, and gating the refusal on the money
-    /// being there would leave the application stuck at PENDING_RELEASE with no way out.
-    /// And there is no explicit database transaction: this writes one row and updates
-    /// one, so a single SaveChangesAsync is already atomic.
-    ///
-    /// The row is still written, with Amount 0 — nothing moved, and what was refused is
-    /// one join away on LoanApproval.PrincipalAmount. It exists so the refusal has an
-    /// author and a reason, the same way a rejected review or approval does.
-    /// </summary>
     private async Task<FundRelease> RejectAsync (int adminUserId, LoanApproval loanApproval, string? remarks)
     {
         var rejectedStatus = await _statusService.GetRequiredApplicationStatusAsync(LoanApplicationStatusCodes.Rejected);

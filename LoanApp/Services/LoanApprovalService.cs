@@ -70,10 +70,6 @@ public class LoanApprovalService
         return loanApproval;
     }
 
-    /// <summary>
-    /// The decision desk: applications already reviewed and sitting at PENDING_APPROVAL,
-    /// oldest first.
-    /// </summary>
     public async Task<List<LoanApplication>> GetQueueAsync (
         int tenantId, ApplicationQueryRequest applicationQueryRequest)
     {

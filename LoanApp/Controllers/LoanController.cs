@@ -41,8 +41,6 @@ public class LoanController : ControllerBase
     return Ok(LoanResponse.From(loan, DateTime.UtcNow, User.CanSeeLoanGrading()));
   }
 
-  // A sub-resource of the loan: same visibility question as GetById, so it lives here
-  // rather than on PaymentController and inherits this controller's bare [Authorize].
   [HttpGet("{id}/payments")]
   public async Task<ActionResult<List<PaymentResponse>>> GetPayments (int id)
   {
@@ -50,8 +48,6 @@ public class LoanController : ControllerBase
       id, User.GetTenantId(), User.GetUserId(), User.CanSeeStaffNames());
     if (payments is null) return NotFound();
 
-    // showBorrower: false — a borrower reading their own loan does not need their own
-    // name echoed back, and staff already have it from the loan read.
     return Ok(PaymentResponse.From(payments, showBorrower: false));
   }
 }

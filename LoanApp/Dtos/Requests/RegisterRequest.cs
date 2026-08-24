@@ -26,6 +26,6 @@ public class RegisterRequest
   [Required]
   [RegularExpression(NamePattern, ErrorMessage = NameError)]
   public string LastName { get; set; } = null!;
-  
+
   public DateTime Birthdate { get; set; }
 }

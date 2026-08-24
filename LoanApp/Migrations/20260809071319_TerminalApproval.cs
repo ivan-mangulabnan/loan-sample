@@ -4,10 +4,8 @@
 
 namespace LoanApp.Migrations
 {
-    /// <inheritdoc />
     public partial class TerminalApproval : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropIndex(
@@ -26,7 +24,6 @@ namespace LoanApp.Migrations
                 unique: true);
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DropIndex(

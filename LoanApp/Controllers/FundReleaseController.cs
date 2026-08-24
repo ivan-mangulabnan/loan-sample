@@ -20,14 +20,6 @@ public class FundReleaseController : ControllerBase
     _fundReleaseService = fundReleaseService;
   }
 
-  /// <summary>
-  /// Release the funds, or refuse to. One endpoint rather than two because the desk
-  /// makes one decision, the same shape the review and approval desks take.
-  ///
-  /// The sentence branches on the decision. useWriteAction shows whatever comes back
-  /// verbatim as the reader's notice, so a fixed "Funds released." would announce a
-  /// disbursement that did not happen.
-  /// </summary>
   [HttpPost]
   public async Task<ActionResult<MessageResponse>> Decide (FundReleaseRequest fundReleaseRequest)
   {

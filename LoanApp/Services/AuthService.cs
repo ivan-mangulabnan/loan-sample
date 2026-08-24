@@ -26,7 +26,7 @@ public class AuthService
     var result = new PasswordHasher<User>().VerifyHashedPassword(user, user.PasswordHash, loginRequest.Password);
 
     if (result == PasswordVerificationResult.Failed) return null;
-    
+
     return user;
   }
 
@@ -34,14 +34,10 @@ public class AuthService
   {
     var user = await _context.Users.Include(u => u.Role)
       .FirstOrDefaultAsync(u => u.TenantId == tenantId && u.UserName == userName);
-    
+
     return user;
   }
 
-  // Separate from GetUserAsync on purpose: that one serves login and the registration
-  // duplicate check, neither of which renders a name, and widening it would hide this
-  // include-contract from the only code that depends on it. Keyed on UserId, which
-  // arrives from a signature-validated claim.
   public async Task<User?> GetUserForIdentityAsync (int userId)
   {
     return await _context.Users

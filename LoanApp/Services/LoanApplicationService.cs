@@ -39,10 +39,6 @@ public class LoanApplicationService
     public async Task<LoanApplication?> GetLoanApplicationAsync (
         int loanApplicationId, int tenantId, int requesterId, bool isStaff)
     {
-        // WithApplicationDetail rather than a second hand-written Include chain: this
-        // method used to carry its own copy, and it silently fell behind when the read
-        // graph grew a release. One list means the detail read cannot drift from the
-        // list reads again.
         var loanApplication = await _context.LoanApplications
             .WithApplicationDetail()
             .AsSplitQuery()
@@ -53,16 +49,6 @@ public class LoanApplicationService
         return loanApplication;
     }
 
-    /// <summary>
-    /// Every application in the tenant, at any status. The queue endpoints are each
-    /// filtered to one stage, so staff have no other way to see an application's
-    /// whole history. Borrower is included here — unlike the /me query, which does
-    /// not need it — because it is the column that makes a tenant-wide list usable.
-    ///
-    /// Returns the filtered list whole, up to ListLimit.MaxRows. The reader's screen
-    /// decides how much of it is visible at once, and the reader's screen is not
-    /// something this layer can see.
-    /// </summary>
     public async Task<List<LoanApplication>> GetLoanApplicationsByTenantAsync (
         int tenantId, ApplicationQueryRequest applicationQueryRequest)
     {
@@ -73,16 +59,9 @@ public class LoanApplicationService
 
         return await query
             .WithApplicationDetail()
-            // LoanApplicationId breaks ties: DateRequested is a UtcNow stamp, so two
-            // applications submitted in the same tick would otherwise come back in
-            // whatever order the server found convenient, and the client pages this
-            // list by position.
             .OrderByDescending(l => l.DateRequested)
             .ThenByDescending(l => l.LoanApplicationId)
             .Take(ListLimit.MaxRows)
-            // Reviews and Approvals are collections — two reviews and one approval per
-            // application in live data — so one query would drag six joined rows back
-            // per application, times the page size.
             .AsSplitQuery()
             .ToListAsync();
     }
@@ -95,11 +74,7 @@ public class LoanApplicationService
             .WhereStatusCode(applicationQueryRequest.Status)
             .WhereMatches(applicationQueryRequest.Search);
 
-        // This query carried no OrderBy at all before. An unordered list is returned in
-        // whatever order the server finds convenient, which is a different order on two
-        // requests — so the ordering is load-bearing here rather than cosmetic.
         return await query
-            // includeBorrower: false — the reader is the borrower.
             .WithApplicationDetail(includeBorrower: false)
             .OrderByDescending(l => l.DateRequested)
             .ThenByDescending(l => l.LoanApplicationId)
@@ -108,16 +83,6 @@ public class LoanApplicationService
             .ToListAsync();
     }
 
-    /// <summary>
-    /// The way out of RETURNED_BY_REVIEWER: fix what the reviewer objected to and send
-    /// it back to the front of the queue.
-    ///
-    /// The switch below is what keeps this from becoming a general-purpose edit. Only a
-    /// returned application has a target status, so one still under review — or already
-    /// approved — throws rather than quietly rewriting its own figures.
-    ///
-    /// A null amount keeps the one on record. See ResubmitApplicationRequest.
-    /// </summary>
     public async Task<LoanApplication?> ResubmitAsync (int loanApplicationId, int borrowerId, int paymentPlanId, decimal? amount)
     {
         var loanApplication = await GetOwnedAsync(loanApplicationId, borrowerId);

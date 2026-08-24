@@ -13,15 +13,6 @@ public class PaymentPlanService
         _context = context;
     }
 
-    /// <summary>
-    /// Every plan on offer. Reference data, not tenant data — PaymentPlans has no
-    /// TenantId, so there is nothing to scope here.
-    ///
-    /// Interest is Included because the rate lives on that row and PaymentPlanResponse
-    /// reads it; without the Include the projection throws on a null navigation.
-    /// Ordered by term so the picker is stable rather than in whatever order the server
-    /// found convenient.
-    /// </summary>
     public async Task<List<PaymentPlan>> GetPaymentPlansAsync ()
     {
         var paymentPlans = await _context.PaymentPlans

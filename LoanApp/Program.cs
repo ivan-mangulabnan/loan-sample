@@ -45,16 +45,10 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
             )
         };
 
-        // The browser holds the JWT in an HttpOnly cookie, so it can never set an
-        // Authorization header. The header still wins when present, for curl, Postman
-        // and scripted callers holding a token — both carry the same signed token.
         options.Events = new JwtBearerEvents
         {
             OnMessageReceived = context =>
             {
-                // Read the header directly: the handler has not parsed it yet at this
-                // point, so `context.Token` is always null here. Guarding on it would
-                // read like "prefer the header" while silently doing the opposite.
                 var header = context.Request.Headers.Authorization.ToString();
                 var hasBearer = header.StartsWith("Bearer ", StringComparison.OrdinalIgnoreCase);
 
@@ -66,14 +60,6 @@ builder.Services.AddAuthentication(JwtBearerDefaults.AuthenticationScheme)
         };
     });
 
-// Authentication is the floor, not something each action opts into. Without this,
-// [Authorize] is the only thing standing between an action and the public: an action
-// added without one is anonymous, not merely under-restricted. Controllers that mix
-// roles across their actions carry no class-level attribute, so the omission would be
-// easy to make and silent when made.
-//
-// Actions still opt DOWN to a role with [Authorize(Roles = ...)], and [AllowAnonymous]
-// still opts out entirely (AuthController's login, logout and register do).
 builder.Services.AddAuthorization(options =>
 {
     options.FallbackPolicy = new AuthorizationPolicyBuilder()

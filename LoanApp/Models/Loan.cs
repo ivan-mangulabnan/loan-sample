@@ -9,7 +9,7 @@ public class Loan
 
     public int BorrowerId { get; set; }
     public User Borrower { get; set; } = null!;
-    
+
     public int StatusId { get; set; }
     public Status Status { get; set; } = null!;
 

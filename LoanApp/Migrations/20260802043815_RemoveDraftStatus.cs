@@ -4,10 +4,8 @@
 
 namespace LoanApp.Migrations
 {
-    /// <inheritdoc />
     public partial class RemoveDraftStatus : Migration
     {
-        /// <inheritdoc />
         protected override void Up(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.DeleteData(
@@ -79,7 +77,6 @@ namespace LoanApp.Migrations
                 value: "APPROVED");
         }
 
-        /// <inheritdoc />
         protected override void Down(MigrationBuilder migrationBuilder)
         {
             migrationBuilder.UpdateData(

@@ -3,7 +3,7 @@ namespace Models;
 public class CapitalDeposit
 {
   public int CapitalDepositId { get; set; }
-  
+
   public int LedgerId { get; set; }
   public Ledger Ledger { get; set; } = null!;
 

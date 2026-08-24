@@ -62,17 +62,11 @@ public class ReviewApplicationService
         return reviewApplication;
     }
 
-    /// <summary>
-    /// The first-pass desk: applications sitting at PENDING_REVIEW, oldest first, so the
-    /// longest wait is worked first.
-    /// </summary>
     public async Task<List<LoanApplication>> GetQueueAsync (
         int tenantId, ApplicationQueryRequest applicationQueryRequest)
     {
         var query = _context.LoanApplications
             .ForTenant(tenantId)
-            // The stage is this desk's identity, not a caller-supplied filter — the
-            // request's own Status narrows within it and cannot widen past it.
             .WhereStatusCode(LoanApplicationStatusCodes.PendingReview)
             .WhereMatches(applicationQueryRequest.Search);
 

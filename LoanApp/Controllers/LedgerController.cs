@@ -43,9 +43,6 @@ public class LedgerController : ControllerBase
 
     try
     {
-      // Resolved but not otherwise used: a tenant with no ledger must get the same 409
-      // as /balance rather than an empty list, which would read as "no movements yet".
-      // One condition, one story.
       await _ledgerService.GetOperatingLedgerAsync(tenantId);
     }
     catch (InvalidOperationException ex)

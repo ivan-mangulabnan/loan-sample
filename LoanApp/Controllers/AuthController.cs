@@ -26,9 +26,6 @@ public class AuthController : ControllerBase
     _environment = environment;
   }
 
-  // Not Request.IsHttps: behind a TLS-terminating proxy that reads false unless
-  // forwarded headers are configured, so production would silently drop Secure.
-  // This fails safe — anything that is not Development gets a Secure cookie.
   private bool CookieIsSecure => !_environment.IsDevelopment();
 
   [AllowAnonymous]
@@ -43,16 +40,11 @@ public class AuthController : ControllerBase
 
     Response.Cookies.Append(AuthCookie.Name, token, AuthCookie.Options(CookieIsSecure, expires));
 
-    // Reloaded because ValidateCredentialsAsync includes Role but not Account, and
-    // PersonName.Of would quietly return the login handle. One extra query on a cold
-    // path is cheaper than widening the shared lookup.
     var identity = await _authService.GetUserForIdentityAsync(user.UserId);
 
     return Ok(MeResponse.From(identity!));
   }
 
-  // The cookie is unreadable to JS, so this is how the SPA learns who it is — on first
-  // load and after a refresh. No Roles: every role has to be able to bootstrap.
   [Authorize]
   [HttpGet("me")]
   public async Task<ActionResult<MeResponse>> Me ()
@@ -63,11 +55,6 @@ public class AuthController : ControllerBase
     return Ok(MeResponse.From(user));
   }
 
-  // Cannot revoke the JWT — there is no refresh token to rotate — but the SPA cannot
-  // delete an HttpOnly cookie itself, so without this "sign out" would leave a working
-  // credential and the next page load would sign the user straight back in.
-  // AllowAnonymous deliberately: requiring a valid token to clear an expired token's
-  // cookie is a deadlock, and a caller can only ever delete their own browser's cookie.
   [AllowAnonymous]
   [HttpPost("logout")]
   public IActionResult Logout ()
