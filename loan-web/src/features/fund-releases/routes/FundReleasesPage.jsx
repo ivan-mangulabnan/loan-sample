@@ -35,6 +35,7 @@ export function FundReleasesPage() {
       </header>
 
       <ListView
+        skeletonColumns={7}
         query={query}
         onQueryChange={onQueryChange}
         items={queue.data}

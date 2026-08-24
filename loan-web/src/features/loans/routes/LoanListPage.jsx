@@ -25,6 +25,7 @@ export function LoanListPage() {
       </header>
 
       <ListView
+        skeletonColumns={7}
         query={query}
         onQueryChange={onQueryChange}
         items={data}

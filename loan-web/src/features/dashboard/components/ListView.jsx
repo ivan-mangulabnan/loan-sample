@@ -1,5 +1,7 @@
 import { useEffect, useId, useLayoutEffect, useMemo, useRef, useState } from 'react'
 import Pagination from '../../../components/Pagination.jsx'
+import TableSkeleton from '../../../components/TableSkeleton.jsx'
+import { useDeferredPending } from '../../../hooks/useDeferredPending.js'
 import './ListView.css'
 
 const SEARCH_DEBOUNCE_MS = 300
@@ -28,6 +30,7 @@ function ListView({
   sortLabel = 'Sort',
   showSortLabel = false,
   filters = null,
+  skeletonColumns = 5,
   children,
 }) {
   const fieldId = useId()
@@ -36,6 +39,13 @@ function ListView({
   const [draft, setDraft] = useState(query.search ?? '')
 
   const [rowsPerPage, setRowsPerPage] = useState(UNMEASURED_ROWS)
+
+  const hasItems = Boolean(items)
+
+  const showSkeleton = useDeferredPending(isLoading && !hasItems)
+  const refetchPending = useDeferredPending(isLoading && hasItems)
+
+  const isBusy = isLoading && refetchPending
 
   const rows = items ?? NO_ROWS
 
@@ -92,7 +102,7 @@ function ListView({
     observer.observe(region)
 
     return () => observer.disconnect()
-  }, [items])
+  }, [items, showSkeleton])
 
   const totalPages = Math.ceil(sorted.length / rowsPerPage)
 
@@ -106,8 +116,6 @@ function ListView({
   }, [page])
 
   const isFiltered = Boolean(query.search || query.status)
-
-  const isFirstLoad = isLoading && !items
 
   return (
     <div className="list">
@@ -176,15 +184,15 @@ function ListView({
       </div>
 
       <div
-        className={`list__rows${isLoading && items ? ' list__rows--busy' : ''}`}
+        className={`list__rows${isBusy ? ' list__rows--busy' : ''}`}
         aria-busy={isLoading || undefined}
         ref={scrollRef}
       >
         {error ? (
           <p className="muted">Could not load: {error.message}</p>
-        ) : isFirstLoad ? (
-          <p className="list__empty">Loading…</p>
-        ) : pageRows.length > 0 ? (
+        ) : showSkeleton ? (
+          <TableSkeleton columns={skeletonColumns} rows={rowsPerPage + 2} />
+        ) : !hasItems ? null : pageRows.length > 0 ? (
           <div
             className="list__page"
             key={`${query.search ?? ''}|${query.status ?? ''}|${query.sort ?? ''}|${page}`}

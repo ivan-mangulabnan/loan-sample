@@ -68,6 +68,7 @@ export function LedgerPage() {
           </section>
 
           <ListView
+            skeletonColumns={4}
             query={query}
             onQueryChange={onQueryChange}
             items={transactions.data}

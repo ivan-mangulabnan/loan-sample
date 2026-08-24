@@ -40,6 +40,7 @@ export function ReviewPage() {
       </header>
 
       <ListView
+        skeletonColumns={7}
         query={query}
         onQueryChange={onQueryChange}
         items={queue.data}

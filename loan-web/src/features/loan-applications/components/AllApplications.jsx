@@ -25,6 +25,7 @@ function AllApplications() {
       </header>
 
       <ListView
+        skeletonColumns={6}
         query={query}
         onQueryChange={onQueryChange}
         items={data}

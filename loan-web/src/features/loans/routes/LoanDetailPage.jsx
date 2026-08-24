@@ -98,6 +98,7 @@ export function LoanDetailPage() {
           <h2 className="section-label">Payments</h2>
 
           <ListView
+            skeletonColumns={2}
             query={query}
             onQueryChange={onQueryChange}
             items={visible}

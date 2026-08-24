@@ -1,0 +1,48 @@
+.tskel {
+  height: 100%;
+  overflow: hidden;
+  background: var(--surface-panel);
+  border-radius: var(--radius-lg);
+  -webkit-mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
+  mask-image: linear-gradient(to bottom, #000 72%, transparent 100%);
+}
+
+.tskel__row {
+  display: grid;
+  grid-template-columns: repeat(var(--tskel-cols), minmax(0, 1fr));
+  gap: var(--space-5);
+  padding: var(--space-4) var(--space-5);
+  font-size: var(--text-base);
+}
+
+.tskel__row--head {
+  border-bottom: 1px solid var(--border);
+}
+
+.tskel__row--head .skel {
+  width: 55%;
+}
+
+.tskel__row:not(.tskel__row--head) .skel:nth-child(4n + 1) {
+  width: 62%;
+}
+
+.tskel__row:not(.tskel__row--head) .skel:nth-child(4n + 2) {
+  width: 88%;
+}
+
+.tskel__row:not(.tskel__row--head) .skel:nth-child(4n + 3) {
+  width: 71%;
+}
+
+.tskel__row:not(.tskel__row--head) .skel:nth-child(4n + 4) {
+  width: 80%;
+}
+
+.tskel__row:nth-child(even) .skel:nth-child(4n + 1) {
+  width: 78%;
+}
+
+.tskel__row:nth-child(even) .skel:nth-child(4n + 3) {
+  width: 58%;
+}
