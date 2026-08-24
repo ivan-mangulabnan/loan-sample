@@ -58,10 +58,12 @@
   border: none;
   padding: 0;
   cursor: pointer;
-  /* ⏻ (U+23FB) is a 2012-vintage addition that some system UI fonts don't
-     cover — fall through to symbol fonts that do before giving up. */
-  font-family: "Segoe UI Symbol", "Segoe UI Emoji", "Noto Sans Symbols", sans-serif, inherit;
   flex-shrink: 0;
+}
+
+.rail__signout-icon {
+  width: var(--space-5);
+  height: var(--space-5);
 }
 
 .content {

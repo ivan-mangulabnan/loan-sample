@@ -40,7 +40,22 @@ function AppLayout() {
             aria-label="Sign out"
             onClick={handleSignOut}
           >
-            ⏻
+            {/* Inline SVG rather than the ⏻ glyph (U+23FB) — that codepoint has
+                spotty coverage outside Chromium's bundled symbol font and rendered
+                as a tofu box in Firefox regardless of font-family fallbacks. */}
+            <svg
+              className="rail__signout-icon"
+              viewBox="0 0 16 16"
+              fill="none"
+              stroke="currentColor"
+              strokeWidth="1.6"
+              strokeLinecap="round"
+              strokeLinejoin="round"
+              aria-hidden="true"
+            >
+              <path d="M8 2v6" />
+              <path d="M12 4.5a6 6 0 1 1-8 0" />
+            </svg>
           </button>
         </nav>
 
