@@ -7,17 +7,6 @@ import { useAllApplications } from '../hooks.js'
 import { APPLICATION_STATUS_OPTIONS } from '../statusOptions.js'
 import { RECORD_SORT_OPTIONS } from '../sortOptions.js'
 
-/**
- * Every application in the tenant, at any status. The queue endpoints each show
- * one stage only, so this is the sole place staff see an application's history —
- * and the only list that offers a status filter, because it is the only one not
- * already pinned to a stage server-side.
- *
- * Read-only: staff act on an application from their own queue, where it is attached to
- * the decision they are being asked to make. What this list lacked was any way to open
- * a row at all, which made the "sole place staff see an application's history" claim
- * above true only of the row itself, never of the remarks behind it.
- */
 function AllApplications() {
   const [query, onQueryChange] = useListQuery()
   const { data, error, isLoading, reload } = useAllApplications(query)

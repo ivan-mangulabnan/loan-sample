@@ -18,23 +18,9 @@ const date = new Intl.DateTimeFormat(undefined, {
   year: 'numeric',
 })
 
-// Approve is the affirmative, Reject the destructive one; Return is neither — it hands
-// the application back for changes, so it stays neutral rather than borrowing a warning
-// colour it has not earned.
 const toneFor = (decision) =>
   decision === DECISIONS.Approve ? 'accent' : decision === DECISIONS.Reject ? 'danger' : 'default'
 
-/**
- * The decision dialog behind both staff queues. Review and approval differ only in which
- * decisions they offer and where the caller posts, so `decisions` is a prop rather than
- * two near-identical components (rule 3).
- *
- * It restates the row's figures because the row is behind a backdrop by the time this is
- * open — deciding on an amount you can no longer see is how the wrong loan gets approved.
- *
- * The caller owns the request. This reports *what* the reader chose and renders whatever
- * came back; it does not know which endpoint it feeds (rule 4).
- */
 function DecisionModal({
   application,
   decisions,
@@ -45,8 +31,6 @@ function DecisionModal({
   error = null,
 }) {
   const [remarks, setRemarks] = useState('')
-  // Which button was pressed, so only that one shows the pending label — three buttons
-  // all reading "Working…" would not say which decision is in flight.
   const [pending, setPending] = useState(null)
   const [missingRemarks, setMissingRemarks] = useState(false)
 
@@ -60,8 +44,6 @@ function DecisionModal({
 
     setMissingRemarks(false)
     setPending(decision)
-    // Always sends `decision`. An omitted key is not an empty decision to the API — it
-    // is an Approve (see decisions.js).
     onSubmit({ decision, remarks: remarks.trim() || undefined })
   }
 
@@ -71,10 +53,6 @@ function DecisionModal({
       title={`${title} #${application.loanApplicationId}`}
       onClose={onClose}
       footer={
-        /* No Cancel button: it called the same `onClose` as the header ✕, so the dialog
-           carried two controls for one behaviour — and "Cancel" here collided with the
-           row action that cancels the application itself. The ✕ is the single dismiss
-           and has been given a resting background to match. */
         decisions.map((decision) => (
           <IconButton
             key={decision}
@@ -88,8 +66,6 @@ function DecisionModal({
         ))
       }
     >
-      {/* Where this sits in the journey, before the detail of it. The badge below still
-          carries the server's exact wording; this carries the shape. */}
       <ModalProgress application={application} />
 
       <dl className="decision__facts">
@@ -148,8 +124,6 @@ function DecisionModal({
         </p>
       )}
 
-      {/* The server's own sentence. It names the rule that was broken, which is more
-          than the client can work out from a 409 alone. */}
       {error && (
         <p className="decision__error" role="alert">
           {error}

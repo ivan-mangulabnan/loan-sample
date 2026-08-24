@@ -44,8 +44,6 @@ export const router = createBrowserRouter([
           return { Component: DashboardPage }
         },
       },
-      // Both audiences reach this one, so it carries no role gate — the page
-      // renders the borrower or the staff view, and the API enforces the rest.
       {
         path: 'applications',
         lazy: async () => {
@@ -68,9 +66,6 @@ export const router = createBrowserRouter([
               return { Component: LoanListPage }
             },
           },
-          // Sibling of the index, not a child of it: the table unmounts and the
-          // detail takes its place, so Back restores the list rather than nesting
-          // one inside the other.
           {
             path: ':id',
             lazy: async () => {

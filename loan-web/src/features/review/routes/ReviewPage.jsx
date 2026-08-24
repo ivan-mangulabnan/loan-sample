@@ -7,17 +7,6 @@ import { DECISIONS, DecisionModal, QUEUE_SORT_OPTIONS } from '../../loan-applica
 import { useSession } from '../../auth/index.js'
 import { submitReview } from '../api.js'
 
-/**
- * First-pass review: applications at PENDING_REVIEW. Its own component rather
- * than a shared queue page, so the URL means this area and the review action has
- * somewhere to land.
- *
- * No status filter: the endpoint is pinned to one stage server-side, so a dropdown
- * here could only ever offer the stage the reader is already looking at.
- */
-
-// The reviewer's full vocabulary. Return sends the application back to the borrower to
-// change the plan; the approver, one desk on, has no such option.
 const REVIEW_DECISIONS = [DECISIONS.Approve, DECISIONS.Return, DECISIONS.Reject]
 
 export function ReviewPage() {
@@ -57,8 +46,6 @@ export function ReviewPage() {
         isLoading={queue.isLoading}
         error={queue.error}
         emptyMessage="No applications are waiting for review."
-        // Oldest first: this is a queue, and the application that has waited
-        // longest is the one to work next (rule 20b).
         sortOptions={QUEUE_SORT_OPTIONS}
         searchPlaceholder="Search by reference or borrower name"
         searchLabel="Search the review queue"
@@ -73,8 +60,6 @@ export function ReviewPage() {
         )}
       </ListView>
 
-      {/* Keyed on the row so the remarks box starts empty for each application — the
-          modal unmounts between rows, and a key change is what guarantees it. */}
       <DecisionModal
         key={review.target?.loanApplicationId}
         application={review.target}

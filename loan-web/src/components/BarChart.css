@@ -2,8 +2,6 @@
   margin: 0;
 }
 
-/* Fixed height (--bars-height) so the percentage heights have something to resolve
-   against; bars grow from the baseline up. */
 .bars__row {
   display: flex;
   align-items: flex-end;
@@ -11,9 +9,6 @@
   height: var(--bars-height);
 }
 
-/* The band the bars actually occupy. The label is a sibling in the same fixed-height
-   column, so without its own track a 100% bar fills the column outright and shunts the
-   label past the bottom edge — the tallest month was the one whose name vanished. */
 .bars__track {
   flex: 1;
   min-height: 0;
@@ -23,8 +18,6 @@
   justify-content: center;
 }
 
-/* Each column takes an equal share so a full month name has room to centre under its
-   bar; without this the columns size to the label and the bars drift apart unevenly. */
 .bars__item {
   display: flex;
   flex-direction: column;
@@ -43,14 +36,10 @@
   flex-shrink: 0;
 }
 
-/* A month with nothing in it reads as an absence, not as a very small amount. */
 .bars__bar--empty {
   background: var(--surface-track);
 }
 
-/* One line, always. The row has a fixed height and the bar grows from the baseline, so
-   a label that wraps to two lines would shorten its own bar and break the baseline the
-   other months stand on. */
 .bars__label {
   font-size: var(--text-xs);
   color: var(--text-faint);
@@ -60,10 +49,6 @@
   white-space: nowrap;
 }
 
-/* Names the bars for a sighted reader — the caption was previously only an aria-label
-   and a visually-hidden figcaption, so on screen the chart never said what it plotted.
-   A step below the bar labels in colour, and --text-sm rather than .muted's 13px: it
-   sits directly under 10px labels, and .muted would outweigh the thing it describes. */
 .bars__caption {
   margin: var(--space-2) 0 0;
   font-size: var(--text-sm);

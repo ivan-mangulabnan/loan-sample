@@ -1,6 +1,3 @@
-/* Same facts grid the sibling dialogs use — two columns where there is room, one when
-   there is not. Kept local rather than shared with CancelModal: promote on second use
-   is about components, and two <dl>s agreeing on a grid is not yet a component. */
 .viewapp__facts {
   margin: 0 0 var(--space-6);
   display: grid;
@@ -27,8 +24,6 @@
   font-weight: 600;
 }
 
-/* A heading inside the body, because the notes are a second subject rather than more
-   facts — without it the timeline reads as an unlabelled tail on the list above. */
 .viewapp__section {
   margin: 0 0 var(--space-4);
   padding-top: var(--space-5);

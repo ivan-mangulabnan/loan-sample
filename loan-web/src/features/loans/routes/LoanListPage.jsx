@@ -7,10 +7,6 @@ import { useMyLoans } from '../hooks.js'
 import { LOAN_STATUS_OPTIONS } from '../statusOptions.js'
 import { LOAN_SORT_OPTIONS } from '../sortOptions.js'
 
-/**
- * The borrower's own loans in full. The status dropdown is the loan lifecycle, a
- * different vocabulary from the application one — see statusOptions.js.
- */
 export function LoanListPage() {
   const navigate = useNavigate()
   const [query, onQueryChange] = useListQuery()

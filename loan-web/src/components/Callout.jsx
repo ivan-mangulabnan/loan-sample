@@ -2,10 +2,6 @@ import Button from './Button.jsx'
 import Glow, { GlowHost } from './Glow.jsx'
 import './Callout.css'
 
-/**
- * Translucent notice panel with the teal/blue glow behind it.
- * The dashboard's "7 applications have been pending documentation…" banner.
- */
 function Callout({ children, action, onAction, onDismiss }) {
   return (
     <GlowHost className="callout">

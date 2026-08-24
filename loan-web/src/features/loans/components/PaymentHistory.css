@@ -1,8 +1,3 @@
-/* Two columns of short values, unlike .loans and .queue — so no sideways scroll box
-   here. Inside ListView's flex row region an `overflow-x: auto` wrapper shrink-wraps
-   its table instead of stretching it, which collapsed this to ~40% of the panel and
-   left the figures huddled against the left edge. `width: 100%` states the intent the
-   scroll box was accidentally overriding. */
 .paylist {
   width: 100%;
   background: var(--surface-panel);
@@ -30,21 +25,15 @@
   color: var(--text);
 }
 
-/* Zebra rather than a rule per row, matching .loans — and on the <td>, because a
-   background on the <tr> sits under the cell and the stripe would win on half of them. */
 .paylist__table tbody tr:nth-child(even) td {
   background: var(--surface-row-alt);
 }
 
-/* Money right-aligns so the figures compare down the column: the decimal points line up
-   and a larger payment is visibly wider. Header follows the cells it labels. */
 .paylist__num-head,
 .paylist__amount {
   text-align: right;
 }
 
-/* Takes the slack so the money column stays pinned to the right edge, where a column of
-   figures is read from. */
 .paylist__date {
   width: 100%;
   color: var(--text-muted);
@@ -53,7 +42,5 @@
 .paylist__amount {
   color: var(--text-strong);
   font-weight: var(--weight-bold);
-  /* Tabular figures so digits sit in equal columns; proportional ones make an aligned
-     column of currency look ragged. */
   font-variant-numeric: tabular-nums;
 }

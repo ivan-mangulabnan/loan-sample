@@ -27,8 +27,6 @@
   font-size: var(--text-sm);
 }
 
-/* A link in weight, a button in behaviour — it fills a field rather than navigating, so
-   it must not compete with the two real actions in the footer. */
 .pay__all {
   margin-top: var(--space-3);
   padding: 0;

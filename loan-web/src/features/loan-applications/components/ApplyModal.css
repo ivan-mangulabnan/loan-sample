@@ -9,8 +9,6 @@
   margin-top: var(--space-5);
 }
 
-/* The consequence of the two fields above, so it reads as a result rather than as a
-   third input. */
 .apply__preview {
   display: flex;
   flex-direction: column;

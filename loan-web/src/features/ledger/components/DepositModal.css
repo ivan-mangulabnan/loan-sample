@@ -5,8 +5,6 @@
   line-height: 1.55;
 }
 
-/* What the deposit is being added to, stated before the field so the figure typed below
-   has something to be judged against. */
 .deposit__balance {
   margin: 0 0 var(--space-6);
   padding-bottom: var(--space-4);

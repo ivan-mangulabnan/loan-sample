@@ -1,18 +1,11 @@
-/* Sits beside the heading rather than under it, so the primary action is where it is on
-   every other area page. */
 .ledger__actions {
   display: flex;
   gap: var(--space-3);
   flex-wrap: wrap;
 }
 
-/* Outside the scrolling region on purpose: the balance is the fact the rows explain, so
-   it stays visible while they are paged through. flex-shrink keeps it from being
-   squeezed when ListView claims the remaining height. */
 .ledger__balance {
   flex-shrink: 0;
-  /* No margin: .main is a flex column with its own gap, and adding one here would
-     double the space and leave the measured row region shorter than it renders. */
   padding: var(--space-5) var(--space-6);
   background: var(--surface-panel);
   border: 1px solid var(--border);

@@ -1,6 +1,3 @@
-/* One labelled control: its name above, its pair of bounds below. Stacking the label
-   rather than setting it inline keeps the two ranges the same height as the sort select
-   beside them, so the toolbar stays one straight row. */
 .payfilter {
   display: flex;
   flex-direction: column;
@@ -10,14 +7,9 @@
 .payfilter__legend {
   color: var(--text-faint);
   font-size: var(--text-xs);
-  /* Aligns with the field text below rather than the field's outer edge. */
   padding-left: 2px;
 }
 
-/* nowrap is the point: the pair is one control, and letting it break put "to" and the
-   second date on their own lines, which read as three separate fields stacked up. The
-   whole labelled group wraps as a unit instead (the toolbar does that), and the fields
-   shrink to fit a narrow panel rather than forcing the break. */
 .payfilter__pair {
   display: flex;
   align-items: center;
@@ -25,39 +17,27 @@
   flex-wrap: nowrap;
 }
 
-/* Reads the pair as a range rather than as two unrelated boxes. */
 .payfilter__to {
   color: var(--text-faint);
   font-size: var(--text-sm);
 }
 
-/* Shrinkable, with a floor that still shows a whole date. `min-width` on a flex item
-   is a hard floor that cannot be shrunk past, which is what forced the pair to wrap in
-   a narrow panel; `flex-basis` with `min-width: 0` lets it give ground first and only
-   wrap the group when it genuinely cannot fit (rule 16). */
 .payfilter .payfilter__field {
   width: auto;
   flex: 0 1 8.5rem;
   min-width: 0;
-  /* The date input's internal spinner has its own intrinsic width; without this it
-     refuses to shrink below it and the flex basis is ignored. */
   box-sizing: border-box;
 }
 
-/* The money pair needs less room than a date and should not claim the same width. */
 .payfilter .payfilter__field--num {
   flex: 0 1 5.5rem;
 }
 
-/* Dark-only design: the picker indicator ships black-on-black otherwise and is
-   effectively invisible against --surface-sunken. */
 .payfilter__field::-webkit-calendar-picker-indicator {
   filter: invert(0.7);
   cursor: pointer;
 }
 
-/* Keeps each labelled range together when the toolbar runs out of room: the group wraps
-   as a whole to the next line rather than splitting between its two bounds. */
 .payfilter {
   flex: 0 1 auto;
   min-width: 0;

@@ -1,6 +1,3 @@
-/* Same frame as QueueTable: the table scrolls inside its own box so the page never
-   scrolls sideways (rule 15). Not shared with it — these are two different tables, and
-   a common stylesheet would couple them for the sake of a border. */
 .txn {
   overflow-x: auto;
   background: var(--surface-panel);
@@ -28,13 +25,6 @@
   color: var(--text);
 }
 
-/* Zebra striping instead of a rule between every row: the tint alone separates them,
-   and carrying both made a dark table read as busy. Even rows are the tinted ones, so
-   the first row of data stays flush with the panel and does not merge into the header.
-
-   On the <td>, not the <tr>: the hover rule below also paints cells, and a background
-   on the row would sit underneath it — the stripe would win on half the rows and the
-   hover would appear not to work. */
 .txn__table tbody tr:nth-child(even) td {
   background: var(--surface-row-alt);
 }
@@ -48,13 +38,6 @@
   font-family: var(--mono);
 }
 
-/* Figures align on their last digit, so the column can be scanned for magnitude, and
-   the heading sits over the figures it names.
-
-   Both selectors are qualified with `.txn__table`. Unqualified, `.txn__amount-head`
-   (0,1,0) ties with `.txn__table th` (0,1,1)'s `text-align: left` — and in fact loses,
-   because that rule is both more specific and earlier in the file. The heading stayed
-   left while the cells went right, leaving the label 193px adrift from its column. */
 .txn__table .txn__amount-head,
 .txn__table .txn__amount {
   text-align: right;
@@ -65,13 +48,6 @@
   font-weight: var(--weight-bold);
 }
 
-/* Reinforces the sign, never replaces it — the +/− is already in the formatted value,
-   so the colour is redundant by design rather than load-bearing.
-
-   Qualified with `.txn__table` because unqualified they never applied: at (0,1,0) they
-   lose to `.txn__table td { color: var(--text) }` at (0,1,1), so every figure rendered
-   the same grey and the tone classes were dead the whole time. Measured, not assumed —
-   reverting this file to HEAD reproduces the grey. */
 .txn__table .txn__amount--credit {
   color: var(--success);
 }

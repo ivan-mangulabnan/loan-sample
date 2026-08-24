@@ -1,9 +1,5 @@
 import IconChip from '../../../components/IconChip.jsx'
 
-/**
- * One figure in the .stats grid. Styling comes from DashboardPage.css, which the
- * page already imports — this owns no CSS of its own.
- */
 function StatTile({ tone = 'accent', glyph, label, value, isLoading = false }) {
   return (
     <div>

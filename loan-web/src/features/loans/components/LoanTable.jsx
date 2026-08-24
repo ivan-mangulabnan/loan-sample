@@ -16,16 +16,6 @@ const date = new Intl.DateTimeFormat(undefined, {
   year: 'numeric',
 })
 
-/**
- * A borrower's own loans. Deliberately reads no staff-only field: grade,
- * daysBehind and isGoodPayer are nulled for a Loaner by the API, so "behind
- * schedule" is derived from standing.behindBy instead.
- *
- * `actionLabel` + `onAction` add a trailing action column, the same opt-in shape
- * QueueTable carries (rule 19b) — the row click is a convenience over the button, which
- * is what a keyboard reaches, and the button stops propagation so one click is one
- * navigation.
- */
 function LoanTable({ rows, actionLabel, onAction }) {
   const canAct = Boolean(actionLabel && onAction)
 

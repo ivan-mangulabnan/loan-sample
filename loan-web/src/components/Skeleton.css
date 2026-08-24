@@ -1,13 +1,9 @@
-/* One travelling sheen, shared by every variant. The animation is on the ::after rather
-   than on a background-position of the element itself, so a caller can still set the
-   element's own background without losing the sweep. */
 .skel {
   display: block;
   position: relative;
   overflow: hidden;
   background: var(--surface-skeleton);
   border-radius: var(--radius-sm);
-  /* Never let a skeleton be the thing that collapses a flex row. */
   flex-shrink: 0;
 }
 
@@ -22,9 +18,6 @@
     transparent 100%
   );
   transform: translateX(-100%);
-  /* Slower than the progress comet (2.4s) on purpose: that one signals travel toward a
-     known end, this one signals only that something is pending. A fast sweep on a block
-     the size of a chart reads as a scan line. */
   animation: skel-sheen 1.8s ease-in-out infinite;
 }
 
@@ -34,55 +27,30 @@
   }
 }
 
-/* ---- Variants ---- */
-
-/* A line of body text. Height tracks the line box it stands in rather than a fixed px,
-   so a bar inside a heading is heading-sized without the caller saying so — see
-   .skel--figure on why this is the line box and not the em. */
 .skel--text {
   height: 1lh;
   border-radius: var(--radius-sm);
-  /* Sits on the text baseline instead of the box's, which is what stops a bar inside a
-     line of prose from riding high above the words beside it. */
   vertical-align: middle;
 }
 
-/* Stands in for AreaChart: the same --chart-height, and the same left gutter the axis
-   labels occupy, so the plot does not jump sideways when the real chart lands. */
 .skel--chart {
   height: var(--chart-height);
   border-radius: var(--radius-lg);
   margin-left: var(--chart-gutter);
 }
 
-/* Stands in for BarChart's bar row, at the row's own height. */
 .skel--bars {
   height: var(--bars-height);
   border-radius: var(--radius-md);
 }
 
-/* Stands in for an .icon-chip: the caller composes `.icon-chip`, which already fixes the
-   24px square and the radius, so this variant declares no geometry of its own at all.
-
-   Both earlier attempts failed the same way — the element is empty, so it has nothing to
-   size itself from. `width: 100%` measured 0 tall and then stretched across the flex row;
-   `width: auto` collapsed to nothing. Either one also *beats* `.icon-chip`: both classes
-   are (0,1,0) and this stylesheet loads later. Declaring nothing is what lets the real
-   class through. The rule is kept as a named hook so callers say what they mean. */
 .skel--chip {
-  /* intentionally empty — geometry comes from .icon-chip */
 }
 
-/* Stands in for .progress. The caller composes `.progress` itself rather than this
-   redeclaring a 5px track and a 3px radius — utilities.css owns those numbers, and a
-   second copy here is a number to keep in sync (rule 11). This only supplies the fill. */
 .skel--bar {
   height: 100%;
 }
 
-/* The label beside a chip. Takes the space left in the flex row rather than a share of
-   the whole row — see the call site in DashboardAside. `min-width: 0` because a flex
-   item's default `min-width: auto` refuses to shrink below its content. */
 .skel--label {
   flex: 1;
   min-width: 0;
@@ -90,36 +58,17 @@
   border-radius: var(--radius-sm);
 }
 
-/* Stands in for a Callout while the figure behind it is still loading.
-
-   The real notice is 96px at desktop and 147.5px at 390px, where the action wraps below
-   the text — so this is a `min-height` floor at the desktop figure rather than a pinned
-   height, and the narrow case is handled by the button-sized block below it. Deriving the
-   floor from padding alone came out at 77.5px, 18.5px short, because the action button is
-   taller than the line of text beside it: `--space-6` above and below a 44px control is
-   what actually sets the height, not the `--text-xl` line. */
 .skel--callout {
   min-height: calc(var(--space-6) * 2 + 44px);
   border-radius: var(--radius-xl);
   flex-shrink: 0;
 }
 
-/* Inline variants of the two text shapes, for a bar that stands inside a line of prose
-   rather than owning its own line. `.skel`'s `display: block` forced the dashboard
-   headline onto a second line: the block measured 51px against the real sentence's 36px,
-   and the chart below it started 15px low, then jumped up when the figures landed. */
 .skel--text,
 .skel--figure {
   display: inline-block;
 }
 
-/* A figure — a headline number, a metric.
-
-   `1lh`, not `1em`: a bar sized to the font leaves the line box shorter than the digits
-   it stands in for, and the gap compounds. The pipeline's 24px value has a 36px line
-   box, so four cells of `1em` bars made the aside 48px shorter than the real thing and
-   the whole column jumped when the data landed. The bar has to occupy the line, not the
-   glyph. */
 .skel--figure {
   height: 1lh;
   width: 7ch;
@@ -127,9 +76,6 @@
   vertical-align: middle;
 }
 
-/* Ambient motion with no state behind it: it does not degrade, it stops. The block stays
-   — the shape is the information, the sweep was only decoration. Same treatment as the
-   progress comet in utilities.css. */
 @media (prefers-reduced-motion: reduce) {
   .skel::after {
     display: none;

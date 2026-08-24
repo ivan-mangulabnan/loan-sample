@@ -9,16 +9,6 @@ const currency = new Intl.NumberFormat(undefined, {
   maximumFractionDigits: 0,
 })
 
-/**
- * Posts capital into the operating ledger.
- *
- * `open` rather than a row: unlike the three decision dialogs this one acts on the
- * ledger itself, so there is nothing to key it on and nothing to summarise back.
- *
- * The amount is validated here only to keep an obviously bad value from becoming a round
- * trip — the API's [Range(0.01, ...)] is the real gate (rule 18). A number input still
- * yields '' for junk, so the parse is what actually catches it.
- */
 function DepositModal({ open, balance, onSubmit, onClose, isSubmitting = false, error = null }) {
   const [amount, setAmount] = useState('')
   const [invalid, setInvalid] = useState(false)
@@ -89,7 +79,6 @@ function DepositModal({ open, balance, onSubmit, onClose, isSubmitting = false, 
         </p>
       )}
 
-      {/* The 409 lands here: the tenant has no operating ledger to deposit into. */}
       {error && (
         <p className="deposit__error" role="alert">
           {error}

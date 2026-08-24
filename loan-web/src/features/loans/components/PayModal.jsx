@@ -9,17 +9,6 @@ const currency = new Intl.NumberFormat(undefined, {
   maximumFractionDigits: 2,
 })
 
-/**
- * Posts a payment against one loan.
- *
- * The amount is validated here for the three things the reader can see and fix — not a
- * number, not positive, more than is owed — because each has a better sentence than the
- * API's. Anything else is the server's to refuse.
- *
- * Money is a `decimal` server-side, so the field is `inputMode="decimal"` text rather
- * than a number input: a number input hands back an empty string for "1e5" and for a
- * stray letter alike, which loses the difference between blank and invalid.
- */
 function PayModal({ loan, onSubmit, onClose, isSubmitting = false, error = null }) {
   const [amount, setAmount] = useState('')
   const [problem, setProblem] = useState(null)
@@ -40,8 +29,6 @@ function PayModal({ loan, onSubmit, onClose, isSubmitting = false, error = null 
       return
     }
 
-    // The API refuses this with a 409. Catching it here keeps the reader in the box they
-    // are typing in rather than sending them a round trip to be told the same thing.
     if (parsed > balance) {
       setProblem(`That is more than the ${currency.format(balance)} outstanding.`)
       return
@@ -89,8 +76,6 @@ function PayModal({ loan, onSubmit, onClose, isSubmitting = false, error = null 
         }}
       />
 
-      {/* Fills the exact balance rather than a rounded figure: settling a loan is the
-          common case, and a cent of drift would be an overpayment the API rejects. */}
       <button
         type="button"
         className="pay__all"

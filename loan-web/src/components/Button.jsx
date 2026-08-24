@@ -1,7 +1,3 @@
-/**
- * variant: 'default' | 'accent' | 'ghost' | 'chip'
- * size:    'md' | 'sm'
- */
 function Button({
   variant = 'default',
   size = 'md',

@@ -8,7 +8,6 @@
   box-sizing: border-box;
 }
 
-/* The shell owns viewport height and scrolling; the page itself never scrolls. */
 body {
   margin: 0;
   overflow: hidden;

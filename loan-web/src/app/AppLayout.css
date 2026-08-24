@@ -4,7 +4,6 @@
   justify-content: center;
 }
 
-/* Fills the viewport edge to edge. */
 .shell {
   width: 100%;
   min-width: 0;
@@ -13,7 +12,6 @@
   overflow: hidden;
 }
 
-/* ---- Left rail ---- */
 .rail {
   width: var(--rail-width);
   flex-shrink: 0;
@@ -55,7 +53,6 @@
   color: var(--accent);
 }
 
-/* Same affordance as a rail link, but it is a <button>. */
 .rail__signout {
   background: none;
   border: none;
@@ -65,7 +62,6 @@
   flex-shrink: 0;
 }
 
-/* ---- Content ---- */
 .content {
   flex: 1;
   min-width: 0;
@@ -74,7 +70,6 @@
   gap: var(--space-7);
 }
 
-/* The page scrolls here, not on <body> — the shell stays pinned. */
 .main {
   flex: 1;
   min-width: 0;
@@ -83,26 +78,15 @@
   gap: var(--space-6);
   overflow-y: auto;
   overscroll-behavior: contain;
-  /* Room for a focus ring. `overflow-y: auto` computes overflow-x to auto too, so this
-     box clips on all four sides, and every edge control sits flush against it — the
-     list's search and status fields, and the page-head button. The ring is 2px at 2px
-     offset, so it needs exactly --space-1 (4px) and was getting none.
-
-     Here rather than on the list: the page-head button is clipped as well, and it is
-     not inside the list. This is their common ancestor and the element doing the
-     clipping. The negative margin gives the padding back to the layout, so no page
-     shifts and the content box stays where it was. */
   padding: var(--space-1);
   margin: calc(var(--space-1) * -1);
 }
 
-/* ---- Narrow screens ---- */
 @media (max-width: 768px) {
   .shell {
     flex-direction: column;
   }
 
-  /* Rail becomes a horizontal bar under the content. */
   .rail {
     width: auto;
     order: 2;
@@ -110,10 +94,6 @@
     flex-shrink: 0;
   }
 
-  /* The bar's height, stated once so a fixed overlay can clear it: two rows of
-     --space-8 items with a --space-2 gap, inside --space-2 padding top and bottom.
-     On :root, not .shell — ToastStack renders outside the shell, as a sibling, so it
-     could not inherit it from there. Without this the toast sits over the navigation. */
   :root {
     --rail-bar-height: calc(var(--space-8) * 2 + var(--space-2) * 3);
   }

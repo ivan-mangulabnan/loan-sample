@@ -12,23 +12,6 @@ const date = new Intl.DateTimeFormat(undefined, {
   year: 'numeric',
 })
 
-/**
- * What the borrower has actually paid on this loan.
- *
- * The API already returns them **newest first** — PaymentService orders
- * `OrderByDescending(PaymentDate).ThenByDescending(PaymentId)`. This file used to
- * `.reverse()` them under a comment claiming the opposite, which quietly rendered the
- * oldest payment at the top: the reverse was the bug, not the fix. Do not add it back.
- *
- * A table, not the list it used to be. Ordering, filtering and paging all live in
- * `ListView` now, and ListView measures its page size from rendered `tbody tr` against
- * `thead` — a `<ul>` gives it nothing to measure. Two aligned columns of dates and
- * money were a table anyway; the list was only ever defensible while the region
- * scrolled and stayed short.
- *
- * `borrower` is null on this endpoint by design (the reader is the borrower), so it is
- * not a column.
- */
 function PaymentHistory({ rows }) {
   return (
     <div className="paylist">

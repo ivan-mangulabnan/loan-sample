@@ -7,17 +7,6 @@ import { DECISIONS, DecisionModal, QUEUE_SORT_OPTIONS } from '../../loan-applica
 import { useSession } from '../../auth/index.js'
 import { submitApproval } from '../api.js'
 
-/**
- * Approval decisions: applications at PENDING_APPROVAL, already reviewed. Its
- * own component rather than a shared queue page — approving is not reviewing,
- * and the decision action lives here.
- *
- * No status filter: the endpoint is pinned to one stage server-side.
- */
-
-// Two, not three. LoanApprovalService has no case for Return and throws on it: sending
-// an application back for changes is the reviewer's move, and by this desk it has
-// already passed one.
 const APPROVAL_DECISIONS = [DECISIONS.Approve, DECISIONS.Reject]
 
 export function ApprovalsPage() {
@@ -57,8 +46,6 @@ export function ApprovalsPage() {
         isLoading={queue.isLoading}
         error={queue.error}
         emptyMessage="No applications are waiting for approval."
-        // Oldest first: this is a queue, and the application that has waited
-        // longest is the one to work next (rule 20b).
         sortOptions={QUEUE_SORT_OPTIONS}
         searchPlaceholder="Search by reference or borrower name"
         searchLabel="Search the approval queue"

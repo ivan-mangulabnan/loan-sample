@@ -1,5 +1,3 @@
-/* Stated before the figures, not after: the reader should know what the button does
-   before they start checking whether this is the right application. */
 .cancelapp__lead {
   margin: 0 0 var(--space-5);
   color: var(--text-muted);

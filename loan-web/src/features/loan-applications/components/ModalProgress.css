@@ -1,10 +1,3 @@
-/* Sits above the facts list, separated by a rule: the journey is a different kind of
-   statement from the numbers under it, and without the divider the stepper reads as the
-   first row of the list. Bottom margin only — the modal body owns the space above.
-
-   --space-4 either side of the rule, not --space-5: the stepper's own labels already
-   carry visual space beneath the dots, so a larger gap here read as a hole and cost
-   height on a laptop-height window, where the resubmit dialog was the first to scroll. */
 .modal__progress {
   padding-bottom: var(--space-4);
   margin-bottom: var(--space-4);

@@ -35,8 +35,6 @@ export function LoginPage() {
     }
   }
 
-  // This route sits outside RequireRole, so it does its own waiting: until
-  // /Auth/me answers, a valid cookie looks identical to no session at all.
   if (isLoading) return <div className="session-splash" />
 
   if (isAuthenticated) return <Navigate to="/" replace />
@@ -51,7 +49,6 @@ export function LoginPage() {
         </p>
       }
     >
-      {/* Set by RegisterPage on redirect — the account exists but has no session. */}
       {location.state?.notice && (
         <p className="login__notice" role="status">
           {location.state.notice}

@@ -6,19 +6,6 @@ const date = new Intl.DateTimeFormat(undefined, {
   year: 'numeric',
 })
 
-/**
- * Every remark anyone left on an application, oldest first.
- *
- * These were written all along and never shown. Reviews and approvals have carried
- * `remarks` in the payload since they existed, but the only renderer in the app read
- * `reviews` alone, took the last entry, and lived inside the resubmit dialog — so a
- * borrower saw a reviewer's reason for returning an application and nothing else. Not
- * why it was rejected, not what the approver said, not why a release was refused.
- *
- * Ordering is by date across all three kinds rather than kind-then-date: this is one
- * conversation about one application, and grouping it by desk would make the reader
- * reassemble the sequence themselves.
- */
 function entriesFor(application) {
   const out = []
 
@@ -38,8 +25,6 @@ function entriesFor(application) {
       remarks: approval.remarks,
     })
 
-    // Nested under the approval in the payload because a release decides one approval,
-    // but flattened here — the reader is following an application, not a data model.
     for (const release of approval.releases ?? [])
       out.push({
         step: 'Release',
@@ -49,17 +34,11 @@ function entriesFor(application) {
       })
   }
 
-  // Remarks are optional at every desk. An entry with none is a decision that was made
-  // without comment, and printing an empty quote for it says less than leaving it out.
   return out
     .filter((entry) => entry.remarks?.trim())
     .sort((a, b) => new Date(a.at) - new Date(b.at))
 }
 
-/**
- * Staff names are null for a borrower — the API redacts the name, never the text — so
- * every entry is labelled by the desk it came from rather than by who sat at it.
- */
 function ApplicationRemarks({ application }) {
   const entries = entriesFor(application)
 

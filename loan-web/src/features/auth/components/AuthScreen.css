@@ -1,19 +1,12 @@
-/* Matches the dashboard's .shell: fills the viewport edge to edge and carries the
-   shell surface, so the auth pages never expose the near-black --surface-page. */
 .auth {
   height: 100svh;
   width: 100%;
   background: var(--surface-shell);
   display: flex;
-  /* Not the default 'stretch': the scroll container must be as tall as the
-     viewport so a short screen scrolls the form, not the document. */
   align-items: stretch;
   justify-content: center;
 }
 
-/* The .glow--* placements are tuned for a card, so at viewport scale they drift
-   toward the middle. Re-anchor to the actual corners; tone, size and blur still
-   come from the documented custom properties (rule 13). */
 .auth > .glow--top-left {
   left: -140px;
   top: -180px;
@@ -24,7 +17,6 @@
   bottom: -200px;
 }
 
-/* Scrolling lives here rather than on <body>, same rule as .main. */
 .auth__scroll {
   flex: 1;
   min-height: 0;
@@ -36,7 +28,6 @@
   padding: var(--space-6);
 }
 
-/* One width for every auth card — sign in and sign up must not differ. */
 .auth__card {
   width: 100%;
   max-width: 380px;
@@ -45,47 +36,27 @@
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-raised);
   padding: var(--space-7);
-  /* Keeps the card from being stretched to full height by the flex parent when
-     the form is shorter than the viewport. */
   margin: auto;
 }
 
-/* A card title, not a page title: --text-4xl is scaled for the dashboard and
-   costs height the sign-up form needs. Scoped here so .heading is unchanged
-   everywhere else. */
 .auth__card .heading {
   font-size: var(--text-3xl);
 }
 
-/* The Stepper ships without outer margin so it can sit in any layout; the auth
-   card owns its spacing. */
 .auth__card .stepper {
   margin-top: var(--space-5);
 }
 
-/* ---- Step transition ---- */
-/* Height is set inline from a measured value: 'auto' cannot be animated, so
-   without it the card would jump between steps. */
 .auth__body {
   position: relative;
   overflow: hidden;
   transition: height 0.28s cubic-bezier(0.4, 0, 0.2, 1);
-  /* Focus rings are a 2px outline at 2px offset, so they reach 4px past the
-     control. Bleed the clip box sideways by that much — negative margin keeps
-     the card's own spacing unchanged — or the ring is cut off the inputs.
-     Vertical is left alone: padding here would be inside the pinned height and
-     eat into the content instead of extending the box. */
   margin-inline: calc(var(--space-1) * -1);
   padding-inline: var(--space-1);
 }
 
-/* display:flow-root contains the child's margin-top. Without it the form's top
-   margin escapes the pane, offsetting it below the measured box while the pinned
-   height stays the same — which clips the submit button by exactly that margin. */
 .auth__pane {
   display: flow-root;
-  /* Room for the last control's focus ring. Inside the measured box (flow-root
-     contains it), so the pinned height accounts for it automatically. */
   padding-bottom: var(--space-1);
   animation: auth-pane-in 0.28s cubic-bezier(0.4, 0, 0.2, 1) both;
 }
@@ -101,9 +72,6 @@
   }
 }
 
-/* ---- Short viewports ---- */
-/* 820px catches the common 800px-tall laptop, where the sign-up form would
-   otherwise overflow by a hair and hand the card an unnecessary scrollbar. */
 @media (max-height: 820px) {
   .auth__scroll {
     padding: var(--space-4);

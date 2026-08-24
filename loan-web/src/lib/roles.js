@@ -1,4 +1,3 @@
-/** Mirrors LoanApp/Constants/RoleNames.cs. */
 export const ROLES = {
   Admin: 'Admin',
   Reviewer: 'Reviewer',
@@ -6,7 +5,6 @@ export const ROLES = {
   Loaner: 'Loaner',
 }
 
-/** Every role except Loaner is staff — they see grading and staff names. */
 export const ADMIN_ROLES = [ROLES.Admin, ROLES.Reviewer, ROLES.Approver]
 
 export function isAdminRole(role) {

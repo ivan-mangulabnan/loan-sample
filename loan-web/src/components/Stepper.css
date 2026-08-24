@@ -1,20 +1,12 @@
 .stepper {
   display: flex;
   align-items: center;
-  /* Centred rather than flush-left like the form fields, so the step row reads
-     as its own band of chrome instead of another form row. */
   justify-content: center;
   gap: var(--space-3);
-  /* Wrap rather than a breakpoint (rule 16): four stages do not fit one phone
-     row, and where they stop fitting is a function of the labels, not of the
-     viewport. Two stages never wrap, so registration is unaffected. */
   flex-wrap: wrap;
   row-gap: var(--space-4);
 }
 
-/* The label sits UNDER the dot. Beside it, four stages clip at every width a
-   modal can offer — measured down to 2px of a 59px word at a 390px viewport.
-   Stacked, nothing clips at any width. */
 .stepper__step {
   display: flex;
   flex-direction: column;
@@ -23,8 +15,6 @@
   min-width: 0;
   text-align: center;
   flex: 0 1 auto;
-  /* Bounds a long outcome word ("Awaiting resubmission") into two short lines
-     rather than one wide column that shoulders its neighbours off the row. */
   max-width: 6.5rem;
 }
 
@@ -52,9 +42,6 @@
   font-size: var(--text-xs);
 }
 
-/* The cross carries its own class rather than reusing the check's: they mean opposite
-   things, and a probe (or a stylesheet) asking "does this step show a check?" must not
-   be answered yes by a rejection. Same box, so the two never shift the dot. */
 .stepper__check,
 .stepper__cross {
   width: 15px;
@@ -68,8 +55,6 @@
   height: 12px;
 }
 
-/* Wraps rather than truncating: nowrap + ellipsis is what clipped the labels when
-   they sat beside the dots, and a stacked step has a column to wrap inside. */
 .stepper__label {
   font-size: var(--text-sm);
   color: var(--text-muted);
@@ -77,11 +62,7 @@
   transition: color 0.25s ease;
 }
 
-/* Announced by screen readers, never shown: the visual state is carried by
-   colour and the check mark, which a non-visual reader cannot see. */
 .stepper__state {
-  /* Not position:absolute — .stepper__step is not a positioned ancestor, so it
-     would escape to the card. Collapsing the box keeps it in flow but invisible. */
   width: 1px;
   height: 1px;
   padding: 0;
@@ -92,20 +73,6 @@
   border: 0;
 }
 
-/* Capped rather than flex:1 — a connector that eats all the leftover width
-   pushes the steps to opposite edges, so the row reads as two corner items
-   instead of one centred group. It still shrinks when space is tight.
-
-   flex-basis is 0 with a grow, not a fixed --space-8: once the row can wrap, a
-   fixed-basis connector that lands first on a new line still claims its width and
-   draws a rule joining nothing. Growing from zero means a wrapped-to-front bar has
-   no leftover space to claim on its own line and collapses, while a bar between two
-   steps still fills the gap. max-width keeps it from eating the row, which is what
-   the original cap was defending against.
-
-   align-self + margin-top pin it to the dot. The step is a column now, so the
-   default centring would drop the connector to the middle of the dot-plus-label
-   stack instead of across the dots. 15px is half a 30px dot; 11px half of 22px. */
 .stepper__bar {
   flex: 1 1 0;
   max-width: var(--space-8);
@@ -125,7 +92,6 @@
   background: var(--accent);
 }
 
-/* ---- States ---- */
 .stepper__step--active .stepper__dot {
   background: var(--accent);
   border-color: var(--accent);
@@ -136,7 +102,6 @@
   color: var(--text-strong);
 }
 
-/* Done: outlined with a check, so it reads as finished rather than current. */
 .stepper__step--done .stepper__dot {
   border-color: var(--accent);
   color: var(--accent);
@@ -147,7 +112,6 @@
   color: var(--text-muted);
 }
 
-/* Waiting: the step is blocked on an action, so the dot pulses to draw the eye. */
 .stepper__step--waiting .stepper__dot {
   background: var(--accent);
   border-color: var(--accent);
@@ -158,25 +122,16 @@
   color: var(--text-strong);
 }
 
-/* A ring that expands and fades out from behind the dot. Separate element so
-   the dot itself does not move — animating the dot would shift the label. */
 .stepper__pulse {
   position: absolute;
   inset: -1px;
   border-radius: 50%;
-  /* Ring and halo read from one pair of variables so a state can retint the pulse
-     without redeclaring the animation — see --pulse-ring on 'pending' below. */
   border: 2px solid var(--pulse-ring, var(--accent));
-  /* A soft halo under the ring so the pulse carries further than a hairline. */
   box-shadow: 0 0 0 0 var(--pulse-glow, var(--glow-accent-soft));
   animation: stepper-pulse 1.6s ease-out infinite;
   pointer-events: none;
 }
 
-/* Holds near-opaque through the first third so the ring is genuinely visible,
-   then expands and fades. Peak scale is bounded by the dot-to-label gap: at a
-   30px dot with an 8px gap the ring reaches the label at 1.53x, so 1.5 is the
-   most it can travel without colliding. Widen that gap before raising this. */
 @keyframes stepper-pulse {
   0% {
     transform: scale(1);
@@ -193,11 +148,6 @@
   }
 }
 
-/* Pending: waiting on the READER, not on another desk. Orange rather than the red of
-   'invalid' — nothing has failed and nothing is terminal, the application is simply
-   parked until they act — and it pulses for the same reason 'waiting' does, because
-   something is expected of somebody. The two are distinguished by colour: accent means
-   another desk has it, warning means you do. */
 .stepper__step--pending .stepper__dot {
   background: var(--warning-tint);
   border-color: var(--warning);
@@ -210,7 +160,6 @@
   color: var(--warning);
 }
 
-/* Invalid: visited but needs fixing. */
 .stepper__step--invalid .stepper__dot {
   border-color: var(--danger);
   color: var(--danger);
@@ -221,8 +170,6 @@
   color: var(--danger);
 }
 
-/* Co-located with the rules it overrides, so import order cannot decide which
-   one wins. */
 @media (prefers-reduced-motion: reduce) {
   .stepper__dot,
   .stepper__label,
@@ -230,8 +177,6 @@
     transition: none;
   }
 
-  /* The pulse signals "waiting on you", so keep a static ring rather than
-     removing the affordance entirely. */
   .stepper__pulse {
     animation: none;
     opacity: 0.5;

@@ -20,9 +20,6 @@ const EMPTY = {
   birthdate: '',
 }
 
-// Only the 409 needs saying differently here: the server answers a duplicate username
-// with a bare "Conflict", which names no field. Everything else — ProblemDetails
-// validation, the raw string an unknown tenant produces — is the shared decoding.
 function messageFor(error) {
   if (error.status === 409)
     return 'That username is already taken for this tenant.'
@@ -43,10 +40,6 @@ export function RegisterPage() {
     return (event) => setForm((prev) => ({ ...prev, [field]: event.target.value }))
   }
 
-  // Step 1 is 'done' only once it is both left behind and accepted — a 409 or an
-  // unknown tenant sends the user back here, and a check mark on a step the
-  // server just rejected would be a lie. 'waiting' pulses the step that needs
-  // input; submitting is not waiting on the user, so it drops back to plain.
   const stepStatus = (n) => {
     if (step === n) return error && n === 1 ? 'invalid' : isSubmitting ? 'active' : 'waiting'
     return step > n ? 'done' : 'todo'
@@ -57,9 +50,6 @@ export function RegisterPage() {
     status: stepStatus(index + 1),
   }))
 
-  // Step 1 sends nothing: the API has a single register endpoint that creates the
-  // User and its Account together, so the whole form goes in one request at the
-  // end. This only advances the wizard.
   function handleNext(event) {
     event.preventDefault()
     setError(null)
@@ -67,7 +57,6 @@ export function RegisterPage() {
   }
 
   function handleBack() {
-    // Keeps the entered values — form state is not reset between steps.
     setError(null)
     setStep(1)
   }
@@ -83,30 +72,23 @@ export function RegisterPage() {
         userName: form.userName,
         password: form.password,
         firstName: form.firstName,
-        // The API pattern rejects an empty string, so omit rather than send one.
         middleName: form.middleName.trim() || undefined,
         lastName: form.lastName,
         birthdate: form.birthdate,
       })
 
-      // Register returns a message, not a cookie — the account exists but there is
-      // no session yet, so hand off to the login page rather than to the dashboard.
       navigate('/login', {
         replace: true,
         state: { notice: 'Account created. Sign in to continue.' },
       })
     } catch (err) {
       setError(messageFor(err))
-      // A duplicate username or an unknown tenant is a step 1 field, so send the
-      // user back there — the message is about input they can no longer see.
       if (err.status === 409 || typeof err.body === 'string') setStep(1)
     } finally {
       setIsSubmitting(false)
     }
   }
 
-  // Same reasoning as LoginPage: this route sits outside RequireRole, so until
-  // /Auth/me answers, a valid cookie is indistinguishable from no session.
   if (isLoading) return <div className="session-splash" />
 
   if (isAuthenticated) return <Navigate to="/" replace />

@@ -11,13 +11,6 @@ const currency = new Intl.NumberFormat(undefined, {
   maximumFractionDigits: 2,
 })
 
-/**
- * Applies for a loan — amount plus a plan.
- *
- * Note what is NOT guarded: nothing stops a borrower filing several applications at
- * once, because nothing server-side does either (CreateLoanApplicationAsync has no such
- * rule). Adding the check here alone would invent a limit the API does not keep.
- */
 function ApplyModal({ onSubmit, onClose, isSubmitting = false, error = null }) {
   const plans = usePaymentPlans()
 
@@ -100,8 +93,6 @@ function ApplyModal({ onSubmit, onClose, isSubmitting = false, error = null }) {
             if (problem) setProblem(null)
           }}
         >
-          {/* No plan is preselected: the term and the rate differ enough between them
-              that a default would be a decision made for the borrower. */}
           <option value="">
             {plans.isLoading ? 'Loading plans…' : 'Choose a plan'}
           </option>
@@ -116,9 +107,6 @@ function ApplyModal({ onSubmit, onClose, isSubmitting = false, error = null }) {
       {preview !== null && (
         <p className="apply__preview">
           <span className="apply__preview-figure">{currency.format(preview)}</span>
-          {/* Short form, matching ResubmitModal: the plan picker directly above
-              already states the term and the rate, so spelling out when the rate is
-              fixed repeated three facts to make one point. */}
           <span className="apply__preview-note">
             to repay over {selected.numberOfMonths} months · indicative until approved
           </span>

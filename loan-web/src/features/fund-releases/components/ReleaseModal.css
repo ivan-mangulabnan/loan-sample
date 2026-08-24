@@ -29,8 +29,6 @@
   font-size: var(--text-base);
 }
 
-/* The principal is the sum actually leaving the ledger, so it is separated from the rest
-   by a rule rather than sitting as one line among five. */
 .release__fact--lead {
   padding-bottom: var(--space-3);
   border-bottom: 1px solid var(--border);
@@ -58,7 +56,6 @@
   font-size: var(--text-xs);
 }
 
-/* Same override as the decision box: `.field` fixes a 44px single-line height. */
 .release__remarks {
   display: block;
   height: auto;

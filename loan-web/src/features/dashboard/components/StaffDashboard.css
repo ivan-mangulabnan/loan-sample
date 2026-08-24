@@ -1,5 +1,3 @@
-/* Two columns inside .main rather than in AppLayout: the aside is dashboard-only, and
-   putting it in the shell would make every other route opt out of it. */
 .staff {
   display: grid;
   grid-template-columns: minmax(0, 1fr) var(--aside-width);
@@ -20,25 +18,12 @@
   margin: var(--space-2) 0 0;
 }
 
-/* Header and plot are one block, closer to each other than to anything above: the
-   sentence is the chart's title, not a figure floating over it. --space-4 rather than
-   the column's --space-6 is what says so. */
 .staff__chart {
   display: flex;
   flex-direction: column;
   gap: var(--space-4);
 }
 
-/* One sentence, not two elements: the figure is an inline span inside the line of text
-   that says what it counts. Nothing aligns them — sharing a line box does, which is the
-   point. It wraps as prose on a narrow viewport (rule 16).
-
-   The two halves are sized to read as one voice. 34px over 13px was a 2.6x jump, and at
-   that distance the same typeface stops looking like the same typeface — the number read
-   as a display graphic with a footnote stuck to it. 24/17 is close enough that the line
-   reads as a sentence with one word emphasised, which is what it is. The figure is also
-   no longer larger than the h1 above it (30px); it is a figure on the page, not the
-   title of it. */
 .staff__headline {
   font-size: var(--text-xl);
   font-weight: var(--weight-medium);
@@ -53,9 +38,6 @@
   letter-spacing: var(--tracking-tight);
 }
 
-/* The key for the curve below. The same dot the aside's metrics use (rule 11), inline
-   in the sentence rather than a flex item beside it — optically centred on the text
-   instead of sat on its baseline, which is where an inline-block would land. */
 .staff__key {
   vertical-align: middle;
   margin-right: var(--space-2);
@@ -65,7 +47,6 @@
   min-width: 0;
 }
 
-/* ---- Aside ---- */
 .aside {
   display: flex;
   flex-direction: column;
@@ -148,38 +129,15 @@
   margin: 0 0 var(--space-4);
 }
 
-/* The aside has a designed width, so it stacks rather than shrinking. Reuses the
-   shell's existing 768px breakpoint (rule 16). */
 @media (max-width: 768px) {
   .staff {
     grid-template-columns: minmax(0, 1fr);
   }
 }
 
-/* ---- Arrival ----
-
-   Each block fades up as its own request lands. Same keyframe, curve and 6px as every
-   other swap in the app (`list-page-in`, rule 16a) — a swap is a swap, and a second
-   timing would read as two different apps.
-
-   It exists because the dashboard's sections arrive independently and at different
-   times: without it a figure, a chart and four pipeline cells simply appeared, which is
-   the "blitz of data" the staggered fade is meant to soften. The list pages already had
-   this on their rows, which is why they never needed a placeholder.
-
-   The stagger is small and in reading order — the eye follows the page down rather than
-   watching four things pop at once. It is not a queue: each section still animates when
-   ITS data arrives, so a slow chart does not hold up a fast notice; the delay only
-   separates blocks that happen to land together, which is the common case. */
 .staff__arrive {
   animation: list-page-in 0.28s cubic-bezier(0.4, 0, 0.2, 1) both;
-  /* The wrapper inherits the flex-item role from whatever it wraps, and a default
-     `flex-shrink: 1` would undo `.callout`'s own `0` — the notice would compress and clip
-     its button on a narrow viewport, which is precisely what rule 12b's flex-shrink
-     exists to prevent. Measured at 1 before this line. */
   flex-shrink: 0;
-  /* It must also not become a horizontal constraint of its own: the callout and the
-     chart both stretch to the column, and a shrink-to-fit wrapper would pull them in. */
   min-width: 0;
 }
 
@@ -200,8 +158,6 @@
 }
 
 @media (prefers-reduced-motion: reduce) {
-  /* Not `animation: none` alone — with `both` filling backwards that strands the content
-     at the keyframe's starting opacity, i.e. invisible (rule 16a). */
   .staff__arrive {
     animation: none;
     opacity: 1;

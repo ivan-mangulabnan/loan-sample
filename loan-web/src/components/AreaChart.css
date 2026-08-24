@@ -1,66 +1,32 @@
 .chart {
   margin: 0;
 
-  /* The y-axis column (--chart-gutter, in tokens.css) is a constant, not a fraction of
-     the plot: the SVG is preserveAspectRatio="none", so anything reserved *inside* the
-     viewBox scales with the rendered width — too narrow for "₱224,000" on a phone and a
-     tenth of the chart wasted on a desktop. Sized from the longest label a caller can
-     produce, at --text-xs, plus the gap to the gridline. The x-axis tick row is indented
-     by the same amount so its labels stay under their points. */
-
-  /* Diameter of the peak's bloom. A constant rather than a share of the plot: it is a
-     light source, and a light source does not get wider because the window did. */
   --chart-glow-size: 116px;
 }
 
-/* Gutter beside canvas. */
 .chart__plot {
   display: flex;
 }
 
-/* The box the axis labels position against — it stretches to the canvas's height, which
-   is the SVG's height, so a label's `top` percentage of the viewBox lands on its
-   gridline. */
 .chart__axis {
   position: relative;
   width: var(--chart-gutter);
   flex-shrink: 0;
 }
 
-/* Owns the marker and the empty-state overlay: both position themselves as a percentage
-   of the plot's coordinate space, so this has to be the plot and nothing more. */
 .chart__canvas {
   position: relative;
   flex: 1;
   min-width: 0;
 }
 
-/* Width is fluid, height is fixed. `height: auto` would derive height from the
-   viewBox's aspect ratio, so a wide column would produce a chart several hundred
-   pixels tall — the plot is a band across the page, not a square. The viewBox still
-   carries the coordinate space, so no layout px is hardcoded (rule 15). */
 .chart__svg {
   display: block;
   width: 100%;
   height: var(--chart-height);
-  /* Positioned only so it paints above the glow: between two positioned siblings the
-     later one in the DOM wins, and an unpositioned block would lose to both. */
   position: relative;
 }
 
-/* ---- peak glow ---- */
-
-/* The ground around the peak, lit. An HTML element for the same reason the marker is
-   one — inside the SVG, preserveAspectRatio="none" stretches a circle into an ellipse
-   that changes shape with the viewport. It sits under the plot, so the curve and the
-   gridlines stay crisp and only the space behind them glows.
-
-   The falloff is the point: half strength at the centre, an eighth of it by 45%, gone
-   at the rim. A single stop to transparent reads as a flat disc with a soft edge.
-
-   closest-side, not the default farthest-corner: the corner of a square box is 1.41x
-   its inscribed radius, so the default ends the ramp outside the rounded edge and
-   border-radius clips the remaining ~7% alpha off as a visible ring. */
 .chart__glow {
   position: absolute;
   width: var(--chart-glow-size);
@@ -82,8 +48,6 @@
   vector-effect: non-scaling-stroke;
 }
 
-/* non-scaling-stroke throughout: preserveAspectRatio="none" stretches the viewBox
-   horizontally, which would otherwise smear the stroke into a wedge. */
 .chart__line {
   fill: none;
   stroke-width: 2;
@@ -98,10 +62,6 @@
   vector-effect: non-scaling-stroke;
 }
 
-/* ---- y-axis ---- */
-
-/* Right-aligned so every label ends the same short distance from the gridline it
-   belongs to, whatever its length. */
 .chart__axis-label {
   position: absolute;
   right: var(--space-3);
@@ -111,10 +71,6 @@
   white-space: nowrap;
 }
 
-/* ---- marker ---- */
-
-/* An HTML element, not an SVG circle: the SVG is stretched horizontally, which would
-   flatten a circle into an ellipse. */
 .chart__marker {
   position: absolute;
   width: 10px;
@@ -125,8 +81,6 @@
   pointer-events: none;
 }
 
-/* The peak's own value. Reads brighter than the axis because it is the number the eye
-   is looking for; the axis behind it is only there for scale. */
 .chart__marker-label {
   position: absolute;
   top: 50%;
@@ -137,8 +91,6 @@
   white-space: nowrap;
 }
 
-/* Which side of the dot the label takes. A peak on the last day would otherwise push
-   its own value past the right edge of the figure. */
 .chart__marker-label--end {
   left: calc(100% + var(--space-2));
 }
@@ -147,11 +99,6 @@
   right: calc(100% + var(--space-2));
 }
 
-/* ---- x-axis ---- */
-
-/* Sits under the canvas — indented past the gutter — spanning the same coordinate space
-   so each label lines up with its point. Outside the SVG so the glyphs are not
-   stretched. */
 .chart__ticks {
   position: relative;
   height: var(--space-5);
@@ -167,8 +114,6 @@
   white-space: nowrap;
 }
 
-/* Sits over the plot rather than replacing it: the axis stays, so the period is still
-   legible when nothing happened. */
 .chart__empty {
   position: absolute;
   inset: 0;

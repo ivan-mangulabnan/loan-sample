@@ -1,14 +1,3 @@
-/**
- * Reusable classes built from tokens.css. Add here only when a pattern
- * appears twice; anything used once belongs in its component's own CSS.
- */
-
-/* ---------------------------------------------------------------
- * Glow — the blurred radial orb behind translucent panels.
- * Put .glow-host on the clipping parent, then one or more .glow
- * children with a placement modifier. Colour and size are set by
- * --glow-color / --glow-size, so any tint works without new classes.
- * ------------------------------------------------------------- */
 .glow-host {
   position: relative;
   overflow: hidden;
@@ -28,7 +17,6 @@
   pointer-events: none;
 }
 
-/* Content inside a .glow-host must sit above the orbs. */
 .glow-host > *:not(.glow) {
   position: relative;
 }
@@ -58,9 +46,6 @@
   bottom: -70px;
 }
 
-/* ---------------------------------------------------------------
- * Buttons
- * ------------------------------------------------------------- */
 .btn {
   display: inline-flex;
   align-items: center;
@@ -117,7 +102,6 @@
   color: var(--text-strong);
 }
 
-/* Rounded filter/selector control, e.g. the "Week ⌄" chip. */
 .btn--chip {
   background: var(--surface-sunken);
   color: var(--text);
@@ -127,9 +111,6 @@
   border-radius: var(--radius-pill);
 }
 
-/* ---------------------------------------------------------------
- * Surfaces
- * ------------------------------------------------------------- */
 .panel {
   background: var(--surface-panel);
   border-radius: var(--radius-xl);
@@ -142,7 +123,6 @@
   padding: var(--space-5);
 }
 
-/* Dashed placeholder box for a thumbnail or asset slot. */
 .slot {
   display: flex;
   align-items: center;
@@ -157,9 +137,6 @@
   flex-shrink: 0;
 }
 
-/* ---------------------------------------------------------------
- * Text helpers
- * ------------------------------------------------------------- */
 .heading {
   font-size: var(--text-4xl);
   font-weight: var(--weight-bold);
@@ -168,9 +145,6 @@
   margin: 0;
 }
 
-/* In the accessibility tree but not on screen. Not display:none, which is skipped by
-   screen readers entirely — this is for content that must be read but not seen, such
-   as the data behind a chart. */
 .visually-hidden {
   position: absolute;
   width: 1px;
@@ -183,8 +157,6 @@
   border: 0;
 }
 
-/* Page title on the left, an action on the right. Wraps rather than squeezing
-   the button off-screen on a narrow viewport (rule 16). */
 .page-head {
   display: flex;
   align-items: flex-start;
@@ -193,9 +165,6 @@
   flex-wrap: wrap;
 }
 
-/* For a head carrying more than one action. Without the wrapper, space-between
-   spreads three children across the row and the title stops being a pair with
-   nothing. Part of .page-head rather than a pattern of its own. */
 .page-head__actions {
   display: flex;
   align-items: center;
@@ -220,9 +189,6 @@
   color: var(--text-subtle);
 }
 
-/* ---------------------------------------------------------------
- * Small parts
- * ------------------------------------------------------------- */
 .dot {
   width: 14px;
   height: 14px;
@@ -237,9 +203,6 @@
   height: 8px;
 }
 
-/* Status pill. Tone is picked per lifecycle — see each feature's statuses.js.
-   Shared by application and loan badges, so it lives here rather than beside
-   either one. */
 .badge {
   display: inline-block;
   padding: 2px var(--space-3);
@@ -281,7 +244,6 @@
   color: var(--text-muted);
 }
 
-/* Counter bubble pinned to a parent's corner. */
 .badge-count {
   position: absolute;
   top: 2px;
@@ -298,7 +260,6 @@
   justify-content: center;
 }
 
-/* Rounded square holding an icon or glyph. */
 .icon-chip {
   width: 24px;
   height: 24px;
@@ -323,31 +284,13 @@
   background: var(--bar-accent);
 }
 
-/* Opt-in motion, matching the loan detail ring: the bar sweeps out to its value, then
-   keeps a sense of forward travel until the balance is cleared.
-
-   Three layers, all moving the same direction, because the first attempt used only one
-   and a lone symmetric band read as a flash passing over the bar rather than the bar
-   advancing:
-
-     1. the fill itself carries a moving stripe texture (the "loading" cue),
-     2. a leading highlight runs the filled length and goes out at the end,
-     3. the tip glows, so the eye is told where the value currently stands.
-
-   On a 5px bar a soft wash has almost no room to be seen, which is why the highlight is
-   now a hard-edged crest with a trailing tail rather than a symmetric blur. */
 .progress--animated .progress__bar {
   position: relative;
-  /* Clips the stripes and the crest to the filled width. The wrapper can no longer do it
-     (it has to let the tip out), so the fill carries its own rounding. */
   overflow: hidden;
   border-radius: 3px;
   transition: width 1.1s cubic-bezier(0.16, 1, 0.3, 1);
 }
 
-/* The stripe texture. Layered over the tone gradient the element already carries via its
-   inline `background`, so this is a ::before rather than another background-image —
-   overwriting the element's background would lose the accent/warning distinction. */
 .progress--animated .progress__bar::before {
   content: '';
   position: absolute;
@@ -357,23 +300,13 @@
     var(--bar-stripe) 0 var(--bar-stripe-w),
     transparent var(--bar-stripe-w) calc(var(--bar-stripe-w) * 2.6)
   );
-  /* Wider than the bar so the loop has somewhere to come from. */
   background-size: calc(var(--bar-stripe-w) * 2.6) 100%;
-  /* Deliberately not on the crest's clock: this is a continuous texture, not part of the
-     pass, and locking the two together made them read as one stuttering thing. Slow
-     enough to sit under the crest rather than compete with it. */
   animation: progress-stripes 1.6s linear infinite;
 }
 
-/* The travelling crest. Clipped by the filled bar, so it fades out exactly where the
-   value stops rather than carrying on over the empty track. Asymmetric on purpose: the
-   bright edge leads and the tail follows, which is what gives it a direction. */
 .progress__comet {
   position: absolute;
   inset: 0;
-  /* Capped below --glow-travel's near-opaque white: at full strength the crest washed
-     the fill to grey as it passed, which cost the accent/warning distinction exactly
-     when the eye was on it. The bar has to stay its own colour while it moves. */
   background: linear-gradient(
     90deg,
     transparent 0%,
@@ -382,7 +315,6 @@
     color-mix(in srgb, var(--glow-travel) 40%, transparent) 92%,
     transparent 100%
   );
-  /* Starts fully off the left edge so the first pass enters rather than appearing. */
   transform: translateX(-100%);
   animation: progress-comet 2.4s cubic-bezier(0.37, 0, 0.34, 1) 0.4s infinite;
 }
@@ -399,14 +331,11 @@
   }
 }
 
-/* Dark for most of the cycle, then a brief flare as the crest lands on it. The window is
-   narrow on purpose — a slow pulse reads as a light that is always on. */
 @media (prefers-reduced-motion: reduce) {
   .progress--animated .progress__bar {
     transition: none;
   }
 
-  /* Ambient motion with no state behind it: it does not degrade, it stops. */
   .progress--animated .progress__bar::before,
   .progress__comet {
     display: none;
@@ -438,10 +367,6 @@
   color: var(--text-faint);
 }
 
-/*
- * Applied directly to an <input>/<select> rather than to a wrapper —
- * same sunken box, but it is the control itself.
- */
 .field--input {
   width: 100%;
   border: none;
@@ -460,26 +385,11 @@
   outline-offset: 2px;
 }
 
-/*
- * Shown while /Auth/me decides whether there is a session. Deliberately blank
- * rather than a spinner: on a local call it renders for a few frames, and a
- * flashing spinner reads worse than a still surface.
- */
 .session-splash {
   min-height: 100svh;
   background: var(--surface-page);
 }
 
-/* ---- Component swap ---- */
-
-/* The fade a swapped-in block of content uses: a new page of list rows, a re-sorted
-   payment history. Same curve and same 6px as `auth-pane-in` (rule 16a) — a swap is a
-   swap, and a second timing would read as two different apps.
-
-   It lives here rather than in ListView.css because two features consume it and the
-   loan detail route never imports ListView: a lazily-loaded route that referenced a
-   keyframe from a stylesheet it does not pull in would animate against an undefined
-   name, and with `both` filling backwards the content would simply stay invisible. */
 @keyframes list-page-in {
   from {
     opacity: 0;

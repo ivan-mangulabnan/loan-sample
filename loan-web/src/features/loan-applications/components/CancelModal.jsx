@@ -17,18 +17,6 @@ const date = new Intl.DateTimeFormat(undefined, {
   year: 'numeric',
 })
 
-/**
- * Confirms withdrawing an application.
- *
- * A confirm rather than a form: there is nothing to fill in, and CANCELLED is terminal
- * with no undo in the API. It restates the figures for the same reason DecisionModal
- * does — by the time this is open the row is behind a backdrop, and "cancel #12" means
- * nothing if you can no longer see what #12 was.
- *
- * Reached two ways: the Cancel action on a pending row, and the "Cancel application"
- * button inside ResubmitModal. The page swaps one dialog for the other rather than
- * stacking them.
- */
 function CancelModal({ application, onSubmit, onClose, isSubmitting = false, error = null }) {
   if (!application) return null
 
@@ -39,13 +27,6 @@ function CancelModal({ application, onSubmit, onClose, isSubmitting = false, err
       onClose={onClose}
       footer={
         <>
-          {/* "Keep it" rather than "Cancel": on a dialog about cancelling, a Cancel
-              button is ambiguous in exactly the wrong direction. It survives as the
-              hover label; the ↺ reads as "put it back".
-
-              Danger tone on the confirm, not accent: this one ends the application, and
-              on this dialog it is the destructive choice even though it is the one the
-              reader came to make. */}
           <IconButton
             glyph={DECISION_GLYPHS[DECISIONS.Return]}
             label="Keep it"
@@ -63,8 +44,6 @@ function CancelModal({ application, onSubmit, onClose, isSubmitting = false, err
         </>
       }
     >
-      {/* Shown before the warning: how far this got is the context for deciding
-          whether to withdraw it. */}
       <ModalProgress application={application} />
 
       <p className="cancelapp__lead">
@@ -93,8 +72,6 @@ function CancelModal({ application, onSubmit, onClose, isSubmitting = false, err
         </div>
       </dl>
 
-      {/* The 409 to expect: it reached PENDING_RELEASE while this was open, at which
-          point pulling out is no longer the borrower's call. */}
       {error && (
         <p className="cancelapp__error" role="alert">
           {error}

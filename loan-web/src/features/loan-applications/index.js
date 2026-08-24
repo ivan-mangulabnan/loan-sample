@@ -1,4 +1,3 @@
-// Public surface of this feature. Other features import only from here.
 export { default as ApplicationStatusBadge } from './components/ApplicationStatusBadge.jsx'
 export { default as DecisionModal } from './components/DecisionModal.jsx'
 export { default as ModalProgress } from './components/ModalProgress.jsx'

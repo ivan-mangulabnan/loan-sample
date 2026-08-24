@@ -1,9 +1,5 @@
 import { useCallback, useEffect, useState } from 'react'
 
-/**
- * Generic loading/error/data wrapper around an apiClient call.
- * Feature hooks.js files build on this instead of hand-rolling useEffect.
- */
 export function useApiResource(fetcher, deps = []) {
   const [data, setData] = useState(null)
   const [error, setError] = useState(null)

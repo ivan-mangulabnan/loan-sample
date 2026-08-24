@@ -15,11 +15,6 @@ function UnconfiguredRole({ role }) {
   )
 }
 
-/**
- * Picks the dashboard body from the role's config kind, never from the role
- * itself — adding a role means adding a roleConfig entry, not a branch here
- * (rule 17).
- */
 export function DashboardPage() {
   const { role } = useSession()
   const config = configFor(role)
