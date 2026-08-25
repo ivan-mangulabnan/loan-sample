@@ -27,8 +27,7 @@ function ViewApplicationModal({ application, onClose, onAct }) {
   const app = full.data ?? application
   const approval = (app.approvals ?? []).at(-1)
 
-  const action = onAct ? actionFor(app) : null
-  const destructive = action === BORROWER_ACTIONS.Cancel
+  const canResubmit = onAct && actionFor(app) === BORROWER_ACTIONS.Resubmit
 
   return (
     <Modal
@@ -36,12 +35,9 @@ function ViewApplicationModal({ application, onClose, onAct }) {
       title={`Application #${app.loanApplicationId}`}
       onClose={onClose}
       footer={
-        action ? (
-          <Button
-            variant={destructive ? 'default' : 'accent'}
-            onClick={() => onAct(application)}
-          >
-            {destructive ? 'Cancel application' : 'Resubmit'}
+        canResubmit ? (
+          <Button variant="accent" onClick={() => onAct(application)}>
+            Resubmit
           </Button>
         ) : null
       }
@@ -49,6 +45,12 @@ function ViewApplicationModal({ application, onClose, onAct }) {
       <ModalProgress application={app} />
 
       <dl className="viewapp__facts">
+        {!onAct && app.borrower && (
+          <div className="viewapp__fact">
+            <dt>Borrower</dt>
+            <dd>{app.borrower}</dd>
+          </div>
+        )}
         <div className="viewapp__fact">
           <dt>Amount requested</dt>
           <dd className="viewapp__amount">{currency.format(app.amount)}</dd>

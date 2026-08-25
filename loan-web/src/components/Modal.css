@@ -86,6 +86,9 @@
   gap: var(--space-3);
   flex-shrink: 0;
   flex-wrap: wrap;
-  padding: var(--space-5) var(--space-6) var(--space-7);
+  /* Extra right inset: the last button's tooltip is far wider than the 44px
+     button it hangs under, and centering it there would push the label past
+     the panel edge. Left stays at --space-6 to match the head and body. */
+  padding: var(--space-5) var(--space-7) var(--space-7) var(--space-6);
   border-top: 1px solid var(--border);
 }
