@@ -15,8 +15,6 @@ import { submitReview } from '../api.js'
 
 const REVIEW_DECISIONS = [DECISIONS.Approve, DECISIONS.Return, DECISIONS.Reject]
 
-// The three decision buttons sit side by side and a wrong one cannot be taken
-// back once it reaches the server, so the request is held briefly behind an undo.
 const DEFERRED = {
   deferMessage: (application, { decision }) =>
     `Application #${application.loanApplicationId} ${DECISION_OUTCOMES[decision]}.`,

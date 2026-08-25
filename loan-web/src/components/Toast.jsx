@@ -1,9 +1,6 @@
 import { useEffect, useRef, useState } from 'react'
 import './Toast.css'
 
-// Hovering or focusing pauses the countdown, which is what makes an undo toast
-// comfortable to use. It also means a pointer left resting on the toast would
-// hold a pending request back forever, so the wait is capped regardless.
 const MAX_DEFER_MS = 15000
 
 function Toast({
@@ -28,9 +25,6 @@ function Toast({
     return () => clearTimeout(timer)
   }, [isPaused, duration])
 
-  // Deliberately has no dependencies: pausing must not restart this one, or it
-  // would never be a ceiling. Whichever timer fires first wins — dismissing
-  // twice is harmless because the provider resolves a toast only once.
   useEffect(() => {
     if (!isDeferring.current) return
 

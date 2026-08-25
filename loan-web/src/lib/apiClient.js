@@ -8,9 +8,6 @@ export function setUnauthorizedHandler(handler) {
 
 let isUnloading = false
 
-// Once the page is going away a normal fetch is cancelled with the document.
-// Flipping this makes the requests we still owe the server keepalive, so they
-// have a chance to land. One-way on purpose: there is no "unloading" to undo.
 export function setUnloading() {
   isUnloading = true
 }

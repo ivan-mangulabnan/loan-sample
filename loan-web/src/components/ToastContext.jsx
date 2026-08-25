@@ -13,14 +13,8 @@ export function ToastProvider({ children }) {
 
   const nextId = useRef(0)
 
-  // Toasts can carry work that has not been sent yet: `commit` is the deferred
-  // request, and it must run on every way out except an explicit undo. The map
-  // lives in a ref so a commit is never lost to a re-render, and the provider
-  // sits above the router so it survives navigation between pages.
   const pending = useRef(new Map())
 
-  // Mirrors `toasts` so eviction can be worked out synchronously in `push`
-  // rather than inside a state updater, which React may run more than once.
   const visible = useRef([])
 
   const syncKeys = useCallback(() => {
@@ -45,9 +39,6 @@ export function ToastProvider({ children }) {
 
       if (!entry) return
 
-      // Deleting before running is what makes this idempotent: a second call —
-      // the timer firing as the user clicks ✕, or StrictMode's doubled effects —
-      // finds nothing and does nothing.
       pending.current.delete(id)
       syncKeys()
 
@@ -75,8 +66,6 @@ export function ToastProvider({ children }) {
       visible.current = next.slice(-MAX_VISIBLE)
       setToasts(visible.current)
 
-      // Overflowed toasts are gone from the screen but their work is not
-      // cancelled — pushing a fourth toast must never silently drop a decision.
       for (const toast of overflow) resolve(toast.id)
 
       return id
@@ -86,9 +75,6 @@ export function ToastProvider({ children }) {
 
   const undo = useCallback((id) => resolve(id, { cancel: true }), [resolve])
 
-  // Last-ditch flush. Anything still held back when the page goes away is sent
-  // rather than lost; `setUnloading` switches the client to keepalive so the
-  // request can outlive the document. Best-effort by nature.
   useEffect(() => {
     const flush = () => {
       if (pending.current.size === 0) return

@@ -12,8 +12,6 @@ export const DECISION_LABELS = {
   [DECISIONS.Return]: 'Return for changes',
 }
 
-// Past tense, for reporting a decision that has already been taken — "Application
-// #12 returned for changes." DECISION_LABELS is the imperative form on a button.
 export const DECISION_OUTCOMES = {
   [DECISIONS.Approve]: 'approved',
   [DECISIONS.Reject]: 'rejected',

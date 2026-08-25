@@ -25,13 +25,7 @@ export function useWriteAction(submit, onDone, { deferMessage = null, keyOf = nu
 
   const run = useCallback(
     async (payload) => {
-      // Deferred mode: hold the request behind an undo toast instead of sending
-      // it. Nothing is awaited here, so there is no submitting state and the
-      // modal's inline error has nothing to show — a failure arrives later, as
-      // a toast, because by then the modal is long closed.
       if (deferMessage) {
-        // Captured now. `target` is cleared on the next line, so reading it at
-        // commit time would find nothing.
         const row = target
         const message = deferMessage(row, payload)
 
@@ -51,8 +45,6 @@ export function useWriteAction(submit, onDone, { deferMessage = null, keyOf = nu
                 tone: 'danger',
               })
             } finally {
-              // Either way the queue is refetched: on success to settle the
-              // optimistic removal, on failure to put the row back.
               onDone?.()
             }
           },

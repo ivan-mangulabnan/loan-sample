@@ -15,8 +15,6 @@ import { submitApproval } from '../api.js'
 
 const APPROVAL_DECISIONS = [DECISIONS.Approve, DECISIONS.Reject]
 
-// Approving sends the application on to release and rejecting is terminal; both
-// are held briefly behind an undo. See ReviewPage for the same arrangement.
 const DEFERRED = {
   deferMessage: (application, { decision }) =>
     `Application #${application.loanApplicationId} ${DECISION_OUTCOMES[decision]}.`,
