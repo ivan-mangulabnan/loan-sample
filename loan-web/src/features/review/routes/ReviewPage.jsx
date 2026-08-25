@@ -1,13 +1,27 @@
 import { useCallback } from 'react'
 import Button from '../../../components/Button.jsx'
+import { useToast } from '../../../components/useToast.js'
 import { useListQuery } from '../../../hooks/useListQuery.js'
 import { useWriteAction } from '../../../hooks/useWriteAction.js'
 import { ListView, QueueTable, configFor, useRoleQueue } from '../../dashboard/index.js'
-import { DECISIONS, DecisionModal, QUEUE_SORT_OPTIONS } from '../../loan-applications/index.js'
+import {
+  DECISIONS,
+  DECISION_OUTCOMES,
+  DecisionModal,
+  QUEUE_SORT_OPTIONS,
+} from '../../loan-applications/index.js'
 import { useSession } from '../../auth/index.js'
 import { submitReview } from '../api.js'
 
 const REVIEW_DECISIONS = [DECISIONS.Approve, DECISIONS.Return, DECISIONS.Reject]
+
+// The three decision buttons sit side by side and a wrong one cannot be taken
+// back once it reaches the server, so the request is held briefly behind an undo.
+const DEFERRED = {
+  deferMessage: (application, { decision }) =>
+    `Application #${application.loanApplicationId} ${DECISION_OUTCOMES[decision]}.`,
+  keyOf: (application) => application.loanApplicationId,
+}
 
 export function ReviewPage() {
   const { role } = useSession()
@@ -25,7 +39,9 @@ export function ReviewPage() {
     [],
   )
 
-  const review = useWriteAction(send, queue.reload)
+  const review = useWriteAction(send, queue.reload, DEFERRED)
+
+  const { pendingKeys } = useToast()
 
   return (
     <>
@@ -54,7 +70,7 @@ export function ReviewPage() {
         {(rows) => (
           <QueueTable
             shape="application"
-            rows={rows}
+            rows={rows.filter((row) => !pendingKeys.has(row.loanApplicationId))}
             actionLabel="Review"
             onAction={review.open}
           />

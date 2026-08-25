@@ -1,7 +1,7 @@
 export { default as ApplicationStatusBadge } from './components/ApplicationStatusBadge.jsx'
 export { default as DecisionModal } from './components/DecisionModal.jsx'
 export { default as ModalProgress } from './components/ModalProgress.jsx'
-export { DECISIONS, DECISION_GLYPHS, REQUIRES_REMARKS } from './decisions.js'
+export { DECISIONS, DECISION_GLYPHS, DECISION_OUTCOMES, REQUIRES_REMARKS } from './decisions.js'
 export { stagesFor, stagesForCode } from './progress.js'
 export { QUEUE_SORT_OPTIONS, RECORD_SORT_OPTIONS } from './sortOptions.js'
 export { useApplication, useMyApplications } from './hooks.js'

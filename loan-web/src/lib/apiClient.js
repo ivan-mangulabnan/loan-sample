@@ -6,6 +6,15 @@ export function setUnauthorizedHandler(handler) {
   onUnauthorized = handler
 }
 
+let isUnloading = false
+
+// Once the page is going away a normal fetch is cancelled with the document.
+// Flipping this makes the requests we still owe the server keepalive, so they
+// have a chance to land. One-way on purpose: there is no "unloading" to undo.
+export function setUnloading() {
+  isUnloading = true
+}
+
 export class ApiError extends Error {
   constructor(message, status, body) {
     super(message)
@@ -24,6 +33,7 @@ async function request(path, { method = 'GET', body, signal } = {}) {
     headers,
     credentials: 'include',
     body: body ? JSON.stringify(body) : undefined,
+    keepalive: isUnloading || undefined,
     signal,
   })
 

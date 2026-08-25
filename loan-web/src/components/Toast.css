@@ -26,6 +26,32 @@
   color: var(--text);
 }
 
+.toast__undo {
+  flex-shrink: 0;
+  padding: 0;
+  background: none;
+  border: none;
+  border-radius: var(--radius-sm);
+  color: var(--accent);
+  font-family: inherit;
+  font-size: var(--text-sm);
+  font-weight: var(--weight-medium);
+  cursor: pointer;
+}
+
+.toast__undo:hover {
+  text-decoration: underline;
+}
+
+.toast__undo:focus-visible {
+  outline: 2px solid var(--accent);
+  outline-offset: 2px;
+}
+
+.toast--danger .toast__undo {
+  color: var(--danger);
+}
+
 .toast__dismiss {
   flex-shrink: 0;
   width: var(--space-5);

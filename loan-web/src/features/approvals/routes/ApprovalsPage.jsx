@@ -1,13 +1,27 @@
 import { useCallback } from 'react'
 import Button from '../../../components/Button.jsx'
+import { useToast } from '../../../components/useToast.js'
 import { useListQuery } from '../../../hooks/useListQuery.js'
 import { useWriteAction } from '../../../hooks/useWriteAction.js'
 import { ListView, QueueTable, configFor, useRoleQueue } from '../../dashboard/index.js'
-import { DECISIONS, DecisionModal, QUEUE_SORT_OPTIONS } from '../../loan-applications/index.js'
+import {
+  DECISIONS,
+  DECISION_OUTCOMES,
+  DecisionModal,
+  QUEUE_SORT_OPTIONS,
+} from '../../loan-applications/index.js'
 import { useSession } from '../../auth/index.js'
 import { submitApproval } from '../api.js'
 
 const APPROVAL_DECISIONS = [DECISIONS.Approve, DECISIONS.Reject]
+
+// Approving sends the application on to release and rejecting is terminal; both
+// are held briefly behind an undo. See ReviewPage for the same arrangement.
+const DEFERRED = {
+  deferMessage: (application, { decision }) =>
+    `Application #${application.loanApplicationId} ${DECISION_OUTCOMES[decision]}.`,
+  keyOf: (application) => application.loanApplicationId,
+}
 
 export function ApprovalsPage() {
   const { role } = useSession()
@@ -25,7 +39,9 @@ export function ApprovalsPage() {
     [],
   )
 
-  const approval = useWriteAction(send, queue.reload)
+  const approval = useWriteAction(send, queue.reload, DEFERRED)
+
+  const { pendingKeys } = useToast()
 
   return (
     <>
@@ -54,7 +70,7 @@ export function ApprovalsPage() {
         {(rows) => (
           <QueueTable
             shape="application"
-            rows={rows}
+            rows={rows.filter((row) => !pendingKeys.has(row.loanApplicationId))}
             actionLabel="Decide"
             onAction={approval.open}
           />
