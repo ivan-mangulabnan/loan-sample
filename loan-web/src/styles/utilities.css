@@ -431,10 +431,16 @@
    grid-template-rows 0fr -> 1fr is what makes the *height* ease in too; without it
    the box fades in at full size and still shoves everything below it in one frame,
    which is the abrupt part. The inner wrapper needs min-height: 0 or the row cannot
-   collapse. */
+   collapse.
+
+   The caller sets --reveal-gap for the space above the block. It has to be a margin on
+   *this* wrapper — inside .reveal__inner it lands under overflow: hidden and is clipped
+   away, letting the block run into whatever sits above it. Being out here it must
+   animate with the row, or it holds an empty strip open while collapsed. */
 .reveal {
   display: grid;
   grid-template-rows: 0fr;
+  margin-top: 0;
   animation: reveal-open var(--motion-in) var(--ease-swap) forwards;
 }
 
@@ -474,16 +480,19 @@
 @keyframes reveal-open {
   to {
     grid-template-rows: 1fr;
+    margin-top: var(--reveal-gap, 0);
   }
 }
 
 @keyframes reveal-close {
   from {
     grid-template-rows: 1fr;
+    margin-top: var(--reveal-gap, 0);
   }
 
   to {
     grid-template-rows: 0fr;
+    margin-top: 0;
   }
 }
 
@@ -512,5 +521,16 @@
      strands at the keyframe's starting opacity. */
   .reveal__value {
     animation: none;
+  }
+
+  /* The gap is spacing, not motion: it must not depend on an animation reaching its
+     last frame. reveal-open still runs here and would set it anyway, but a later
+     change to this branch shouldn't be able to silently close the gap back up. */
+  .reveal {
+    margin-top: var(--reveal-gap, 0);
+  }
+
+  .reveal--leaving {
+    margin-top: 0;
   }
 }

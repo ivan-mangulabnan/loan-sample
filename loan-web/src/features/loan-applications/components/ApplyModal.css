@@ -9,11 +9,14 @@
   margin-top: var(--space-5);
 }
 
-/* The gap belongs to the .reveal wrapper, not the panel inside it: a margin within
-   the collapsing grid row does not collapse with the row, so it would hold a strip
-   of space open before the preview has appeared. */
+/* The gap belongs to the .reveal wrapper, not the panel inside it. On the panel it is
+   *inside* .reveal__inner's overflow: hidden, so it gets clipped away instead of
+   pushing the preview clear of the select above — the two ran together.
+
+   On the wrapper it has to collapse with the row, or it holds a strip of space open
+   before the preview exists. --reveal-gap is what .reveal animates; see utilities.css. */
 .apply__preview-slot {
-  margin-top: var(--space-5);
+  --reveal-gap: var(--space-5);
 }
 
 .apply__preview {

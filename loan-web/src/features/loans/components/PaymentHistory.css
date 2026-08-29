@@ -29,6 +29,23 @@
   background: var(--surface-row-alt);
 }
 
+/* This table had zebra but no hover at all — the one table where tracking a row across
+   columns had no help. Rows here are not clickable, so it gets the tracking highlight
+   without the accent edge the actionable tables carry. */
+.paylist__table tbody tr:hover td {
+  background: var(--surface-row-hover);
+}
+
+.paylist__table tbody tr td {
+  transition: background var(--motion-out) var(--ease-swap);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .paylist__table tbody tr td {
+    transition: none;
+  }
+}
+
 .paylist__num-head,
 .paylist__amount {
   text-align: right;

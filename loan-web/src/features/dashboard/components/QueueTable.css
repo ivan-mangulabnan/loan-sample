@@ -29,8 +29,10 @@
   background: var(--surface-row-alt);
 }
 
+/* Beats both zebra bands rather than sitting between them — see --surface-row-hover.
+   Listed after the :nth-child rule so it wins at equal specificity on source order. */
 .queue__table tbody tr:hover td {
-  background: var(--surface-card);
+  background: var(--surface-row-hover);
 }
 
 .queue__table .queue__ref {
@@ -57,4 +59,20 @@
 
 .queue__row--actionable {
   cursor: pointer;
+}
+
+/* See LoanTable.css — accent edge on clickable rows only, as an inset shadow so it
+   costs no layout. */
+.queue__row--actionable:hover td:first-child {
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+
+.queue__table tbody tr td {
+  transition: background var(--motion-out) var(--ease-swap);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .queue__table tbody tr td {
+    transition: none;
+  }
 }

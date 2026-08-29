@@ -200,9 +200,9 @@ function ResubmitModal({
       )}
 
       {showPreview && heldPreview !== null && (
-        <div className={revealClass}>
+        <div className={`resub__preview-slot ${revealClass}`}>
           <div className="reveal__inner">
-            <p className="resub__preview resub__preview-slot">
+            <p className="resub__preview">
               {/* keyed on the value so the settle animation re-runs when it changes */}
               <span key={heldPreview} className="resub__preview-figure reveal__value">
                 {currency.format(heldPreview)}

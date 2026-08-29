@@ -6,6 +6,10 @@
   --surface-sunken: #191f23;
   --surface-track: #1d2427;
   --surface-row-alt: #1f272b;
+  /* Hover has to read as a lift on *both* zebra bands, so it sits above the lighter of
+     the two rather than between them — --surface-card (#1a2124) was darker than
+     --surface-row-alt, which made hovering a striped row look like it dimmed. */
+  --surface-row-hover: #2b3940;
 
   --surface-control: #252e33;
   --surface-control-hover: #2e3a40;

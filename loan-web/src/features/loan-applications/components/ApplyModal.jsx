@@ -149,9 +149,9 @@ function ApplyModal({ open = true, onSubmit, onClose, isSubmitting = false, erro
       )}
 
       {showPreview && heldPreview !== null && (
-        <div className={revealClass}>
+        <div className={`apply__preview-slot ${revealClass}`}>
           <div className="reveal__inner">
-            <p className="apply__preview apply__preview-slot">
+            <p className="apply__preview">
               {/* keyed on the value so the settle animation re-runs when it changes */}
               <span key={heldPreview} className="apply__preview-figure reveal__value">
                 {currency.format(heldPreview)}

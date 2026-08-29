@@ -29,8 +29,20 @@
   background: var(--surface-row-alt);
 }
 
+/* Beats both zebra bands rather than sitting between them — see --surface-row-hover.
+   Listed after the :nth-child rule so it wins at equal specificity on source order. */
 .txn__table tbody tr:hover td {
-  background: var(--surface-card);
+  background: var(--surface-row-hover);
+}
+
+.txn__table tbody tr td {
+  transition: background var(--motion-out) var(--ease-swap);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .txn__table tbody tr td {
+    transition: none;
+  }
 }
 
 .txn__table .txn__ref {

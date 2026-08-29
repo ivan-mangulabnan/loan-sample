@@ -29,8 +29,10 @@
   background: var(--surface-row-alt);
 }
 
+/* Beats both zebra bands rather than sitting between them — see --surface-row-hover.
+   Listed after the :nth-child rule so it wins at equal specificity on source order. */
 .loans__table tbody tr:hover td {
-  background: var(--surface-card);
+  background: var(--surface-row-hover);
 }
 
 .loans__table .loans__ref {
@@ -69,4 +71,24 @@
 
 .loans__row--actionable {
   cursor: pointer;
+}
+
+/* An accent edge on the clickable rows only, so hover distinguishes "this opens
+   something" from the plain row-tracking highlight the read-only tables use.
+
+   inset box-shadow rather than a border-left: it paints inside the cell box and so
+   costs no layout, where a border would shift every column by 2px on hover. Only the
+   first cell carries it, or the bar would repeat at each column edge. */
+.loans__row--actionable:hover td:first-child {
+  box-shadow: inset 2px 0 0 var(--accent);
+}
+
+.loans__table tbody tr td {
+  transition: background var(--motion-out) var(--ease-swap);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  .loans__table tbody tr td {
+    transition: none;
+  }
 }

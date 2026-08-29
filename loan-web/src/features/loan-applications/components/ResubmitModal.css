@@ -38,10 +38,10 @@
   margin-top: var(--space-4);
 }
 
-/* See ApplyModal.css — the gap sits on the .reveal wrapper so it does not hold
-   space open before the preview exists. */
+/* See ApplyModal.css — the gap sits on the .reveal wrapper, and animates with the row
+   so it neither gets clipped nor holds space open before the preview exists. */
 .resub__preview-slot {
-  margin-top: var(--space-4);
+  --reveal-gap: var(--space-4);
 }
 
 .resub__preview {
