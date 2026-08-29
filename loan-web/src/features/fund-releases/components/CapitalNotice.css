@@ -1,0 +1,22 @@
+/* Deliberately not a Callout. A Callout is a full block — --space-6 padding and
+   --text-xl text — and .main is overflow-y: auto, so adding one above the queue is
+   what puts a scrollbar on the page. This states the same condition in one line at
+   body size, and flex-shrink: 0 keeps it out of .list__rows' scroll area. */
+.capnotice {
+  display: flex;
+  align-items: baseline;
+  flex-wrap: wrap;
+  gap: var(--space-2) var(--space-3);
+  flex-shrink: 0;
+  padding: var(--space-3) var(--space-4);
+  background: var(--warning-tint);
+  border-radius: var(--radius-md);
+  font-size: var(--text-sm);
+  line-height: 1.5;
+  color: var(--text);
+}
+
+.capnotice__figure {
+  color: var(--warning);
+  font-weight: var(--weight-bold);
+}

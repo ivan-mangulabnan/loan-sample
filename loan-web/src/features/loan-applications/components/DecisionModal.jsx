@@ -125,7 +125,7 @@ function DecisionModal({
         ref={remarksRef}
         id="decision-remarks"
         className={`field field--input decision__remarks${
-          missingRemarks ? ' decision__remarks--missing' : ''
+          missingRemarks ? ' field--invalid' : ''
         }`}
         rows={4}
         value={remarks}

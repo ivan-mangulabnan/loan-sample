@@ -53,16 +53,6 @@
   line-height: 1.5;
 }
 
-/* The missing-remarks message is a toast (rule 12b), so the field itself has to
-   carry the emphasis — a toast names the problem, this points at it. The field is
-   focused in the same gesture, so this is the accent focus ring recoloured rather
-   than a second mark competing with it. */
-.decision__remarks--missing:focus-visible,
-.decision__remarks--missing {
-  outline: 2px solid var(--danger);
-  outline-offset: 2px;
-}
-
 .decision__error {
   margin: var(--space-4) 0 0;
   color: var(--danger);

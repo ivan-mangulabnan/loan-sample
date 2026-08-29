@@ -58,6 +58,7 @@ export function LoginPage() {
       <form className="login__form" onSubmit={handleSubmit}>
         <label className="login__label" htmlFor="tenantId">
           Tenant
+          <span className="req" aria-hidden="true" />
         </label>
         <select
           id="tenantId"
@@ -71,6 +72,7 @@ export function LoginPage() {
 
         <label className="login__label" htmlFor="userName">
           Username
+          <span className="req" aria-hidden="true" />
         </label>
         <input
           id="userName"
@@ -83,6 +85,7 @@ export function LoginPage() {
 
         <label className="login__label" htmlFor="password">
           Password
+          <span className="req" aria-hidden="true" />
         </label>
         <input
           id="password"

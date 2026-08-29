@@ -1,9 +1,11 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import Button from '../../../components/Button.jsx'
 import Stepper from '../../../components/Stepper.jsx'
+import { useToast } from '../../../components/useToast.js'
 import AuthScreen from '../components/AuthScreen.jsx'
 import { messageFrom } from '../../../lib/apiError.js'
+import { birthdateProblem, earliestBirthdate, latestBirthdate } from '../../../lib/dates.js'
 import { register } from '../api.js'
 import { useSession } from '../hooks.js'
 import './RegisterPage.css'
@@ -31,18 +33,31 @@ export function RegisterPage() {
   const { isAuthenticated, isLoading } = useSession()
   const navigate = useNavigate()
 
+  const toast = useToast()
+
   const [step, setStep] = useState(1)
   const [form, setForm] = useState(EMPTY)
   const [error, setError] = useState(null)
+  const [invalidField, setInvalidField] = useState(null)
   const [isSubmitting, setIsSubmitting] = useState(false)
 
+  const birthdateRef = useRef(null)
+
   function update(field) {
-    return (event) => setForm((prev) => ({ ...prev, [field]: event.target.value }))
+    return (event) => {
+      setForm((prev) => ({ ...prev, [field]: event.target.value }))
+      if (invalidField === field) setInvalidField(null)
+    }
   }
 
+  // A server error sends the reader back to step 1; a client-side one is raised against
+  // the field in front of them. Marking whichever step actually failed — the old rule
+  // hard-coded step 1, so a failure on "About you" drew no cross at all.
   const stepStatus = (n) => {
-    if (step === n) return error && n === 1 ? 'invalid' : isSubmitting ? 'active' : 'waiting'
-    return step > n ? 'done' : 'todo'
+    if (step !== n) return step > n ? 'done' : 'todo'
+    if ((error || invalidField) && step === n) return 'invalid'
+
+    return isSubmitting ? 'active' : 'waiting'
   }
 
   const steps = STEPS.map((label, index) => ({
@@ -64,6 +79,20 @@ export function RegisterPage() {
   async function handleSubmit(event) {
     event.preventDefault()
     setError(null)
+
+    // min/max on <input type="date"> only greys the picker out — a typed or pasted
+    // value still lands in state, so the rule has to be enforced here as well.
+    const problem = birthdateProblem(form.birthdate)
+
+    if (problem) {
+      setInvalidField('birthdate')
+      birthdateRef.current?.focus()
+      toast.push({ message: problem, tone: 'danger' })
+
+      return
+    }
+
+    setInvalidField(null)
     setIsSubmitting(true)
 
     try {
@@ -109,6 +138,7 @@ export function RegisterPage() {
         <form className="register__form" onSubmit={handleNext}>
           <label className="register__label" htmlFor="tenantId">
             Tenant
+            <span className="req" aria-hidden="true" />
           </label>
           <select
             id="tenantId"
@@ -122,6 +152,7 @@ export function RegisterPage() {
 
           <label className="register__label" htmlFor="userName">
             Username
+            <span className="req" aria-hidden="true" />
           </label>
           <input
             id="userName"
@@ -134,6 +165,7 @@ export function RegisterPage() {
 
           <label className="register__label" htmlFor="password">
             Password
+            <span className="req" aria-hidden="true" />
           </label>
           <input
             id="password"
@@ -159,6 +191,7 @@ export function RegisterPage() {
         <form className="register__form" onSubmit={handleSubmit}>
           <label className="register__label" htmlFor="firstName">
             First name
+            <span className="req" aria-hidden="true" />
           </label>
           <input
             id="firstName"
@@ -170,7 +203,7 @@ export function RegisterPage() {
           />
 
           <label className="register__label" htmlFor="middleName">
-            Middle name <span className="register__optional">optional</span>
+            Middle name <span className="register__optional">(Optional)</span>
           </label>
           <input
             id="middleName"
@@ -182,6 +215,7 @@ export function RegisterPage() {
 
           <label className="register__label" htmlFor="lastName">
             Last name
+            <span className="req" aria-hidden="true" />
           </label>
           <input
             id="lastName"
@@ -194,13 +228,20 @@ export function RegisterPage() {
 
           <label className="register__label" htmlFor="birthdate">
             Date of birth
+            <span className="req" aria-hidden="true" />
           </label>
           <input
+            ref={birthdateRef}
             id="birthdate"
-            className="field field--input"
+            className={`field field--input${
+              invalidField === 'birthdate' ? ' field--invalid' : ''
+            }`}
             type="date"
+            min={earliestBirthdate()}
+            max={latestBirthdate()}
             value={form.birthdate}
             autoComplete="bday"
+            aria-invalid={invalidField === 'birthdate' || undefined}
             onChange={update('birthdate')}
             required
           />

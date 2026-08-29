@@ -22,7 +22,15 @@ const date = new Intl.DateTimeFormat(undefined, {
   year: 'numeric',
 })
 
-function ReleaseModal({ release, onSubmit, onClose, isSubmitting = false, error = null }) {
+function ReleaseModal({
+  release,
+  balance,
+  releaseBlocked = false,
+  onSubmit,
+  onClose,
+  isSubmitting = false,
+  error = null,
+}) {
   const [remarks, setRemarks] = useState('')
   const [pending, setPending] = useState(null)
   const [missingRemarks, setMissingRemarks] = useState(false)
@@ -64,13 +72,21 @@ function ReleaseModal({ release, onSubmit, onClose, isSubmitting = false, error 
             onClick={() => handle(DECISIONS.Reject)}
             disabled={isSubmitting}
           />
+          {/* Rejecting moves no money, so it stays enabled while the ledger is short —
+              only the payout is blocked. Uses the native title tooltip rather than
+              IconButton's hover label, which is positioned for the button row. */}
           <IconButton
             glyph={DECISION_GLYPHS[DECISIONS.Approve]}
             label="Release funds"
             tone="accent"
             busy={isSubmitting && pending === DECISIONS.Approve}
             onClick={() => handle(DECISIONS.Approve)}
-            disabled={isSubmitting}
+            disabled={isSubmitting || releaseBlocked}
+            title={
+              releaseBlocked
+                ? `Capital on hand is ${currency.format(balance)} — not enough to release ${currency.format(release.principalAmount)}.`
+                : undefined
+            }
           />
         </>
       }
@@ -86,7 +102,17 @@ function ReleaseModal({ release, onSubmit, onClose, isSubmitting = false, error 
       <dl className="release__facts">
         <div className="release__fact release__fact--lead">
           <dt>Principal</dt>
-          <dd className="release__amount">{currency.format(release.principalAmount)}</dd>
+          <dd className="release__amount">
+            {currency.format(release.principalAmount)}
+            {/* Sits inside the existing fact row rather than as its own block: the
+                modal body is overflow-y: auto and already dense, so a new block is
+                what would put a scrollbar in it. */}
+            {releaseBlocked && (
+              <span className="release__short">
+                Capital on hand is only {currency.format(balance)}
+              </span>
+            )}
+          </dd>
         </div>
         <div className="release__fact">
           <dt>Borrower</dt>
@@ -118,7 +144,7 @@ function ReleaseModal({ release, onSubmit, onClose, isSubmitting = false, error 
         ref={remarksRef}
         id="release-remarks"
         className={`field field--input release__remarks${
-          missingRemarks ? ' release__remarks--missing' : ''
+          missingRemarks ? ' field--invalid' : ''
         }`}
         rows={3}
         value={remarks}

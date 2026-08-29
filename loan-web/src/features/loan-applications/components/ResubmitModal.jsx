@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import IconButton from '../../../components/IconButton.jsx'
 import Modal from '../../../components/Modal.jsx'
+import { useToast } from '../../../components/useToast.js'
 import ModalProgress from './ModalProgress.jsx'
 import { DECISION_GLYPHS, DECISIONS } from '../decisions.js'
 import { usePaymentPlans } from '../hooks.js'
@@ -39,7 +40,14 @@ function ResubmitModal({
   const [planId, setPlanId] = useState(
     String(application?.paymentPlan?.paymentPlanId ?? ''),
   )
-  const [problem, setProblem] = useState(null)
+  // Which control the toast is about — two fields here, so the ring has to know
+  // which one to mark.
+  const [invalidField, setInvalidField] = useState(null)
+
+  const amountRef = useRef(null)
+  const planRef = useRef(null)
+
+  const toast = useToast()
 
   if (!application) return null
 
@@ -49,18 +57,19 @@ function ResubmitModal({
   const preview = repaymentPreview(parsed, selected)
   const remarks = latestRemarks(application)
 
+  function fail(field, ref, message) {
+    setInvalidField(field)
+    ref.current?.focus()
+    toast.push({ message, tone: 'danger' })
+  }
+
   function handleSubmit() {
-    if (!amount.trim() || Number.isNaN(parsed) || parsed <= 0) {
-      setProblem('Enter how much you want to borrow.')
-      return
-    }
+    if (!amount.trim() || Number.isNaN(parsed) || parsed <= 0)
+      return fail('amount', amountRef, 'Enter how much you want to borrow.')
 
-    if (!selected) {
-      setProblem('Choose a payment plan.')
-      return
-    }
+    if (!selected) return fail('plan', planRef, 'Choose a payment plan.')
 
-    setProblem(null)
+    setInvalidField(null)
     onSubmit({ amount: parsed, paymentPlanId: selected.paymentPlanId })
   }
 
@@ -106,23 +115,29 @@ function ResubmitModal({
 
       <label className="resub__label" htmlFor="resub-amount">
         How much do you want to borrow?
+        <span className="req" aria-hidden="true" />
       </label>
       <input
+        ref={amountRef}
         id="resub-amount"
-        className="field field--input"
+        className={`field field--input${
+          invalidField === 'amount' ? ' field--invalid' : ''
+        }`}
         type="text"
         inputMode="decimal"
         autoComplete="off"
         value={amount}
         placeholder="0.00"
+        aria-invalid={invalidField === 'amount' || undefined}
         onChange={(event) => {
           setAmount(event.target.value)
-          if (problem) setProblem(null)
+          if (invalidField === 'amount') setInvalidField(null)
         }}
       />
 
       <label className="resub__label resub__label--spaced" htmlFor="resub-plan">
         Payment plan
+        <span className="req" aria-hidden="true" />
       </label>
       {plans.error ? (
         <p className="resub__error" role="alert">
@@ -130,13 +145,17 @@ function ResubmitModal({
         </p>
       ) : (
         <select
+          ref={planRef}
           id="resub-plan"
-          className="field field--input"
+          className={`field field--input${
+            invalidField === 'plan' ? ' field--invalid' : ''
+          }`}
           value={planId}
           disabled={plans.isLoading}
+          aria-invalid={invalidField === 'plan' || undefined}
           onChange={(event) => {
             setPlanId(event.target.value)
-            if (problem) setProblem(null)
+            if (invalidField === 'plan') setInvalidField(null)
           }}
         >
           <option value="">{plans.isLoading ? 'Loading plans…' : 'Choose a plan'}</option>
@@ -154,12 +173,6 @@ function ResubmitModal({
           <span className="resub__preview-note">
             to repay over {selected.numberOfMonths} months · indicative until approved
           </span>
-        </p>
-      )}
-
-      {problem && (
-        <p className="resub__error" role="alert">
-          {problem}
         </p>
       )}
 

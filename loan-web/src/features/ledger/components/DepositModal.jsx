@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import Button from '../../../components/Button.jsx'
 import Modal from '../../../components/Modal.jsx'
+import { useToast } from '../../../components/useToast.js'
 import './DepositModal.css'
 
 const currency = new Intl.NumberFormat(undefined, {
@@ -13,6 +14,10 @@ function DepositModal({ open, balance, onSubmit, onClose, isSubmitting = false, 
   const [amount, setAmount] = useState('')
   const [invalid, setInvalid] = useState(false)
 
+  const amountRef = useRef(null)
+
+  const toast = useToast()
+
   if (!open) return null
 
   const parsed = Number(amount)
@@ -21,6 +26,9 @@ function DepositModal({ open, balance, onSubmit, onClose, isSubmitting = false, 
   function handleSubmit() {
     if (!isPositive) {
       setInvalid(true)
+      amountRef.current?.focus()
+      toast.push({ message: 'Enter an amount greater than zero.', tone: 'danger' })
+
       return
     }
 
@@ -57,27 +65,24 @@ function DepositModal({ open, balance, onSubmit, onClose, isSubmitting = false, 
 
       <label className="deposit__label" htmlFor="deposit-amount">
         Amount
+        <span className="req" aria-hidden="true" />
       </label>
       <input
+        ref={amountRef}
         id="deposit-amount"
         type="number"
         inputMode="decimal"
         min="0.01"
         step="0.01"
-        className="field field--input"
+        className={`field field--input${invalid ? ' field--invalid' : ''}`}
         value={amount}
         placeholder="0.00"
+        aria-invalid={invalid || undefined}
         onChange={(event) => {
           setAmount(event.target.value)
           if (invalid) setInvalid(false)
         }}
       />
-
-      {invalid && (
-        <p className="deposit__error" role="alert">
-          Enter an amount greater than zero.
-        </p>
-      )}
 
       {error && (
         <p className="deposit__error" role="alert">

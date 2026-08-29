@@ -385,6 +385,33 @@
   outline-offset: 2px;
 }
 
+/* The invalid counterpart of the ring above: the same outline, recoloured. Client-side
+   validation raises a toast and turns this on (rule 12b) — the toast names the problem,
+   the ring points at it, and there is no inline sentence saying it a third time.
+
+   Recolour, never add a second mark: a box-shadow ring over a --danger-tint fill was
+   tried and rejected — it reads as a filled/disabled field and sits *alongside* the
+   accent outline instead of replacing it, so the field wears two rings at once.
+
+   :focus-visible is listed first and explicitly because it must beat
+   .field--input:focus-visible, and at equal (0,1,0) specificity it does that only on
+   source order. Keeping both rules in this one file is what makes that safe — as two
+   stylesheets it was rule 12c's trap in a different costume. */
+.field--invalid:focus-visible,
+.field--invalid {
+  outline: 2px solid var(--danger);
+  outline-offset: 2px;
+}
+
+/* Marks a required field, appended inside its <label>. Decorative by design: the glyph
+   is aria-hidden and the control's own `required` attribute is what reaches a screen
+   reader, which would otherwise announce "star" on every field in the form. */
+.req::after {
+  content: '*';
+  margin-left: var(--space-1);
+  color: var(--danger);
+}
+
 .session-splash {
   min-height: 100svh;
   background: var(--surface-page);

@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import Button from '../../../components/Button.jsx'
 import Modal from '../../../components/Modal.jsx'
+import { useToast } from '../../../components/useToast.js'
 import './PayModal.css'
 
 const currency = new Intl.NumberFormat(undefined, {
@@ -11,30 +12,39 @@ const currency = new Intl.NumberFormat(undefined, {
 
 function PayModal({ loan, onSubmit, onClose, isSubmitting = false, error = null }) {
   const [amount, setAmount] = useState('')
-  const [problem, setProblem] = useState(null)
+  const [invalid, setInvalid] = useState(false)
+
+  const amountRef = useRef(null)
+
+  const toast = useToast()
 
   if (!loan) return null
 
   const parsed = Number.parseFloat(amount)
   const balance = loan.balance
 
+  // Every rule here points at the same input, so the ring is a plain flag — only the
+  // sentence differs.
+  function problemWith(value) {
+    if (!value.trim() || Number.isNaN(parsed)) return 'Enter the amount you want to pay.'
+    if (parsed <= 0) return 'The amount has to be more than zero.'
+    if (parsed > balance) return `That is more than the ${currency.format(balance)} outstanding.`
+
+    return null
+  }
+
   function handleSubmit() {
-    if (!amount.trim() || Number.isNaN(parsed)) {
-      setProblem('Enter the amount you want to pay.')
+    const problem = problemWith(amount)
+
+    if (problem) {
+      setInvalid(true)
+      amountRef.current?.focus()
+      toast.push({ message: problem, tone: 'danger' })
+
       return
     }
 
-    if (parsed <= 0) {
-      setProblem('The amount has to be more than zero.')
-      return
-    }
-
-    if (parsed > balance) {
-      setProblem(`That is more than the ${currency.format(balance)} outstanding.`)
-      return
-    }
-
-    setProblem(null)
+    setInvalid(false)
     onSubmit({ amount: parsed })
   }
 
@@ -61,18 +71,21 @@ function PayModal({ loan, onSubmit, onClose, isSubmitting = false, error = null 
 
       <label className="pay__label" htmlFor="pay-amount">
         Amount
+        <span className="req" aria-hidden="true" />
       </label>
       <input
+        ref={amountRef}
         id="pay-amount"
-        className="field field--input"
+        className={`field field--input${invalid ? ' field--invalid' : ''}`}
         type="text"
         inputMode="decimal"
         autoComplete="off"
         value={amount}
         placeholder="0.00"
+        aria-invalid={invalid || undefined}
         onChange={(event) => {
           setAmount(event.target.value)
-          if (problem) setProblem(null)
+          if (invalid) setInvalid(false)
         }}
       />
 
@@ -81,17 +94,11 @@ function PayModal({ loan, onSubmit, onClose, isSubmitting = false, error = null 
         className="pay__all"
         onClick={() => {
           setAmount(String(balance))
-          setProblem(null)
+          setInvalid(false)
         }}
       >
         Pay it all ({currency.format(balance)})
       </button>
-
-      {problem && (
-        <p className="pay__error" role="alert">
-          {problem}
-        </p>
-      )}
 
       {error && (
         <p className="pay__error" role="alert">

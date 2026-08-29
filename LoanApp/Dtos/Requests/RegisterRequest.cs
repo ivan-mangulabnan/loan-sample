@@ -1,4 +1,5 @@
 using System.ComponentModel.DataAnnotations;
+using Validation;
 
 namespace Dtos.Requests;
 
@@ -27,5 +28,7 @@ public class RegisterRequest
   [RegularExpression(NamePattern, ErrorMessage = NameError)]
   public string LastName { get; set; } = null!;
 
+  [Required]
+  [Birthdate(ErrorMessage = "You have to be at least 18 to open an account.")]
   public DateTime Birthdate { get; set; }
 }

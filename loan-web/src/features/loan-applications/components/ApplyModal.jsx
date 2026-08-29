@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import Button from '../../../components/Button.jsx'
 import Modal from '../../../components/Modal.jsx'
+import { useToast } from '../../../components/useToast.js'
 import { usePaymentPlans } from '../hooks.js'
 import { repaymentPreview } from '../repayment.js'
 import './ApplyModal.css'
@@ -16,25 +17,33 @@ function ApplyModal({ onSubmit, onClose, isSubmitting = false, error = null }) {
 
   const [amount, setAmount] = useState('')
   const [planId, setPlanId] = useState('')
-  const [problem, setProblem] = useState(null)
+  // Which control the toast is about — two fields here, so the ring has to know
+  // which one to mark.
+  const [invalidField, setInvalidField] = useState(null)
+
+  const amountRef = useRef(null)
+  const planRef = useRef(null)
+
+  const toast = useToast()
 
   const parsed = Number.parseFloat(amount)
   const options = plans.data ?? []
   const selected = options.find((plan) => String(plan.paymentPlanId) === planId) ?? null
   const preview = repaymentPreview(parsed, selected)
 
+  function fail(field, ref, message) {
+    setInvalidField(field)
+    ref.current?.focus()
+    toast.push({ message, tone: 'danger' })
+  }
+
   function handleSubmit() {
-    if (!amount.trim() || Number.isNaN(parsed) || parsed <= 0) {
-      setProblem('Enter how much you want to borrow.')
-      return
-    }
+    if (!amount.trim() || Number.isNaN(parsed) || parsed <= 0)
+      return fail('amount', amountRef, 'Enter how much you want to borrow.')
 
-    if (!selected) {
-      setProblem('Choose a payment plan.')
-      return
-    }
+    if (!selected) return fail('plan', planRef, 'Choose a payment plan.')
 
-    setProblem(null)
+    setInvalidField(null)
     onSubmit({ amount: parsed, paymentPlanId: selected.paymentPlanId })
   }
 
@@ -60,23 +69,29 @@ function ApplyModal({ onSubmit, onClose, isSubmitting = false, error = null }) {
     >
       <label className="apply__label" htmlFor="apply-amount">
         How much do you want to borrow?
+        <span className="req" aria-hidden="true" />
       </label>
       <input
+        ref={amountRef}
         id="apply-amount"
-        className="field field--input"
+        className={`field field--input${
+          invalidField === 'amount' ? ' field--invalid' : ''
+        }`}
         type="text"
         inputMode="decimal"
         autoComplete="off"
         value={amount}
         placeholder="0.00"
+        aria-invalid={invalidField === 'amount' || undefined}
         onChange={(event) => {
           setAmount(event.target.value)
-          if (problem) setProblem(null)
+          if (invalidField === 'amount') setInvalidField(null)
         }}
       />
 
       <label className="apply__label apply__label--spaced" htmlFor="apply-plan">
         Payment plan
+        <span className="req" aria-hidden="true" />
       </label>
       {plans.error ? (
         <p className="apply__error" role="alert">
@@ -84,13 +99,17 @@ function ApplyModal({ onSubmit, onClose, isSubmitting = false, error = null }) {
         </p>
       ) : (
         <select
+          ref={planRef}
           id="apply-plan"
-          className="field field--input"
+          className={`field field--input${
+            invalidField === 'plan' ? ' field--invalid' : ''
+          }`}
           value={planId}
           disabled={plans.isLoading}
+          aria-invalid={invalidField === 'plan' || undefined}
           onChange={(event) => {
             setPlanId(event.target.value)
-            if (problem) setProblem(null)
+            if (invalidField === 'plan') setInvalidField(null)
           }}
         >
           <option value="">
@@ -110,12 +129,6 @@ function ApplyModal({ onSubmit, onClose, isSubmitting = false, error = null }) {
           <span className="apply__preview-note">
             to repay over {selected.numberOfMonths} months · indicative until approved
           </span>
-        </p>
-      )}
-
-      {problem && (
-        <p className="apply__error" role="alert">
-          {problem}
         </p>
       )}
 
