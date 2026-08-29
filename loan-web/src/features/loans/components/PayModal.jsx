@@ -1,7 +1,12 @@
-import { useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import Button from '../../../components/Button.jsx'
 import Modal from '../../../components/Modal.jsx'
 import { useToast } from '../../../components/useToast.js'
+import {
+  useClosingProp,
+  useClosingValue,
+  useResetOnOpen,
+} from '../../../hooks/useClosingValue.js'
 import './PayModal.css'
 
 const currency = new Intl.NumberFormat(undefined, {
@@ -18,10 +23,28 @@ function PayModal({ loan, onSubmit, onClose, isSubmitting = false, error = null 
 
   const toast = useToast()
 
-  if (!loan) return null
+  // Held through the exit so the dialog still has something to render while it
+  // animates out — see useClosingValue.
+  const shown = useClosingValue(loan)
+
+  // Clear the field every time the modal opens — including on the same loan, which
+  // is exactly the case that kept showing the amount just posted.
+  useResetOnOpen(
+    Boolean(loan),
+    useCallback(() => {
+      setAmount('')
+      setInvalid(false)
+    }, []),
+  )
+
+  // Held so the button does not flip from "Posting…" back to "Post payment" while
+  // the dialog fades: the write clears the target and resets isSubmitting together.
+  const busy = useClosingProp(isSubmitting, Boolean(loan))
+
+  if (!shown) return null
 
   const parsed = Number.parseFloat(amount)
-  const balance = loan.balance
+  const balance = shown.balance
 
   // Every rule here points at the same input, so the ring is a plain flag — only the
   // sentence differs.
@@ -50,16 +73,16 @@ function PayModal({ loan, onSubmit, onClose, isSubmitting = false, error = null 
 
   return (
     <Modal
-      open
-      title={`Pay loan #${loan.loanId}`}
+      open={Boolean(loan)}
+      title={`Pay loan #${shown.loanId}`}
       onClose={onClose}
       footer={
         <>
-          <Button variant="ghost" onClick={onClose} disabled={isSubmitting}>
+          <Button variant="ghost" onClick={onClose} disabled={busy}>
             Cancel
           </Button>
-          <Button variant="accent" onClick={handleSubmit} disabled={isSubmitting}>
-            {isSubmitting ? 'Posting…' : 'Post payment'}
+          <Button variant="accent" onClick={handleSubmit} disabled={busy}>
+            {busy ? 'Posting…' : 'Post payment'}
           </Button>
         </>
       }

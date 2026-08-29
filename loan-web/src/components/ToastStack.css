@@ -14,6 +14,12 @@
   pointer-events: auto;
 }
 
+/* Beats .toaststack > * — a toast already playing its exit must not swallow a click
+   meant for whatever is underneath, and its own Undo is gone by then anyway. */
+.toaststack > .toast--leaving {
+  pointer-events: none;
+}
+
 /* Portalled into an open <dialog> so it clears the top layer (see ToastContext).
    The dialog is a narrow, centred, transparent box — the stack must ignore that
    box entirely and keep addressing the viewport as it does anywhere else. */

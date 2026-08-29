@@ -100,7 +100,7 @@ export function FundReleasesPage() {
       </ListView>
 
       <ReleaseModal
-        key={release.target?.loanApprovalId}
+        
         release={release.target}
         balance={balance}
         releaseBlocked={releaseBlocked}

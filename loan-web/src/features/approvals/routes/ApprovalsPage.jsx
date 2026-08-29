@@ -76,7 +76,7 @@ export function ApprovalsPage() {
       </ListView>
 
       <DecisionModal
-        key={approval.target?.loanApplicationId}
+        
         application={approval.target}
         decisions={APPROVAL_DECISIONS}
         title="Approval"

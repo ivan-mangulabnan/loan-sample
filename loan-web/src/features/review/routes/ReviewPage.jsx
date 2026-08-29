@@ -76,7 +76,7 @@ export function ReviewPage() {
       </ListView>
 
       <DecisionModal
-        key={review.target?.loanApplicationId}
+        
         application={review.target}
         decisions={REVIEW_DECISIONS}
         title="Review"

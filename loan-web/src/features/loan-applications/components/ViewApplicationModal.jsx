@@ -4,6 +4,7 @@ import Button from '../../../components/Button.jsx'
 import Modal from '../../../components/Modal.jsx'
 import ModalProgress from './ModalProgress.jsx'
 import { actionFor, BORROWER_ACTIONS } from '../actions.js'
+import { useClosingValue } from '../../../hooks/useClosingValue.js'
 import { useApplication } from '../hooks.js'
 import './ViewApplicationModal.css'
 
@@ -20,23 +21,27 @@ const date = new Intl.DateTimeFormat(undefined, {
 })
 
 function ViewApplicationModal({ application, onClose, onAct }) {
-  const full = useApplication(application?.loanApplicationId)
+  // Held through the exit so the dialog still has something to render while it
+  // animates out — and so the detail fetch keeps its id rather than going undefined.
+  const shown = useClosingValue(application)
 
-  if (!application) return null
+  const full = useApplication(shown?.loanApplicationId)
 
-  const app = full.data ?? application
+  if (!shown) return null
+
+  const app = full.data ?? shown
   const approval = (app.approvals ?? []).at(-1)
 
   const canResubmit = onAct && actionFor(app) === BORROWER_ACTIONS.Resubmit
 
   return (
     <Modal
-      open
+      open={Boolean(application)}
       title={`Application #${app.loanApplicationId}`}
       onClose={onClose}
       footer={
         canResubmit ? (
-          <Button variant="accent" onClick={() => onAct(application)}>
+          <Button variant="accent" onClick={() => onAct(shown)}>
             Resubmit
           </Button>
         ) : null

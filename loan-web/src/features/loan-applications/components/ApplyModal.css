@@ -9,11 +9,18 @@
   margin-top: var(--space-5);
 }
 
+/* The gap belongs to the .reveal wrapper, not the panel inside it: a margin within
+   the collapsing grid row does not collapse with the row, so it would hold a strip
+   of space open before the preview has appeared. */
+.apply__preview-slot {
+  margin-top: var(--space-5);
+}
+
 .apply__preview {
   display: flex;
   flex-direction: column;
   gap: var(--space-1);
-  margin: var(--space-5) 0 0;
+  margin: 0;
   padding: var(--space-4);
   background: var(--surface-sunken);
   border-radius: var(--radius-md);

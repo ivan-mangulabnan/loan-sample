@@ -42,13 +42,10 @@ function AllApplications() {
         )}
       </ListView>
 
-      {viewing && (
-        <ViewApplicationModal
-          key={viewing.loanApplicationId}
-          application={viewing}
-          onClose={() => setViewing(null)}
-        />
-      )}
+      <ViewApplicationModal
+        application={viewing}
+        onClose={() => setViewing(null)}
+      />
     </>
   )
 }

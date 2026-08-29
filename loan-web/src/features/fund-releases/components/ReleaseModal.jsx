@@ -1,7 +1,8 @@
-import { useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import IconButton from '../../../components/IconButton.jsx'
 import Modal from '../../../components/Modal.jsx'
 import { useToast } from '../../../components/useToast.js'
+import { useClosingProp, useClosingValue, useResetOnOpen } from '../../../hooks/useClosingValue.js'
 import {
   DECISION_GLYPHS,
   DECISIONS,
@@ -39,7 +40,27 @@ function ReleaseModal({
 
   const toast = useToast()
 
-  if (!release) return null
+  // Held through the exit so the dialog still has something to render while it
+  // animates out — see useClosingValue.
+  const shown = useClosingValue(release)
+
+  // Held so the footer does not flip back to its idle labels while the dialog
+  // fades: a successful write clears the target and resets these together.
+  const busy = useClosingProp(isSubmitting, Boolean(release))
+  const busyOn = useClosingProp(pending, Boolean(release))
+
+  // Replaces the `key` the page used to set — see DecisionModal. Fires on every
+  // open, not only on a new row.
+  useResetOnOpen(
+    Boolean(release),
+    useCallback(() => {
+      setRemarks('')
+      setPending(null)
+      setMissingRemarks(false)
+    }, []),
+  )
+
+  if (!shown) return null
 
   function handle(decision) {
     if (REQUIRES_REMARKS.includes(decision) && !remarks.trim()) {
@@ -59,8 +80,8 @@ function ReleaseModal({
 
   return (
     <Modal
-      open
-      title={`Release funds · #${release.application.loanApplicationId}`}
+      open={Boolean(release)}
+      title={`Release funds · #${shown.application.loanApplicationId}`}
       onClose={onClose}
       footer={
         <>
@@ -68,9 +89,9 @@ function ReleaseModal({
             glyph={DECISION_GLYPHS[DECISIONS.Reject]}
             label="Reject"
             tone="danger"
-            busy={isSubmitting && pending === DECISIONS.Reject}
+            busy={busy && busyOn === DECISIONS.Reject}
             onClick={() => handle(DECISIONS.Reject)}
-            disabled={isSubmitting}
+            disabled={busy}
           />
           {/* Rejecting moves no money, so it stays enabled while the ledger is short —
               only the payout is blocked. Uses the native title tooltip rather than
@@ -79,12 +100,12 @@ function ReleaseModal({
             glyph={DECISION_GLYPHS[DECISIONS.Approve]}
             label="Release funds"
             tone="accent"
-            busy={isSubmitting && pending === DECISIONS.Approve}
+            busy={busy && busyOn === DECISIONS.Approve}
             onClick={() => handle(DECISIONS.Approve)}
-            disabled={isSubmitting || releaseBlocked}
+            disabled={busy || releaseBlocked}
             title={
               releaseBlocked
-                ? `Capital on hand is ${currency.format(balance)} — not enough to release ${currency.format(release.principalAmount)}.`
+                ? `Capital on hand is ${currency.format(balance)} — not enough to release ${currency.format(shown.principalAmount)}.`
                 : undefined
             }
           />
@@ -103,7 +124,7 @@ function ReleaseModal({
         <div className="release__fact release__fact--lead">
           <dt>Principal</dt>
           <dd className="release__amount">
-            {currency.format(release.principalAmount)}
+            {currency.format(shown.principalAmount)}
             {/* Sits inside the existing fact row rather than as its own block: the
                 modal body is overflow-y: auto and already dense, so a new block is
                 what would put a scrollbar in it. */}
@@ -116,22 +137,22 @@ function ReleaseModal({
         </div>
         <div className="release__fact">
           <dt>Borrower</dt>
-          <dd>{release.application.borrower ?? '—'}</dd>
+          <dd>{shown.application.borrower ?? '—'}</dd>
         </div>
         <div className="release__fact">
           <dt>Term</dt>
           <dd>
-            {release.numberOfMonths} months · {release.interestRate}%
+            {shown.numberOfMonths} months · {shown.interestRate}%
           </dd>
         </div>
         <div className="release__fact">
           <dt>Repayment</dt>
-          <dd>{currency.format(release.totalRepaymentAmount)}</dd>
+          <dd>{currency.format(shown.totalRepaymentAmount)}</dd>
         </div>
         <div className="release__fact">
           <dt>Approved</dt>
           <dd>
-            {date.format(new Date(release.approvalDate))} by {release.approver}
+            {date.format(new Date(shown.approvalDate))} by {shown.approver}
           </dd>
         </div>
       </dl>

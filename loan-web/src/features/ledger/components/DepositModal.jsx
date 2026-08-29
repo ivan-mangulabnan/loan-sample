@@ -1,7 +1,8 @@
-import { useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import Button from '../../../components/Button.jsx'
 import Modal from '../../../components/Modal.jsx'
 import { useToast } from '../../../components/useToast.js'
+import { useClosingProp, useResetOnOpen } from '../../../hooks/useClosingValue.js'
 import './DepositModal.css'
 
 const currency = new Intl.NumberFormat(undefined, {
@@ -18,8 +19,19 @@ function DepositModal({ open, balance, onSubmit, onClose, isSubmitting = false, 
 
   const toast = useToast()
 
-  if (!open) return null
+  // No row to key on — reset on each fresh open (see ApplyModal).
+  useResetOnOpen(
+    open,
+    useCallback(() => {
+      setAmount('')
+      setInvalid(false)
+    }, []),
+  )
 
+  const busy = useClosingProp(isSubmitting, open)
+
+  // No early return on `open`: unmounting here would beat Modal's exit animation.
+  // Modal itself holds the dialog on screen for the length of the exit.
   const parsed = Number(amount)
   const isPositive = amount !== '' && Number.isFinite(parsed) && parsed > 0
 
@@ -38,16 +50,16 @@ function DepositModal({ open, balance, onSubmit, onClose, isSubmitting = false, 
 
   return (
     <Modal
-      open
+      open={open}
       title="Post a capital deposit"
       onClose={onClose}
       footer={
         <>
-          <Button variant="ghost" onClick={onClose} disabled={isSubmitting}>
+          <Button variant="ghost" onClick={onClose} disabled={busy}>
             Cancel
           </Button>
-          <Button variant="accent" onClick={handleSubmit} disabled={isSubmitting}>
-            {isSubmitting ? 'Posting…' : 'Post deposit'}
+          <Button variant="accent" onClick={handleSubmit} disabled={busy}>
+            {busy ? 'Posting…' : 'Post deposit'}
           </Button>
         </>
       }

@@ -95,10 +95,31 @@
   background: var(--danger);
 }
 
+/* Fade and lift on the way out — the mirror of toast-in, and shorter, because
+   leaving should get out of the way rather than be watched. The stack is
+   bottom-anchored (justify-content: flex-end), so a toast leaving does not shove
+   its neighbours; no height collapse is needed. pointer-events go first so a click
+   cannot land on something already on its way out. */
+.toast--leaving {
+  animation: toast-out var(--motion-out) var(--ease-swap) both;
+  pointer-events: none;
+}
+
 @keyframes toast-in {
   from {
     opacity: 0;
     transform: translateY(8px);
+  }
+}
+
+@keyframes toast-out {
+  from {
+    opacity: 1;
+  }
+
+  to {
+    opacity: 0;
+    transform: translateY(calc(var(--motion-travel) * -1));
   }
 }
 
@@ -113,12 +134,25 @@
     animation: toast-fade-in 0.22s ease-out;
   }
 
+  /* Keep the fade — it still covers the same removal delay — but drop the travel.
+     `both` is retained deliberately: without it the toast would snap back to full
+     opacity for the rest of the exit window (rule 16a). */
+  .toast--leaving {
+    animation: toast-fade-out var(--motion-out) var(--ease-swap) both;
+  }
+
   .toast__timer {
     animation: none;
   }
 
   @keyframes toast-fade-in {
     from {
+      opacity: 0;
+    }
+  }
+
+  @keyframes toast-fade-out {
+    to {
       opacity: 0;
     }
   }

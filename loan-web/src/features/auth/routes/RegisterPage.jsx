@@ -1,6 +1,7 @@
 import { useRef, useState } from 'react'
 import { Link, Navigate, useNavigate } from 'react-router-dom'
 import Button from '../../../components/Button.jsx'
+import PasswordField from '../../../components/PasswordField.jsx'
 import Stepper from '../../../components/Stepper.jsx'
 import { useToast } from '../../../components/useToast.js'
 import AuthScreen from '../components/AuthScreen.jsx'
@@ -167,10 +168,8 @@ export function RegisterPage() {
             Password
             <span className="req" aria-hidden="true" />
           </label>
-          <input
+          <PasswordField
             id="password"
-            className="field field--input"
-            type="password"
             value={form.password}
             autoComplete="new-password"
             onChange={update('password')}

@@ -90,45 +90,38 @@ function MyApplications() {
         )}
       </ListView>
 
-      {apply.target && (
-        <ApplyModal
-          onSubmit={apply.run}
-          onClose={apply.close}
-          isSubmitting={apply.isSubmitting}
-          error={apply.error}
-        />
-      )}
+      {/* Rendered unconditionally and told whether it is open: gating the element
+          itself unmounts it before it can play its exit. */}
+      <ApplyModal
+        open={Boolean(apply.target)}
+        onSubmit={apply.run}
+        onClose={apply.close}
+        isSubmitting={apply.isSubmitting}
+        error={apply.error}
+      />
 
-      {resubmit.target && (
-        <ResubmitModal
-          key={resubmit.target.loanApplicationId}
-          application={resubmit.target}
-          onSubmit={resubmit.run}
-          onCancelInstead={cancelInstead}
-          onClose={resubmit.close}
-          isSubmitting={resubmit.isSubmitting}
-          error={resubmit.error}
-        />
-      )}
+      <ResubmitModal
+        application={resubmit.target}
+        onSubmit={resubmit.run}
+        onCancelInstead={cancelInstead}
+        onClose={resubmit.close}
+        isSubmitting={resubmit.isSubmitting}
+        error={resubmit.error}
+      />
 
-      {cancel.target && (
-        <CancelModal
-          application={cancel.target}
-          onSubmit={cancel.run}
-          onClose={cancel.close}
-          isSubmitting={cancel.isSubmitting}
-          error={cancel.error}
-        />
-      )}
+      <CancelModal
+        application={cancel.target}
+        onSubmit={cancel.run}
+        onClose={cancel.close}
+        isSubmitting={cancel.isSubmitting}
+        error={cancel.error}
+      />
 
-      {viewing && (
-        <ViewApplicationModal
-          key={viewing.loanApplicationId}
-          application={viewing}
-          onClose={() => setViewing(null)}
-          onAct={actFromViewer}
-        />
-      )}
+      <ViewApplicationModal
+        application={viewing}
+        onClose={() => setViewing(null)}
+        onAct={actFromViewer}
+      />
     </>
   )
 }

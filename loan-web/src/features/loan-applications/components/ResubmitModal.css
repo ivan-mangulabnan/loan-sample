@@ -38,12 +38,18 @@
   margin-top: var(--space-4);
 }
 
+/* See ApplyModal.css — the gap sits on the .reveal wrapper so it does not hold
+   space open before the preview exists. */
+.resub__preview-slot {
+  margin-top: var(--space-4);
+}
+
 .resub__preview {
   display: flex;
   flex-wrap: wrap;
   align-items: baseline;
   gap: var(--space-1) var(--space-3);
-  margin: var(--space-4) 0 0;
+  margin: 0;
   padding: var(--space-3) var(--space-4);
   background: var(--surface-sunken);
   border-radius: var(--radius-md);

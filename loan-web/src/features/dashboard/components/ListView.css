@@ -71,8 +71,11 @@
   color: var(--text-subtle);
 }
 
+/* Re-fades when the reader changes a filter or page — see the key on .list__page in
+   ListView.jsx. On first load this runs alongside .main--arrive at the same duration
+   and curve, so the two read as one motion rather than a double fade. */
 .list__page {
-  animation: list-page-in 0.28s cubic-bezier(0.4, 0, 0.2, 1) both;
+  animation: list-page-in var(--motion-in) var(--ease-swap) both;
 }
 
 

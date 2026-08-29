@@ -1,6 +1,7 @@
 import { useState } from 'react'
 import { Link, Navigate, useLocation, useNavigate } from 'react-router-dom'
 import Button from '../../../components/Button.jsx'
+import PasswordField from '../../../components/PasswordField.jsx'
 import AuthScreen from '../components/AuthScreen.jsx'
 import { useSession } from '../hooks.js'
 import './LoginPage.css'
@@ -87,10 +88,8 @@ export function LoginPage() {
           Password
           <span className="req" aria-hidden="true" />
         </label>
-        <input
+        <PasswordField
           id="password"
-          className="field field--input"
-          type="password"
           value={password}
           autoComplete="current-password"
           onChange={(event) => setPassword(event.target.value)}

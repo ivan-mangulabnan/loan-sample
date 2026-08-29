@@ -74,6 +74,24 @@
   gap: var(--space-7);
 }
 
+.main--arrive {
+  animation: list-page-in var(--motion-in) var(--ease-swap) both;
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* `both` strands the content at the keyframe's starting opacity if the animation
+     is simply switched off, so restate it as a fade (rule 16a). */
+  .main--arrive {
+    animation: main-fade-in var(--motion-in) var(--ease-swap) both;
+  }
+
+  @keyframes main-fade-in {
+    from {
+      opacity: 0;
+    }
+  }
+}
+
 .main {
   flex: 1;
   min-width: 0;

@@ -1,9 +1,10 @@
-import { useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import IconButton from '../../../components/IconButton.jsx'
 import Modal from '../../../components/Modal.jsx'
 import ApplicationStatusBadge from './ApplicationStatusBadge.jsx'
 import ModalProgress from './ModalProgress.jsx'
 import { useToast } from '../../../components/useToast.js'
+import { useClosingProp, useClosingValue, useResetOnOpen } from '../../../hooks/useClosingValue.js'
 import {
   DECISION_GLYPHS,
   DECISION_LABELS,
@@ -45,7 +46,27 @@ function DecisionModal({
 
   const toast = useToast()
 
-  if (!application) return null
+  // Held through the exit so the dialog still has something to render while it
+  // animates out — see useClosingValue.
+  const shown = useClosingValue(application)
+
+  // Held so the footer does not flip back to its idle labels while the dialog
+  // fades: a successful write clears the target and resets these together.
+  const busy = useClosingProp(isSubmitting, Boolean(application))
+  const busyOn = useClosingProp(pending, Boolean(application))
+
+  // Replaces the `key` the pages used to set: clear the form on every open, so the
+  // previous remarks never carry over — not even when it is the same application.
+  useResetOnOpen(
+    Boolean(application),
+    useCallback(() => {
+      setRemarks('')
+      setPending(null)
+      setMissingRemarks(false)
+    }, []),
+  )
+
+  if (!shown) return null
 
   function handle(decision) {
     if (REQUIRES_REMARKS.includes(decision) && !remarks.trim()) {
@@ -65,8 +86,8 @@ function DecisionModal({
 
   return (
     <Modal
-      open
-      title={`${title} #${application.loanApplicationId}`}
+      open={Boolean(application)}
+      title={`${title} #${shown.loanApplicationId}`}
       onClose={onClose}
       footer={
         decisions.map((decision) => (
@@ -75,42 +96,42 @@ function DecisionModal({
             glyph={DECISION_GLYPHS[decision]}
             label={DECISION_LABELS[decision]}
             tone={toneFor(decision)}
-            busy={isSubmitting && pending === decision}
+            busy={busy && busyOn === decision}
             onClick={() => handle(decision)}
-            disabled={isSubmitting}
+            disabled={busy}
           />
         ))
       }
     >
-      <ModalProgress application={application} />
+      <ModalProgress application={shown} />
 
       <dl className="decision__facts">
-        {application.borrower && (
+        {shown.borrower && (
           <div className="decision__fact">
             <dt>Borrower</dt>
-            <dd>{application.borrower}</dd>
+            <dd>{shown.borrower}</dd>
           </div>
         )}
         <div className="decision__fact">
           <dt>Amount</dt>
-          <dd className="decision__amount">{currency.format(application.amount)}</dd>
+          <dd className="decision__amount">{currency.format(shown.amount)}</dd>
         </div>
         <div className="decision__fact">
           <dt>Plan</dt>
           <dd>
-            {application.paymentPlan?.name ?? '—'}
-            {application.paymentPlan &&
-              ` · ${application.paymentPlan.numberOfMonths} months · ${application.paymentPlan.interestRate}%`}
+            {shown.paymentPlan?.name ?? '—'}
+            {shown.paymentPlan &&
+              ` · ${shown.paymentPlan.numberOfMonths} months · ${shown.paymentPlan.interestRate}%`}
           </dd>
         </div>
         <div className="decision__fact">
           <dt>Requested</dt>
-          <dd>{date.format(new Date(application.dateRequested))}</dd>
+          <dd>{date.format(new Date(shown.dateRequested))}</dd>
         </div>
         <div className="decision__fact">
           <dt>Status</dt>
           <dd>
-            <ApplicationStatusBadge status={application.status} />
+            <ApplicationStatusBadge status={shown.status} />
           </dd>
         </div>
       </dl>

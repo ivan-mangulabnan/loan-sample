@@ -8,9 +8,17 @@ const MAX_VISIBLE = 3
 
 const NO_KEYS = new Set()
 
+// Matches --motion-out in tokens.css.
+const EXIT_MS = 180
+
 export function ToastProvider({ children }) {
   const [toasts, setToasts] = useState([])
   const [pendingKeys, setPendingKeys] = useState(NO_KEYS)
+
+  // Set while the whole stack is being retired at once — signing out. Individual
+  // dismissals animate inside Toast; this covers the case where the provider drops
+  // every toast in one go and there is no per-toast timer to hang the exit on.
+  const [isLeavingAll, setIsLeavingAll] = useState(false)
 
   // A <dialog> opened with showModal() renders in the browser's top layer, above
   // every z-index — a fixed-position stack outside it is painted underneath and the
@@ -54,7 +62,8 @@ export function ToastProvider({ children }) {
       pending.current.delete(id)
       syncKeys()
 
-      if (!cancel) entry.commit()
+      // Returned so flushPending can await the write; the timer path ignores it.
+      if (!cancel) return entry.commit()
     },
     [remove, syncKeys],
   )
@@ -80,7 +89,15 @@ export function ToastProvider({ children }) {
           // Pinned at push time. A toast must never migrate between the two stacks:
           // changing its container remounts it, which replays its entry animation
           // and restarts its dismiss timer.
-          host: hostRef.current,
+          //
+          // An undoable one is always page-level, never pinned to a dialog. It is
+          // raised by useWriteAction.run() from a modal that is closing, but
+          // setTarget(null) is a state update and has not flushed yet, so hostRef
+          // still points at the live <dialog> — pinning it there meant the orphan
+          // sweep retired it the instant the modal unmounted, force-committing the
+          // write and taking the undo window with it. Outliving the modal is the
+          // entire point of this toast.
+          host: commit ? null : hostRef.current,
         },
       ]
 
@@ -111,6 +128,37 @@ export function ToastProvider({ children }) {
     return () => window.removeEventListener('pagehide', flush)
   }, [resolve])
 
+  // Commits every deferred write and waits for it — for teardown *inside* the app,
+  // where the page is not going anywhere and the requests can be awaited normally.
+  //
+  // `pagehide` above cannot do this job: it does not fire on a client-side route
+  // change, so signing out after a decision used to drop the write entirely (the
+  // undo window was still open, the cookie was already gone). It also sets
+  // `keepalive`, which is right for a real unload and wrong here — we want to know
+  // the write landed before the session ends.
+  const flushPending = useCallback(async () => {
+    if (pending.current.size === 0) return
+
+    // Start the exit, and start the writes at the same moment — the animation is
+    // not allowed to delay the network. Without this the row of toasts was simply
+    // cut away as the route swapped, which read as a snap rather than a dismissal.
+    setIsLeavingAll(true)
+
+    const commits = Promise.allSettled(
+      [...pending.current.entries()].map(([id, entry]) => {
+        pending.current.delete(id)
+        return entry.commit()
+      }),
+    )
+
+    await Promise.all([commits, new Promise((done) => setTimeout(done, EXIT_MS))])
+
+    syncKeys()
+    visible.current = []
+    setToasts(visible.current)
+    setIsLeavingAll(false)
+  }, [syncKeys])
+
   // A toast pinned to a dialog stops rendering the moment that dialog closes, but it
   // is still in the list — left there it would occupy a MAX_VISIBLE slot forever and
   // never run its own dismiss. Retire it here instead.
@@ -123,8 +171,8 @@ export function ToastProvider({ children }) {
   }, [portalHost, resolve])
 
   const value = useMemo(
-    () => ({ push, dismiss: resolve, undo, pendingKeys, setPortalHost }),
-    [push, resolve, undo, pendingKeys],
+    () => ({ push, dismiss: resolve, undo, flushPending, pendingKeys, setPortalHost }),
+    [push, resolve, undo, flushPending, pendingKeys],
   )
 
   // isConnected guards the gap between a host unmounting and its cleanup landing:
@@ -142,10 +190,20 @@ export function ToastProvider({ children }) {
   return (
     <ToastContext.Provider value={value}>
       {children}
-      <ToastStack toasts={inPage} onDismiss={resolve} onUndo={undo} />
+      <ToastStack
+        toasts={inPage}
+        onDismiss={resolve}
+        onUndo={undo}
+        isLeavingAll={isLeavingAll}
+      />
       {host &&
         createPortal(
-          <ToastStack toasts={inHost} onDismiss={resolve} onUndo={undo} />,
+          <ToastStack
+            toasts={inHost}
+            onDismiss={resolve}
+            onUndo={undo}
+            isLeavingAll={isLeavingAll}
+          />,
           host,
         )}
     </ToastContext.Provider>

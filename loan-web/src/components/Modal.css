@@ -16,8 +16,60 @@
 
 .modal::backdrop {
   background: var(--surface-backdrop);
+  animation: modal-backdrop-in var(--motion-in) var(--ease-swap) both;
 }
 
+.modal--leaving .modal__panel {
+  animation: modal-out var(--motion-out) var(--ease-swap) both;
+}
+
+.modal--leaving::backdrop {
+  animation: modal-backdrop-out var(--motion-out) var(--ease-swap) both;
+}
+
+@keyframes modal-in {
+  from {
+    opacity: 0;
+    transform: translateY(var(--motion-travel)) scale(0.985);
+  }
+}
+
+@keyframes modal-out {
+  to {
+    opacity: 0;
+    transform: translateY(var(--motion-travel)) scale(0.985);
+  }
+}
+
+@keyframes modal-backdrop-in {
+  from {
+    opacity: 0;
+  }
+}
+
+@keyframes modal-backdrop-out {
+  to {
+    opacity: 0;
+  }
+}
+
+/* Travel and scale removed, the fade kept — it still covers the same mount and
+   unmount delay. `both` stays, or the panel snaps back to full opacity partway
+   through the exit (rule 16a). */
+@media (prefers-reduced-motion: reduce) {
+  .modal__panel {
+    animation: modal-backdrop-in var(--motion-in) var(--ease-swap) both;
+  }
+
+  .modal--leaving .modal__panel {
+    animation: modal-backdrop-out var(--motion-out) var(--ease-swap) both;
+  }
+}
+
+/* The panel carries the movement, the backdrop only fades — sliding the dim layer
+   too reads as the whole window lurching. Same curve and 6px travel as every other
+   swap in the app (rule 16a). Declared here rather than in a second .modal__panel
+   rule: at equal specificity the later one wins and would drop the animation. */
 .modal__panel {
   display: flex;
   flex-direction: column;
@@ -26,6 +78,7 @@
   border: 1px solid var(--border);
   border-radius: var(--radius-xl);
   box-shadow: var(--shadow-raised);
+  animation: modal-in var(--motion-in) var(--ease-swap) both;
 }
 
 .modal__head {

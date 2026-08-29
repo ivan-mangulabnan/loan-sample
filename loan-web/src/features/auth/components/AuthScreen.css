@@ -28,6 +28,9 @@
   padding: var(--space-6);
 }
 
+/* The card arrives like any other route (rule 16a). Signing out fades the app away
+   and then landed on a login screen that simply appeared — the animation stopped at
+   the boundary between the two layouts. */
 .auth__card {
   width: 100%;
   max-width: 380px;
@@ -37,6 +40,7 @@
   box-shadow: var(--shadow-raised);
   padding: var(--space-7);
   margin: auto;
+  animation: list-page-in var(--motion-in) var(--ease-swap) both;
 }
 
 .auth__card .heading {
@@ -87,5 +91,17 @@
   .auth__pane {
     transition: none;
     animation: none;
+  }
+
+  /* Kept as a fade rather than `animation: none`, which would strand the card at the
+     keyframe's starting opacity — invisible (rule 16a). */
+  .auth__card {
+    animation: auth-card-fade-in var(--motion-in) var(--ease-swap) both;
+  }
+
+  @keyframes auth-card-fade-in {
+    from {
+      opacity: 0;
+    }
   }
 }

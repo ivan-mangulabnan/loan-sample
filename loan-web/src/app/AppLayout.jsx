@@ -1,15 +1,22 @@
-import { NavLink, Outlet, useNavigate } from 'react-router-dom'
+import { NavLink, Outlet, useLocation, useNavigate } from 'react-router-dom'
+import { useToast } from '../components/useToast.js'
 import { useSession } from '../features/auth/index.js'
 import { configFor } from '../features/dashboard/index.js'
 import './AppLayout.css'
 
 function AppLayout() {
   const { role, signOut } = useSession()
+  const { flushPending } = useToast()
   const navigate = useNavigate()
+  const { pathname } = useLocation()
 
   const navItems = configFor(role)?.nav ?? []
 
   async function handleSignOut() {
+    // A decision taken in the last few seconds is still sitting in its undo window,
+    // uncommitted. Send it before the cookie goes, or the write is lost — signing
+    // out is a decision to leave, not a decision to undo (issue #17).
+    await flushPending()
     await signOut()
     navigate('/login', { replace: true })
   }
@@ -60,7 +67,10 @@ function AppLayout() {
         </nav>
 
         <div className="content">
-          <main className="main">
+          {/* Keyed on the path so each route fades in as a whole (rule 16a). Without
+              it only ListView's rows animated, so a page's header and toolbar snapped
+              in around a table that faded — the page never arrived as one thing. */}
+          <main className="main main--arrive" key={pathname}>
             <Outlet />
           </main>
         </div>

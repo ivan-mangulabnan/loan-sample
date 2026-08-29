@@ -1,7 +1,12 @@
-import { useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import Button from '../../../components/Button.jsx'
 import Modal from '../../../components/Modal.jsx'
 import { useToast } from '../../../components/useToast.js'
+import {
+  useClosingProp,
+  useResetOnOpen,
+  useRevealed,
+} from '../../../hooks/useClosingValue.js'
 import { usePaymentPlans } from '../hooks.js'
 import { repaymentPreview } from '../repayment.js'
 import './ApplyModal.css'
@@ -12,7 +17,7 @@ const currency = new Intl.NumberFormat(undefined, {
   maximumFractionDigits: 2,
 })
 
-function ApplyModal({ onSubmit, onClose, isSubmitting = false, error = null }) {
+function ApplyModal({ open = true, onSubmit, onClose, isSubmitting = false, error = null }) {
   const plans = usePaymentPlans()
 
   const [amount, setAmount] = useState('')
@@ -26,10 +31,30 @@ function ApplyModal({ onSubmit, onClose, isSubmitting = false, error = null }) {
 
   const toast = useToast()
 
+  // No row to key on, so reset on each fresh open — otherwise it reopens showing
+  // the last amount and plan typed into it.
+  useResetOnOpen(
+    open,
+    useCallback(() => {
+      setAmount('')
+      setPlanId('')
+      setInvalidField(null)
+    }, []),
+  )
+
+  // Held so the button keeps its submitting label while the dialog fades out.
+  const busy = useClosingProp(isSubmitting, open)
+
   const parsed = Number.parseFloat(amount)
   const options = plans.data ?? []
   const selected = options.find((plan) => String(plan.paymentPlanId) === planId) ?? null
   const preview = repaymentPreview(parsed, selected)
+
+  // The preview collapses rather than vanishing when the amount is cleared, so it
+  // has to keep its last figures while the row closes.
+  const [showPreview, revealClass] = useRevealed(preview !== null)
+  const heldPreview = useClosingProp(preview, preview !== null)
+  const heldPlan = useClosingProp(selected, preview !== null)
 
   function fail(field, ref, message) {
     setInvalidField(field)
@@ -49,20 +74,20 @@ function ApplyModal({ onSubmit, onClose, isSubmitting = false, error = null }) {
 
   return (
     <Modal
-      open
+      open={open}
       title="Apply for a loan"
       onClose={onClose}
       footer={
         <>
-          <Button variant="ghost" onClick={onClose} disabled={isSubmitting}>
+          <Button variant="ghost" onClick={onClose} disabled={busy}>
             Cancel
           </Button>
           <Button
             variant="accent"
             onClick={handleSubmit}
-            disabled={isSubmitting || plans.isLoading}
+            disabled={busy || plans.isLoading}
           >
-            {isSubmitting ? 'Submitting…' : 'Submit application'}
+            {busy ? 'Submitting…' : 'Submit application'}
           </Button>
         </>
       }
@@ -123,13 +148,20 @@ function ApplyModal({ onSubmit, onClose, isSubmitting = false, error = null }) {
         </select>
       )}
 
-      {preview !== null && (
-        <p className="apply__preview">
-          <span className="apply__preview-figure">{currency.format(preview)}</span>
-          <span className="apply__preview-note">
-            to repay over {selected.numberOfMonths} months · indicative until approved
-          </span>
-        </p>
+      {showPreview && heldPreview !== null && (
+        <div className={revealClass}>
+          <div className="reveal__inner">
+            <p className="apply__preview apply__preview-slot">
+              {/* keyed on the value so the settle animation re-runs when it changes */}
+              <span key={heldPreview} className="apply__preview-figure reveal__value">
+                {currency.format(heldPreview)}
+              </span>
+              <span className="apply__preview-note">
+                to repay over {heldPlan?.numberOfMonths} months · indicative until approved
+              </span>
+            </p>
+          </div>
+        </div>
       )}
 
       {error && (

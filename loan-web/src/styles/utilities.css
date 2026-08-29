@@ -423,3 +423,94 @@
     transform: translateY(6px);
   }
 }
+
+/* A block that appears in place once the reader has supplied enough to compute it —
+   the repayment preview in the apply and resubmit modals. Reuses list-page-in rather
+   than inventing a second entry motion (rule 16a: one curve, one distance).
+
+   grid-template-rows 0fr -> 1fr is what makes the *height* ease in too; without it
+   the box fades in at full size and still shoves everything below it in one frame,
+   which is the abrupt part. The inner wrapper needs min-height: 0 or the row cannot
+   collapse. */
+.reveal {
+  display: grid;
+  grid-template-rows: 0fr;
+  animation: reveal-open var(--motion-in) var(--ease-swap) forwards;
+}
+
+/* The grid child must be an unpadded wrapper — `.reveal__inner` — with the real
+   content inside it. Two reasons, both measured:
+
+   - overflow: hidden here is what actually clips a collapsing row. Without it the
+     content keeps full height while the row is still short and spills past it,
+     which inside .modal__body's overflow-y: auto flashes a scrollbar for a frame.
+   - a *padded* grid child cannot collapse below its own padding: the row floors at
+     32px instead of 0 (measured 50 → 32 → 32 against 50 → 25 → 0 with the wrapper),
+     leaving a block of empty space that snaps away on unmount. */
+.reveal__inner {
+  min-height: 0;
+  overflow: hidden;
+  animation: reveal-in var(--motion-in) var(--ease-swap) both;
+}
+
+/* Fades only. list-page-in's 6px translate pushed the child down inside a row that
+   had not finished growing, which is the other half of the same overflow flash. */
+@keyframes reveal-in {
+  from {
+    opacity: 0;
+  }
+}
+
+/* Closing is the mirror, and has to be driven from JS — a removed element cannot
+   animate. See useRevealed in hooks/useClosingValue.js. */
+.reveal--leaving {
+  animation: reveal-close var(--motion-out) var(--ease-swap) forwards;
+}
+
+.reveal--leaving .reveal__inner {
+  animation: reveal-out var(--motion-out) var(--ease-swap) both;
+}
+
+@keyframes reveal-open {
+  to {
+    grid-template-rows: 1fr;
+  }
+}
+
+@keyframes reveal-close {
+  from {
+    grid-template-rows: 1fr;
+  }
+
+  to {
+    grid-template-rows: 0fr;
+  }
+}
+
+@keyframes reveal-out {
+  to {
+    opacity: 0;
+  }
+}
+
+/* A figure that recomputes as the reader types. Re-running the entry animation on
+   every keystroke strobes, so the value only warms and settles — the change is
+   noticed without the number moving. */
+.reveal__value {
+  animation: value-settle var(--motion-in) var(--ease-swap);
+}
+
+@keyframes value-settle {
+  from {
+    color: var(--accent);
+  }
+}
+
+@media (prefers-reduced-motion: reduce) {
+  /* Height still eases — that is layout, not decoration, and the jump is the
+     complaint. Travel and the colour flash go. `both` stays on the child or it
+     strands at the keyframe's starting opacity. */
+  .reveal__value {
+    animation: none;
+  }
+}

@@ -117,4 +117,12 @@
   --chart-height: 240px;
   --chart-gutter: 58px;
   --bars-height: 72px;
+
+  /* One curve and one distance for the whole app (rule 16a) — a second timing
+     reads as two different apps. Exits are shorter than entries: leaving should
+     get out of the reader's way, arriving should be noticed. */
+  --ease-swap: cubic-bezier(0.4, 0, 0.2, 1);
+  --motion-travel: 6px;
+  --motion-in: 0.28s;
+  --motion-out: 0.18s;
 }

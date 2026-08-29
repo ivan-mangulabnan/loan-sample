@@ -1,7 +1,13 @@
-import { useRef, useState } from 'react'
+import { useCallback, useRef, useState } from 'react'
 import IconButton from '../../../components/IconButton.jsx'
 import Modal from '../../../components/Modal.jsx'
 import { useToast } from '../../../components/useToast.js'
+import {
+  useClosingProp,
+  useClosingValue,
+  useResetOnOpen,
+  useRevealed,
+} from '../../../hooks/useClosingValue.js'
 import ModalProgress from './ModalProgress.jsx'
 import { DECISION_GLYPHS, DECISIONS } from '../decisions.js'
 import { usePaymentPlans } from '../hooks.js'
@@ -49,13 +55,39 @@ function ResubmitModal({
 
   const toast = useToast()
 
-  if (!application) return null
+  // Held through the exit so the dialog still has something to render while it
+  // animates out — see useClosingValue.
+  const shown = useClosingValue(application)
+
+  // Held so the footer does not flip back to its idle labels while the dialog
+  // fades: a successful write clears the target and resets these together.
+  const busy = useClosingProp(isSubmitting, Boolean(application))
+
+  // Replaces the `key` the page used to set. Reseeds from whichever application is
+  // being opened, so a reopen never shows the figures left from the last one.
+  useResetOnOpen(
+    Boolean(application),
+    useCallback(() => {
+      setAmount(String(application?.amount ?? ''))
+      setPlanId(String(application?.paymentPlan?.paymentPlanId ?? ''))
+      setInvalidField(null)
+    }, [application]),
+  )
 
   const parsed = Number.parseFloat(amount)
   const options = plans.data ?? []
   const selected = options.find((plan) => String(plan.paymentPlanId) === planId) ?? null
   const preview = repaymentPreview(parsed, selected)
-  const remarks = latestRemarks(application)
+
+  // The preview collapses rather than vanishing when the amount is cleared — see
+  // ApplyModal. Computed above the `shown` guard so the hooks run unconditionally.
+  const [showPreview, revealClass] = useRevealed(preview !== null)
+  const heldPreview = useClosingProp(preview, preview !== null)
+  const heldPlan = useClosingProp(selected, preview !== null)
+
+  if (!shown) return null
+
+  const remarks = latestRemarks(shown)
 
   function fail(field, ref, message) {
     setInvalidField(field)
@@ -75,8 +107,8 @@ function ResubmitModal({
 
   return (
     <Modal
-      open
-      title={`Resubmit application #${application.loanApplicationId}`}
+      open={Boolean(application)}
+      title={`Resubmit application #${shown.loanApplicationId}`}
       onClose={onClose}
       footer={
         <>
@@ -84,21 +116,21 @@ function ResubmitModal({
             glyph={DECISION_GLYPHS[DECISIONS.Reject]}
             label="Cancel application"
             tone="danger"
-            onClick={() => onCancelInstead(application)}
-            disabled={isSubmitting}
+            onClick={() => onCancelInstead(shown)}
+            disabled={busy}
           />
           <IconButton
             glyph={DECISION_GLYPHS[DECISIONS.Return]}
             label="Resubmit"
             tone="accent"
-            busy={isSubmitting}
+            busy={busy}
             onClick={handleSubmit}
-            disabled={isSubmitting || plans.isLoading}
+            disabled={busy || plans.isLoading}
           />
         </>
       }
     >
-      <ModalProgress application={application} />
+      <ModalProgress application={shown} />
 
       {remarks ? (
         <blockquote className="resub__remarks">
@@ -167,13 +199,20 @@ function ResubmitModal({
         </select>
       )}
 
-      {preview !== null && (
-        <p className="resub__preview">
-          <span className="resub__preview-figure">{currency.format(preview)}</span>
-          <span className="resub__preview-note">
-            to repay over {selected.numberOfMonths} months · indicative until approved
-          </span>
-        </p>
+      {showPreview && heldPreview !== null && (
+        <div className={revealClass}>
+          <div className="reveal__inner">
+            <p className="resub__preview resub__preview-slot">
+              {/* keyed on the value so the settle animation re-runs when it changes */}
+              <span key={heldPreview} className="resub__preview-figure reveal__value">
+                {currency.format(heldPreview)}
+              </span>
+              <span className="resub__preview-note">
+                to repay over {heldPlan?.numberOfMonths} months · indicative until approved
+              </span>
+            </p>
+          </div>
+        </div>
       )}
 
       {error && (
