@@ -65,6 +65,13 @@
   line-height: 1.5;
 }
 
+/* See DecisionModal.css — the accent focus ring recoloured, not a second mark. */
+.release__remarks--missing:focus-visible,
+.release__remarks--missing {
+  outline: 2px solid var(--danger);
+  outline-offset: 2px;
+}
+
 .release__error {
   margin: var(--space-4) 0 0;
   color: var(--danger);

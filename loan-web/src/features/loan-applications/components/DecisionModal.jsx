@@ -1,9 +1,16 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import IconButton from '../../../components/IconButton.jsx'
 import Modal from '../../../components/Modal.jsx'
 import ApplicationStatusBadge from './ApplicationStatusBadge.jsx'
 import ModalProgress from './ModalProgress.jsx'
-import { DECISION_GLYPHS, DECISION_LABELS, DECISIONS, REQUIRES_REMARKS } from '../decisions.js'
+import { useToast } from '../../../components/useToast.js'
+import {
+  DECISION_GLYPHS,
+  DECISION_LABELS,
+  DECISION_OUTCOMES,
+  DECISIONS,
+  REQUIRES_REMARKS,
+} from '../decisions.js'
 import './DecisionModal.css'
 
 const currency = new Intl.NumberFormat(undefined, {
@@ -34,11 +41,20 @@ function DecisionModal({
   const [pending, setPending] = useState(null)
   const [missingRemarks, setMissingRemarks] = useState(false)
 
+  const remarksRef = useRef(null)
+
+  const toast = useToast()
+
   if (!application) return null
 
   function handle(decision) {
     if (REQUIRES_REMARKS.includes(decision) && !remarks.trim()) {
       setMissingRemarks(true)
+      remarksRef.current?.focus()
+      toast.push({
+        message: `Application not ${DECISION_OUTCOMES[decision]} — remarks are required.`,
+        tone: 'danger',
+      })
       return
     }
 
@@ -106,23 +122,20 @@ function DecisionModal({
         </span>
       </label>
       <textarea
+        ref={remarksRef}
         id="decision-remarks"
-        className="field field--input decision__remarks"
+        className={`field field--input decision__remarks${
+          missingRemarks ? ' decision__remarks--missing' : ''
+        }`}
         rows={4}
         value={remarks}
         placeholder="What should the borrower or the next desk know?"
+        aria-invalid={missingRemarks || undefined}
         onChange={(event) => {
           setRemarks(event.target.value)
           if (missingRemarks) setMissingRemarks(false)
         }}
       />
-
-      {missingRemarks && (
-        <p className="decision__error" role="alert">
-          Add remarks before rejecting or returning — they are required, and they are
-          the only explanation the borrower gets.
-        </p>
-      )}
 
       {error && (
         <p className="decision__error" role="alert">

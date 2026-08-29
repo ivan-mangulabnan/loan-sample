@@ -1,6 +1,7 @@
-import { useState } from 'react'
+import { useRef, useState } from 'react'
 import IconButton from '../../../components/IconButton.jsx'
 import Modal from '../../../components/Modal.jsx'
+import { useToast } from '../../../components/useToast.js'
 import {
   DECISION_GLYPHS,
   DECISIONS,
@@ -26,11 +27,20 @@ function ReleaseModal({ release, onSubmit, onClose, isSubmitting = false, error 
   const [pending, setPending] = useState(null)
   const [missingRemarks, setMissingRemarks] = useState(false)
 
+  const remarksRef = useRef(null)
+
+  const toast = useToast()
+
   if (!release) return null
 
   function handle(decision) {
     if (REQUIRES_REMARKS.includes(decision) && !remarks.trim()) {
       setMissingRemarks(true)
+      remarksRef.current?.focus()
+      toast.push({
+        message: 'Release not rejected — remarks are required.',
+        tone: 'danger',
+      })
       return
     }
 
@@ -105,23 +115,20 @@ function ReleaseModal({ release, onSubmit, onClose, isSubmitting = false, error 
         <span className="release__hint">required to reject</span>
       </label>
       <textarea
+        ref={remarksRef}
         id="release-remarks"
-        className="field field--input release__remarks"
+        className={`field field--input release__remarks${
+          missingRemarks ? ' release__remarks--missing' : ''
+        }`}
         rows={3}
         value={remarks}
         placeholder="Reference, payout method, or why this is not being funded"
+        aria-invalid={missingRemarks || undefined}
         onChange={(event) => {
           setRemarks(event.target.value)
           if (missingRemarks) setMissingRemarks(false)
         }}
       />
-
-      {missingRemarks && (
-        <p className="release__error" role="alert">
-          Add remarks before rejecting — they are required, and they are the only
-          explanation the borrower gets for a refused release.
-        </p>
-      )}
 
       {error && (
         <p className="release__error" role="alert">

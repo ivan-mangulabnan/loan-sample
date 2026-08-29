@@ -14,6 +14,14 @@
   pointer-events: auto;
 }
 
+/* Portalled into an open <dialog> so it clears the top layer (see ToastContext).
+   The dialog is a narrow, centred, transparent box — the stack must ignore that
+   box entirely and keep addressing the viewport as it does anywhere else. */
+.modal > .toaststack {
+  max-width: none;
+  width: auto;
+}
+
 @media (max-width: 768px) {
   .toaststack {
     bottom: calc(var(--rail-bar-height) + var(--space-4));
